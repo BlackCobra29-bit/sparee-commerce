@@ -1,0 +1,84 @@
+<main id="auth-page" class="auth-shell">
+  <section class="auth-grid">
+    <aside class="auth-side">
+      <a href="{% url 'home' %}" class="go-home">Back to Store</a>
+      <div class="brand-pill" style="margin-top:14px;">
+        <span class="brand-dot"><i class="fas fa-cog"></i></span>
+        <span>Wahid Pro Access</span>
+      </div>
+      <h2 class="auth-headline">Sign in to your spare parts workspace.</h2>
+      <p class="auth-copy">
+        Keep your fitment profiles, cart, and purchasing signals synced in one secure dashboard.
+      </p>
+      <div class="stats">
+        <div class="stat-card">
+          <span>Saved fitment profiles</span>
+          <b>Active</b>
+        </div>
+        <div class="stat-card">
+          <span>Cross-reference lookup</span>
+          <b>Real-time</b>
+        </div>
+        <div class="stat-card">
+          <span>Fleet purchase history</span>
+          <b>Encrypted</b>
+        </div>
+      </div>
+    </aside>
+
+    <section class="auth-form-wrap">
+      <h1>Welcome back</h1>
+      <p class="subline">Use your account credentials to continue.</p>
+
+      {% if messages %}
+      <div class="alert-stack">
+        {% for message in messages %}
+        <div class="alert-item {% if message.tags == 'error' %}error{% else %}success{% endif %}">
+          {{ message }}
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+
+      <form method="post" action="{% url 'login' %}" class="form-grid" data-parsley-validate
+            hx-post="{% url 'login' %}" hx-target="#auth-page" hx-swap="outerHTML">
+        {% csrf_token %}
+
+        <div class="field">
+          <label for="username">Username</label>
+          <input id="username" name="username" class="input" required autocomplete="username"
+                 data-parsley-required-message="Username is required."
+                 value="{{ prefill_username|default:'' }}" placeholder="Enter your username">
+        </div>
+
+        <div class="field">
+          <label for="password">Password</label>
+          <div class="pass-wrap">
+            <input id="password" type="password" name="password" class="input" required autocomplete="current-password"
+                   data-parsley-required-message="Password is required."
+                   placeholder="Enter your password">
+            <button type="button" class="toggle-pass" data-toggle-password data-target="password">Show</button>
+          </div>
+          <div class="meta-row">
+            <span>Minimum recommended: 8 characters</span>
+            <a href="{% url 'forgot_password' %}" hx-get="{% url 'forgot_password' %}"
+               hx-target="#auth-page" hx-swap="outerHTML" hx-push-url="true">Forgot password?</a>
+          </div>
+        </div>
+
+        <label class="check-row">
+          <input type="checkbox" name="remember">
+          Keep me signed in on this device
+        </label>
+
+        <button class="btn-brand" type="submit">Secure Login</button>
+      </form>
+
+      <div class="helper-links">
+        <span>New here?</span>
+        <a href="{% url 'signup' %}" hx-get="{% url 'signup' %}"
+           hx-target="#auth-page" hx-swap="outerHTML" hx-push-url="true">Create account</a>
+      </div>
+    </section>
+  </section>
+</main>

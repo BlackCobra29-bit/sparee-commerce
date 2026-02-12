@@ -1,0 +1,151 @@
+<main id="auth-page" class="auth-shell">
+  <section class="auth-grid">
+    <aside class="auth-side">
+      <a href="{% url 'home' %}" class="go-home">Back to Store</a>
+      <div class="brand-pill" style="margin-top:14px;">
+        <span class="brand-dot"><i class="fas fa-shield-alt"></i></span>
+        <span>Wahid Pro Account</span>
+      </div>
+      <h2 class="auth-headline">Create an elite account for precision buying.</h2>
+      <p class="auth-copy">
+        Build your profile once and unlock fast fitment checks, OEM cross-reference confidence, and better order flows.
+      </p>
+      <div class="stats">
+        <div class="stat-card">
+          <span>VIN and fitment workspace</span>
+          <b>Ready</b>
+        </div>
+        <div class="stat-card">
+          <span>Saved compare sets</span>
+          <b>Up to 3+</b>
+        </div>
+        <div class="stat-card">
+          <span>Brand signal quality</span>
+          <b>Verified</b>
+        </div>
+      </div>
+    </aside>
+
+    <section class="auth-form-wrap">
+      <h1>Create your account</h1>
+      <p class="subline">All fields are required for account setup.</p>
+
+      {% if messages %}
+      <div class="alert-stack">
+        {% for message in messages %}
+        <div class="alert-item {% if message.tags == 'error' %}error{% else %}success{% endif %}">
+          {{ message }}
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+
+      <form method="post" action="{% url 'signup' %}" class="form-grid" enctype="multipart/form-data" data-parsley-validate
+            hx-post="{% url 'signup' %}" hx-target="#auth-page" hx-swap="outerHTML">
+        {% csrf_token %}
+
+        <div class="field">
+          <label for="account_type">Account type</label>
+          <select id="account_type" name="account_type" class="input" required
+                  data-parsley-required-message="Select account type.">
+            <option value="" disabled {% if not prefill.account_type %}selected{% endif %}>Select Type</option>
+            <option value="buyer" {% if prefill.account_type == 'buyer' %}selected{% endif %}>Buyer</option>
+            <option value="seller" {% if prefill.account_type == 'seller' %}selected{% endif %}>Seller</option>
+          </select>
+        </div>
+
+        <div class="two-col">
+          <div class="field">
+            <label for="first_name">First name</label>
+            <input id="first_name" name="first_name" class="input" required
+                   data-parsley-required-message="First name is required."
+                   value="{{ prefill.first_name|default:'' }}" autocomplete="given-name">
+          </div>
+          <div class="field">
+            <label for="last_name">Last name</label>
+            <input id="last_name" name="last_name" class="input" required
+                   data-parsley-required-message="Last name is required."
+                   value="{{ prefill.last_name|default:'' }}" autocomplete="family-name">
+          </div>
+        </div>
+
+        <div class="two-col">
+          <div class="field">
+            <label for="username">Username</label>
+            <input id="username" name="username" class="input" required
+                   data-parsley-required-message="Username is required."
+                   data-parsley-minlength="3"
+                   data-parsley-minlength-message="Username must be at least 3 characters."
+                   value="{{ prefill.username|default:'' }}" autocomplete="username">
+          </div>
+          <div class="field">
+            <label for="email">Email</label>
+            <input id="email" name="email" type="email" class="input" required
+                   data-parsley-type="email"
+                   data-parsley-required-message="Email is required."
+                   data-parsley-type-message="Enter a valid email address."
+                   value="{{ prefill.email|default:'' }}" autocomplete="email">
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="password">Password</label>
+          <div class="pass-wrap">
+            <input id="password" type="password" name="password" class="input" required autocomplete="new-password"
+                   data-parsley-minlength="8"
+                   data-parsley-required-message="Password is required."
+                   data-parsley-minlength-message="Password must be at least 8 characters.">
+            <button type="button" class="toggle-pass" data-toggle-password data-target="password">Show</button>
+          </div>
+          <div class="strength">
+            <div class="strength-track">
+              <div id="strengthFill" class="strength-fill"></div>
+            </div>
+            <div class="meta-row">
+              <span>Password strength</span>
+              <b id="strengthLabel">Weak</b>
+            </div>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="confirm_password">Confirm password</label>
+          <div class="pass-wrap">
+            <input id="confirm_password" type="password" name="confirm_password" class="input" required autocomplete="new-password"
+                   data-parsley-equalto="#password"
+                   data-parsley-required-message="Please confirm your password."
+                   data-parsley-equalto-message="Passwords do not match.">
+            <button type="button" class="toggle-pass" data-toggle-password data-target="confirm_password">Show</button>
+          </div>
+        </div>
+
+        <div class="field" id="licenseFieldWrap">
+          <label for="license_file">Business/Company License File</label>
+          <input id="license_file" name="license_file" type="file" class="input"
+                 {% if prefill.account_type == 'seller' %}required{% endif %}
+                 accept=".pdf,.png,.jpg,.jpeg"
+                 data-parsley-required-message="License file is required."
+                 data-parsley-fileextension="pdf,png,jpg,jpeg"
+                 data-parsley-maxfilesize="5">
+          <div class="meta-row">
+            <span>Accepted: PDF, PNG, JPG, JPEG</span>
+            <span>Max: 5MB</span>
+          </div>
+        </div>
+
+        <label class="check-row">
+          <input type="checkbox" name="terms" required data-parsley-required-message="You must accept the terms.">
+          I agree to the terms and privacy policy
+        </label>
+
+        <button class="btn-brand" type="submit">Create Account</button>
+      </form>
+
+      <div class="helper-links">
+        <span>Already have an account?</span>
+        <a href="{% url 'login' %}" hx-get="{% url 'login' %}"
+           hx-target="#auth-page" hx-swap="outerHTML" hx-push-url="true">Sign in</a>
+      </div>
+    </section>
+  </section>
+</main>

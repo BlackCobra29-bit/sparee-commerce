@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+{% load static %}
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+  <title>Wahid Pro â€” Mind-Blowing Spare Parts Store (Bootstrap 4)</title>
+
+  <!-- Bootstrap 4.6 -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+  <!-- AOS (Animate on Scroll) -->
+  <link rel="stylesheet" href="https://unpkg.com/aos@2.3.4/dist/aos.css">
+
+  <link rel='stylesheet' href='{% static "css/index.css" %}'>
+  
+
+</head>
+
+<body class="light">
+  <div class="glow"></div>
+
+  <!-- TOP ANNOUNCEMENT BAR -->
+  <div class="topbar py-2">
+    <div class="container d-flex align-items-center justify-content-between">
+      <small>
+        <i class="fas fa-bolt mr-2"></i>
+        New Year Promo: <b>15% OFF</b> brake kits â€¢ Free delivery over <b>$75</b> â€¢ <span class="kbd">WHD15</span>
+      </small>
+      <div class="topbar-search">
+        <div class="search-wrap">
+          <div class="input-group">
+            <div class="input-group-prepend">
+              <span class="input-group-text bg-transparent border-0 search-ico">
+                <i class="fas fa-search"></i>
+              </span>
+            </div>
+            <input id="q" class="form-control" placeholder='Search part / OEM / SKUâ€¦ (try: "filter" or "NGK")'
+              autocomplete="off" />
+            <div class="input-group-append">
+              <button class="btn btn-primary" id="btnSearch"><i class="fas fa-arrow-right"></i></button>
+            </div>
+          </div>
+          <div class="suggest" id="suggestBox"></div>
+        </div>
+      </div>
+      </small>
+    </div>
+  </div>
+
+  <!-- NAVBAR -->
+  <nav class="navbar navbar-expand-lg navbar-dark sticky-top">
+    <div class="container">
+    
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navMain">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="collapse navbar-collapse" id="navMain">
+        <ul class="navbar-nav mr-auto mt-2 mt-lg-0">
+          <li class="nav-item mr-2"><a class="nav-link nav-pill" href="#shop"><i class="fas fa-store mr-1"></i>Shop</a>
+          </li>
+          <li class="nav-item mr-2"><a class="nav-link nav-pill" href="#fitment"><i
+                class="fas fa-car mr-1"></i>Fitment</a></li>
+          <li class="nav-item mr-2"><a class="nav-link nav-pill" href="#deals"><i class="fas fa-bolt mr-1"></i>Deals</a>
+          </li>
+          <li class="nav-item mr-2"><a class="nav-link nav-pill" href="#guides"><i
+                class="fas fa-book mr-1"></i>Guides</a></li>
+          <li class="nav-item mr-2"><a class="nav-link nav-pill" href="#support"><i
+                class="fas fa-headset mr-1"></i>Support</a></li>
+        </ul>
+
+        <div class="d-flex align-items-center w-100 w-lg-auto ml-lg-auto justify-content-lg-end nav-actions">
+          <button class="nav-btn" id="cartModalBtn" data-toggle="modal" data-target="#cartModal">
+            <i class="fas fa-shopping-cart"></i>
+            <span class="d-none d-md-inline ml-1">Cart</span>
+            <span class="badge ml-2" id="cartCount">0</span>
+          </button>
+
+          <a class="nav-btn" href="{% url 'login' %}">
+            <i class="fas fa-sign-in-alt"></i>
+            <span class="d-none d-md-inline ml-1">Login</span>
+          </a>
+
+          <a class="nav-btn nav-btn--primary" href="{% url 'signup' %}">
+            <i class="fas fa-user-plus"></i>
+            <span class="d-none d-md-inline ml-1">Create account</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </nav>
+  {% block 'main-content' %}
+
+  {% endblock %}
+<!-- JS -->
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://unpkg.com/aos@2.3.4/dist/aos.js"></script>
+
+    <script src='{% static "js/index.js" %}'></script>
+</body>
+
+</html>
