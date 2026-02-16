@@ -160,7 +160,10 @@
               </ul>
             </li>
             <li class="nav-item">
-              <a class="btn btn-outline-danger btn-sm mb-0" href="javascript:logout();" title="Sign out">Sign out</a>
+              <button id="logoutBtn" class="btn btn-outline-danger btn-sm mb-0" type="button" title="Sign out">Sign out</button>
+              <form id="logoutForm" method="post" action="{% url 'logout' %}" class="d-none">
+                {% csrf_token %}
+              </form>
             </li>
           </ul>
         </div>
@@ -209,7 +212,7 @@
 
     </div>
   </main>
-  
+
   <div class="fixed-plugin">
     <a class="fixed-plugin-button text-dark position-fixed px-3 py-2">
       <i class="fa fa-cog py-2"> </i>
@@ -282,6 +285,9 @@
   <script src="{% static 'vendors/js/plugins/perfect-scrollbar.min.js' %}"></script>
   <script src="{% static 'vendors/js/plugins/smooth-scrollbar.min.js' %}"></script>
   <script src="{% static 'vendors/js/plugins/chartjs.min.js' %}"></script>
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/parsleyjs@2.9.2/dist/parsley.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   {% block vendor_extra_js %}{% endblock %}
 <script>
     var win = navigator.platform.indexOf('Win') > -1;
@@ -291,6 +297,30 @@
       }
       Scrollbar.init(document.querySelector('#sidenav-scrollbar'), options);
     }
+
+    (function () {
+      var logoutBtn = document.getElementById('logoutBtn');
+      var logoutForm = document.getElementById('logoutForm');
+      if (!logoutBtn || !logoutForm || typeof Swal === 'undefined') return;
+
+      logoutBtn.addEventListener('click', function () {
+        Swal.fire({
+          title: 'Sign out?',
+          text: 'You will be logged out of your account.',
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonText: 'Yes, sign out',
+          cancelButtonText: 'Cancel',
+          confirmButtonColor: '#dc3545',
+          reverseButtons: true,
+          focusCancel: true
+        }).then(function (result) {
+          if (result.isConfirmed) {
+            logoutForm.submit();
+          }
+        });
+      });
+    })();
   </script>
   <!-- Github buttons -->
   <script async defer src="https://buttons.github.io/buttons.js"></script>

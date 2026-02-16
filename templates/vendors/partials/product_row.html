@@ -1,0 +1,41 @@
+{% with stock=product.current_stock|default_if_none:0 %}
+<tr>
+  <td>
+    <div class="d-flex px-2 py-1">
+      <div class="d-flex flex-column justify-content-center">
+        <h6 class="mb-0 text-sm">{{ product.name }}</h6>
+        <p class="text-xs text-secondary mb-0">{{ product.description|truncatechars:48 }}</p>
+      </div>
+    </div>
+  </td>
+  <td class="align-middle text-center text-sm">
+    <span class="text-xs font-weight-bold">{{ product.get_category_display }}</span>
+  </td>
+  <td class="align-middle text-center text-sm">
+    <span class="text-xs font-weight-bold{% if stock <= product.reorder_level and stock > 0 %} text-danger{% endif %}">{{ stock }}</span>
+  </td>
+  <td class="align-middle text-center text-sm">
+    <span class="text-xs font-weight-bold">${{ product.price }}</span>
+  </td>
+  <td class="align-middle text-center">
+    {% if stock <= 0 %}
+      <span class="badge badge-sm bg-gradient-danger">Out of Stock</span>
+    {% elif stock <= product.reorder_level %}
+      <span class="badge badge-sm bg-gradient-warning">Low Stock</span>
+    {% else %}
+      <span class="badge badge-sm bg-gradient-success">In Stock</span>
+    {% endif %}
+  </td>
+  <td class="align-middle text-center">
+    <a href="javascript:;" class="text-secondary font-weight-bold text-xs">
+      <i class="fas fa-eye me-2"></i>
+    </a>
+    <a href="javascript:;" class="text-info font-weight-bold text-xs">
+      <i class="fas fa-edit me-2"></i>
+    </a>
+    <a href="javascript:;" class="text-danger font-weight-bold text-xs">
+      <i class="fas fa-trash me-2"></i>
+    </a>
+  </td>
+</tr>
+{% endwith %}

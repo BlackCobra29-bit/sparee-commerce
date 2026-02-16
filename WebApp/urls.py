@@ -22,6 +22,8 @@ from App.views import (
     ForgotPasswordView,
     HomeView,
     LoginView,
+    LogoutView,
+    VendorProductCreateView,
     VendorAnalyticsView,
     VendorOrdersView,
     VendorProductsView,
@@ -32,12 +34,14 @@ from App.views import (
 urlpatterns = [
     path('', HomeView.as_view(), name='home'),
     path('login/', LoginView.as_view(), name='login'),
+    path('logout/', LogoutView.as_view(), name='logout'),
     path('forgot-password/', ForgotPasswordView.as_view(), name='forgot_password'),
     path('signup/', SignupView.as_view(), name='signup'),
     path('vendor/', VendorDashboardView.as_view(), name='vendor_dashboard'),
     path('vendor/dashboard/', VendorDashboardView.as_view(), name='vendor_dashboard_home'),
     path('vendor/orders/', VendorOrdersView.as_view(), name='vendor_orders'),
     path('vendor/products/', VendorProductsView.as_view(), name='vendor_products'),
+    path('vendor/products/create/', VendorProductCreateView.as_view(), name='vendor_product_create'),
     path('vendor/analytics/', VendorAnalyticsView.as_view(), name='vendor_analytics'),
     path('admin/', admin.site.urls),
 ]

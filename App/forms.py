@@ -3,7 +3,7 @@ import os
 from django import forms
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
-from .models import AccountRegistration
+from .models import AccountRegistration, Product
 
 
 class LoginForm(forms.Form):
@@ -97,3 +97,58 @@ class ForgotPasswordForm(forms.Form):
 
     def clean_email(self):
         return (self.cleaned_data.get("email") or "").strip().lower()
+
+
+class ProductForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        self.vendor = kwargs.pop("vendor", None)
+        super().__init__(*args, **kwargs)
+        if self.vendor is not None:
+            self.instance.vendor = self.vendor
+
+    class Meta:
+        model = Product
+        fields = (
+            "name",
+            "vin",
+            "category",
+            "price",
+            "initial_stock",
+            "reorder_level",
+            "description",
+            "product_image",
+        )
+
+    def clean_vin(self):
+        return (self.cleaned_data.get("vin") or "").strip().upper()
+
+    def clean_description(self):
+        return (self.cleaned_data.get("description") or "").strip()
+
+    def clean_product_image(self):
+        image = self.cleaned_data.get("product_image")
+        if not image:
+            raise forms.ValidationError("Product image is required.")
+
+        allowed_ext = {".jpg", ".jpeg", ".png"}
+        ext = os.path.splitext(image.name)[1].lower()
+        if ext not in allowed_ext:
+            raise forms.ValidationError("Only JPG or PNG files are allowed.")
+        if image.size > 5 * 1024 * 1024:
+            raise forms.ValidationError("Image must be 5MB or smaller.")
+        return image
+
+    def clean(self):
+        cleaned_data = super().clean()
+        if self.vendor is None:
+            raise forms.ValidationError("Authenticated vendor is required.")
+        return cleaned_data
+
+    def save(self, commit=True):
+        product = super().save(commit=False)
+        product.vendor = self.vendor
+        if product.current_stock is None:
+            product.current_stock = product.initial_stock
+        if commit:
+            product.save()
+        return product

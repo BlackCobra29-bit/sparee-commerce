@@ -1,13 +1,18 @@
+import json
+
 from django.contrib import messages
-from django.contrib.auth import login
+from django.contrib.auth import login, logout
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import User
-from django.http import HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import redirect
+from django.db import transaction
+from django.template.loader import render_to_string
 from django.urls import reverse_lazy
-from django.views.generic import FormView, TemplateView
+from django.views.generic import FormView, TemplateView, View
 from django_htmx.http import HttpResponseClientRedirect
 
-from .forms import ForgotPasswordForm, LoginForm, SignupForm
+from .forms import ForgotPasswordForm, LoginForm, ProductForm, SignupForm
 from .models import AccountRegistration
 
 
@@ -15,20 +20,87 @@ class HomeView(TemplateView):
     template_name = "index.html"
 
 
-class VendorDashboardView(TemplateView):
+class VendorAccessMixin(LoginRequiredMixin):
+    login_url = reverse_lazy("login")
+
+
+class VendorDashboardView(VendorAccessMixin, TemplateView):
     template_name = "vendors/index.html"
 
 
-class VendorOrdersView(TemplateView):
+class VendorOrdersView(VendorAccessMixin, TemplateView):
     template_name = "vendors/orders.html"
 
 
-class VendorProductsView(TemplateView):
+class VendorProductsView(VendorAccessMixin, TemplateView):
     template_name = "vendors/products.html"
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["products"] = (
+            self.request.user.products.only(
+                "id",
+                "name",
+                "category",
+                "current_stock",
+                "reorder_level",
+                "price",
+                "description",
+            )
+            .order_by("-created_at")
+        )
+        return context
 
-class VendorAnalyticsView(TemplateView):
+
+class VendorAnalyticsView(VendorAccessMixin, TemplateView):
     template_name = "vendors/analytics.html"
+
+
+class VendorProductCreateView(VendorAccessMixin, View):
+    http_method_names = ["post"]
+
+    def post(self, request, *args, **kwargs):
+        is_htmx = getattr(request, "htmx", False)
+        account = (
+            AccountRegistration.objects.filter(user_id=request.user.id)
+            .only("account_type")
+            .first()
+        )
+        if not account or account.account_type != AccountRegistration.ACCOUNT_TYPE_SELLER:
+            error_text = "Only seller accounts can add products."
+            if is_htmx:
+                response = HttpResponse("", status=403)
+                response["HX-Trigger"] = json.dumps({"product:create:error": {"message": error_text}})
+                return response
+            messages.error(request, error_text)
+            return redirect("vendor_products")
+
+        form = ProductForm(request.POST, request.FILES, vendor=request.user)
+        if not form.is_valid():
+            first_error = next(iter(form.errors.values()))[0] if form.errors else "Please check your input and try again."
+            if is_htmx:
+                response = HttpResponse("", status=422)
+                response["HX-Trigger"] = json.dumps({"product:create:error": {"message": str(first_error)}})
+                return response
+            messages.error(request, first_error)
+            return redirect("vendor_products")
+
+        with transaction.atomic():
+            product = form.save()
+
+        success_message = f"Product '{product.name}' was added successfully."
+        if is_htmx:
+            row_html = render_to_string(
+                "vendors/partials/product_row.html",
+                {"product": product},
+                request=request,
+            )
+            response = HttpResponse(row_html)
+            response["HX-Trigger"] = json.dumps({"product:create:success": {"message": success_message}})
+            return response
+
+        messages.success(request, success_message)
+        return redirect("vendor_products")
 
 
 class HtmxTemplateMixin:
@@ -50,11 +122,11 @@ class LoginView(HtmxTemplateMixin, FormView):
     full_template_name = "auth/login.html"
     partial_template_name = "auth/partials/login_content.html"
     form_class = LoginForm
-    success_url = reverse_lazy("home")
+    success_url = reverse_lazy("vendor_dashboard")
 
     def dispatch(self, request, *args, **kwargs):
         if request.user.is_authenticated:
-            return redirect("home")
+            return redirect("vendor_dashboard")
         return super().dispatch(request, *args, **kwargs)
 
     def get_form_kwargs(self):
@@ -159,3 +231,13 @@ class ForgotPasswordView(HtmxTemplateMixin, FormView):
             "If an account exists for that email, a reset link has been sent.",
         )
         return self.client_redirect(self.get_success_url())
+
+
+class LogoutView(LoginRequiredMixin, View):
+    login_url = reverse_lazy("login")
+    http_method_names = ["post"]
+
+    def post(self, request, *args, **kwargs):
+        logout(request)
+        messages.success(request, "You have been signed out successfully.")
+        return redirect("login")

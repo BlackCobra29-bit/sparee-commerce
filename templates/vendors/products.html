@@ -59,7 +59,7 @@
                   <h6>Inventory Overview</h6>
                   <p class="text-sm mb-0">
                     <i class="fa fa-info-circle text-info" aria-hidden="true"></i>
-                    <span class="font-weight-bold ms-1">142 products</span> in inventory
+                    <span class="font-weight-bold ms-1"><span id="productCount">{{ products|length }}</span> products</span> in inventory
                   </p>
                 </div>
                 <div class="col-lg-6 col-5 my-auto text-end">
@@ -75,7 +75,6 @@
                   <thead>
                     <tr>
                       <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Product</th>
-                      <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">SKU</th>
                       <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Category</th>
                       <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Stock Qty</th>
                       <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Price</th>
@@ -83,181 +82,14 @@
                       <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Actions</th>
                     </tr>
                   </thead>
-                  <tbody>
-                    <tr>
-                      <td>
-                        <div class="d-flex px-2 py-1">
-                          <div class="d-flex flex-column justify-content-center">
-                            <h6 class="mb-0 text-sm">Brake Pads Set</h6>
-                            <p class="text-xs text-secondary mb-0">Front brake pads</p>
-                          </div>
-                        </div>
-                      </td>
-                      <td><p class="text-xs font-weight-bold mb-0">BP-1042</p></td>
-                      <td class="align-middle text-center text-sm"><span class="text-xs font-weight-bold">Brake Parts</span></td>
-                      <td class="align-middle text-center text-sm"><span class="text-xs font-weight-bold">32</span></td>
-                      <td class="align-middle text-center text-sm"><span class="text-xs font-weight-bold">$45.00</span></td>
-                      <td class="align-middle text-center">
-                        <span class="badge badge-sm bg-gradient-success">In Stock</span>
-                      </td>
-                      <td class="align-middle text-center">
-                        <a href="javascript:;" class="text-secondary font-weight-bold text-xs" data-bs-toggle="tooltip" data-bs-original-title="View Details">
-                          <i class="fas fa-eye me-2"></i>
-                        </a>
-                        <a href="javascript:;" class="text-info font-weight-bold text-xs" data-bs-toggle="tooltip" data-bs-original-title="Edit">
-                          <i class="fas fa-edit me-2"></i>
-                        </a>
-                        <a href="javascript:;" class="text-danger font-weight-bold text-xs" data-bs-toggle="tooltip" data-bs-original-title="Delete">
-                          <i class="fas fa-trash me-2"></i>
-                        </a>
-                      </td>
+                  <tbody id="productsTableBody">
+                    {% for product in products %}
+                      {% include "vendors/partials/product_row.html" with product=product %}
+                    {% empty %}
+                    <tr id="emptyProductsRow">
+                      <td colspan="6" class="text-center text-muted py-4">No products yet. Add your first product.</td>
                     </tr>
-
-                    <tr>
-                      <td>
-                        <div class="d-flex px-2 py-1">
-                          <div class="d-flex flex-column justify-content-center">
-                            <h6 class="mb-0 text-sm">Oil Filter</h6>
-                            <p class="text-xs text-secondary mb-0">Premium oil filter</p>
-                          </div>
-                        </div>
-                      </td>
-                      <td><p class="text-xs font-weight-bold mb-0">OF-7781</p></td>
-                      <td class="align-middle text-center text-sm"><span class="text-xs font-weight-bold">Filters</span></td>
-                      <td class="align-middle text-center text-sm"><span class="text-xs font-weight-bold text-danger">9</span></td>
-                      <td class="align-middle text-center text-sm"><span class="text-xs font-weight-bold">$12.00</span></td>
-                      <td class="align-middle text-center">
-                        <span class="badge badge-sm bg-gradient-warning">Low Stock</span>
-                      </td>
-                      <td class="align-middle text-center">
-                        <a href="javascript:;" class="text-secondary font-weight-bold text-xs" data-bs-toggle="tooltip" data-bs-original-title="View Details">
-                          <i class="fas fa-eye me-2"></i>
-                        </a>
-                        <a href="javascript:;" class="text-info font-weight-bold text-xs" data-bs-toggle="tooltip" data-bs-original-title="Edit">
-                          <i class="fas fa-edit me-2"></i>
-                        </a>
-                        <a href="javascript:;" class="text-danger font-weight-bold text-xs" data-bs-toggle="tooltip" data-bs-original-title="Delete">
-                          <i class="fas fa-trash me-2"></i>
-                        </a>
-                      </td>
-                    </tr>
-
-                    <tr>
-                      <td>
-                        <div class="d-flex px-2 py-1">
-                          <div class="d-flex flex-column justify-content-center">
-                            <h6 class="mb-0 text-sm">Shock Absorber</h6>
-                            <p class="text-xs text-secondary mb-0">Rear shock absorber</p>
-                          </div>
-                        </div>
-                      </td>
-                      <td><p class="text-xs font-weight-bold mb-0">SA-2209</p></td>
-                      <td class="align-middle text-center text-sm"><span class="text-xs font-weight-bold">Suspension</span></td>
-                      <td class="align-middle text-center text-sm"><span class="text-xs font-weight-bold">17</span></td>
-                      <td class="align-middle text-center text-sm"><span class="text-xs font-weight-bold">$89.00</span></td>
-                      <td class="align-middle text-center">
-                        <span class="badge badge-sm bg-gradient-success">In Stock</span>
-                      </td>
-                      <td class="align-middle text-center">
-                        <a href="javascript:;" class="text-secondary font-weight-bold text-xs" data-bs-toggle="tooltip" data-bs-original-title="View Details">
-                          <i class="fas fa-eye me-2"></i>
-                        </a>
-                        <a href="javascript:;" class="text-info font-weight-bold text-xs" data-bs-toggle="tooltip" data-bs-original-title="Edit">
-                          <i class="fas fa-edit me-2"></i>
-                        </a>
-                        <a href="javascript:;" class="text-danger font-weight-bold text-xs" data-bs-toggle="tooltip" data-bs-original-title="Delete">
-                          <i class="fas fa-trash me-2"></i>
-                        </a>
-                      </td>
-                    </tr>
-
-                    <tr>
-                      <td>
-                        <div class="d-flex px-2 py-1">
-                          <div class="d-flex flex-column justify-content-center">
-                            <h6 class="mb-0 text-sm">Air Filter</h6>
-                            <p class="text-xs text-secondary mb-0">High performance air filter</p>
-                          </div>
-                        </div>
-                      </td>
-                      <td><p class="text-xs font-weight-bold mb-0">AF-3345</p></td>
-                      <td class="align-middle text-center text-sm"><span class="text-xs font-weight-bold">Filters</span></td>
-                      <td class="align-middle text-center text-sm"><span class="text-xs font-weight-bold text-danger">0</span></td>
-                      <td class="align-middle text-center text-sm"><span class="text-xs font-weight-bold">$28.00</span></td>
-                      <td class="align-middle text-center">
-                        <span class="badge badge-sm bg-gradient-danger">Out of Stock</span>
-                      </td>
-                      <td class="align-middle text-center">
-                        <a href="javascript:;" class="text-secondary font-weight-bold text-xs" data-bs-toggle="tooltip" data-bs-original-title="View Details">
-                          <i class="fas fa-eye me-2"></i>
-                        </a>
-                        <a href="javascript:;" class="text-info font-weight-bold text-xs" data-bs-toggle="tooltip" data-bs-original-title="Edit">
-                          <i class="fas fa-edit me-2"></i>
-                        </a>
-                        <a href="javascript:;" class="text-primary font-weight-bold text-xs" data-bs-toggle="tooltip" data-bs-original-title="Restock">
-                          <i class="fas fa-boxes me-2"></i>
-                        </a>
-                      </td>
-                    </tr>
-
-                    <tr>
-                      <td>
-                        <div class="d-flex px-2 py-1">
-                          <div class="d-flex flex-column justify-content-center">
-                            <h6 class="mb-0 text-sm">Spark Plugs Set</h6>
-                            <p class="text-xs text-secondary mb-0">Iridium spark plugs (4 pcs)</p>
-                          </div>
-                        </div>
-                      </td>
-                      <td><p class="text-xs font-weight-bold mb-0">SP-8892</p></td>
-                      <td class="align-middle text-center text-sm"><span class="text-xs font-weight-bold">Engine</span></td>
-                      <td class="align-middle text-center text-sm"><span class="text-xs font-weight-bold">56</span></td>
-                      <td class="align-middle text-center text-sm"><span class="text-xs font-weight-bold">$35.00</span></td>
-                      <td class="align-middle text-center">
-                        <span class="badge badge-sm bg-gradient-success">In Stock</span>
-                      </td>
-                      <td class="align-middle text-center">
-                        <a href="javascript:;" class="text-secondary font-weight-bold text-xs" data-bs-toggle="tooltip" data-bs-original-title="View Details">
-                          <i class="fas fa-eye me-2"></i>
-                        </a>
-                        <a href="javascript:;" class="text-info font-weight-bold text-xs" data-bs-toggle="tooltip" data-bs-original-title="Edit">
-                          <i class="fas fa-edit me-2"></i>
-                        </a>
-                        <a href="javascript:;" class="text-danger font-weight-bold text-xs" data-bs-toggle="tooltip" data-bs-original-title="Delete">
-                          <i class="fas fa-trash me-2"></i>
-                        </a>
-                      </td>
-                    </tr>
-
-                    <tr>
-                      <td>
-                        <div class="d-flex px-2 py-1">
-                          <div class="d-flex flex-column justify-content-center">
-                            <h6 class="mb-0 text-sm">Brake Rotor</h6>
-                            <p class="text-xs text-secondary mb-0">Front brake rotor disc</p>
-                          </div>
-                        </div>
-                      </td>
-                      <td><p class="text-xs font-weight-bold mb-0">BR-4567</p></td>
-                      <td class="align-middle text-center text-sm"><span class="text-xs font-weight-bold">Brake Parts</span></td>
-                      <td class="align-middle text-center text-sm"><span class="text-xs font-weight-bold text-danger">5</span></td>
-                      <td class="align-middle text-center text-sm"><span class="text-xs font-weight-bold">$68.00</span></td>
-                      <td class="align-middle text-center">
-                        <span class="badge badge-sm bg-gradient-warning">Low Stock</span>
-                      </td>
-                      <td class="align-middle text-center">
-                        <a href="javascript:;" class="text-secondary font-weight-bold text-xs" data-bs-toggle="tooltip" data-bs-original-title="View Details">
-                          <i class="fas fa-eye me-2"></i>
-                        </a>
-                        <a href="javascript:;" class="text-info font-weight-bold text-xs" data-bs-toggle="tooltip" data-bs-original-title="Edit">
-                          <i class="fas fa-edit me-2"></i>
-                        </a>
-                        <a href="javascript:;" class="text-danger font-weight-bold text-xs" data-bs-toggle="tooltip" data-bs-original-title="Delete">
-                          <i class="fas fa-trash me-2"></i>
-                        </a>
-                      </td>
-                    </tr>
-
+                    {% endfor %}
                   </tbody>
                   </table>
               </div>
@@ -298,21 +130,32 @@
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
-          <form>
+          <form id="addProductForm" method="post" action="{% url 'vendor_product_create' %}" enctype="multipart/form-data" novalidate data-parsley-validate hx-post="{% url 'vendor_product_create' %}" hx-encoding="multipart/form-data" hx-target="#productsTableBody" hx-swap="afterbegin">
+            {% csrf_token %}
             <div class="row">
               <div class="col-md-6 mb-3">
-                <label class="form-label">Product Name *</label>
-                <input type="text" class="form-control" placeholder="Enter product name" required>
+                <label class="form-label d-flex align-items-center" for="productName">
+                  Product Name *
+                  <span class="help-dot bg-white" data-tippy-content="Required. Enter a clear product name shown to customers, for example: Brake Pads Set." aria-label="Product name help" tabindex="0">?</span>
+                </label>
+                <input id="productName" name="name" type="text" class="form-control" placeholder="Enter product name" data-help="Enter at least 3 characters." required minlength="3" data-parsley-required-message="Product name is required." data-parsley-minlength="3" data-parsley-minlength-message="Product name must be at least 3 characters.">
+                <div class="invalid-feedback">Please enter a valid product name.</div>
               </div>
               <div class="col-md-6 mb-3">
-                <label class="form-label">SKU *</label>
-                <input type="text" class="form-control" placeholder="Enter SKU" required>
+                <label class="form-label d-flex align-items-center" for="vin">
+                  VIN (Vehicle Identification Number) *
+                  <span class="help-dot bg-white" data-tippy-content="Required. Enter the 17-character vehicle VIN." aria-label="VIN help" tabindex="0">?</span>
+                </label>
+                <input id="vin" name="vin" type="text" class="form-control" placeholder="Enter 17-character VIN" maxlength="17" data-help="Required. VIN must be exactly 17 characters." required data-parsley-required-message="VIN is required." data-parsley-length="[17, 17]" data-parsley-length-message="VIN must be exactly 17 characters.">
               </div>
             </div>
             <div class="row">
               <div class="col-md-6 mb-3">
-                <label class="form-label">Category *</label>
-                <select class="form-control" required>
+                <label class="form-label d-flex align-items-center" for="category">
+                  Category *
+                  <span class="help-dot bg-white" data-tippy-content="Required. Select the product category so buyers can filter items and you can track inventory by type." aria-label="Category help" tabindex="0">?</span>
+                </label>
+                <select id="category" name="category" class="form-control" data-help="Choose one category." required data-parsley-required-message="Please select a category.">
                   <option value="">Select category</option>
                   <option value="brake-parts">Brake Parts</option>
                   <option value="filters">Filters</option>
@@ -320,42 +163,282 @@
                   <option value="engine">Engine Parts</option>
                   <option value="electrical">Electrical</option>
                 </select>
+                <div class="invalid-feedback">Please select a category.</div>
               </div>
               <div class="col-md-6 mb-3">
-                <label class="form-label">Price *</label>
-                <input type="number" class="form-control" placeholder="0.00" step="0.01" required>
+                <label class="form-label d-flex align-items-center" for="price">
+                  Price *
+                  <span class="help-dot bg-white" data-tippy-content="Required. Enter the selling price per unit, for example: 45.00." aria-label="Price help" tabindex="0">?</span>
+                </label>
+                <input id="price" name="price" type="number" class="form-control" placeholder="0.00" step="0.01" min="0.01" data-help="Required. Use a positive amount, e.g. 45.00." required data-parsley-required-message="Price is required." data-parsley-min="0.01" data-parsley-min-message="Price must be greater than 0.">
+                <div class="invalid-feedback">Please enter a valid price.</div>
               </div>
             </div>
             <div class="row">
               <div class="col-md-6 mb-3">
-                <label class="form-label">Initial Stock Quantity *</label>
-                <input type="number" class="form-control" placeholder="0" required>
+                <label class="form-label d-flex align-items-center" for="initialStock">
+                  Initial Stock Quantity *
+                  <span class="help-dot bg-white" id="initialStockHelp" aria-label="Initial stock help" tabindex="0">?</span>
+                </label>
+                <input id="initialStock" name="initial_stock" type="number" class="form-control" placeholder="0" min="0" data-help="Required. Enter 0 or a higher whole number." required data-parsley-required-message="Initial stock is required." data-parsley-type="integer" data-parsley-min="0" data-parsley-min-message="Initial stock cannot be negative.">
+                <div class="invalid-feedback">Please enter a valid stock quantity.</div>
               </div>
               <div class="col-md-6 mb-3">
-                <label class="form-label">Reorder Level</label>
-                <input type="number" class="form-control" placeholder="Minimum stock level">
+                <label class="form-label d-flex align-items-center" for="reorderLevel">
+                  Reorder Level (Optional)
+                  <span class="help-dot bg-white" data-tippy-content="Optional. Set the minimum stock threshold that should trigger a restock alert." aria-label="Reorder level help" tabindex="0">?</span>
+                </label>
+                <input id="reorderLevel" name="reorder_level" type="number" class="form-control" placeholder="Minimum stock level" min="0" data-help="Optional. Enter 0 or a higher number." data-parsley-type="integer" data-parsley-min="0" data-parsley-min-message="Reorder level cannot be negative.">
               </div>
             </div>
             <div class="mb-3">
-              <label class="form-label">Description</label>
-              <textarea class="form-control" rows="3" placeholder="Product description"></textarea>
+              <label class="form-label d-flex align-items-center" for="description">
+                Description
+                <span class="help-dot bg-white" data-tippy-content="Required. Add key details like fitment, material, size, or compatibility notes." aria-label="Description help" tabindex="0">?</span>
+              </label>
+              <textarea id="description" name="description" class="form-control" rows="3" placeholder="Product description" data-help="Describe fitment and compatibility details." required data-parsley-required-message="Description is required." maxlength="500" data-parsley-minlength="10" data-parsley-maxlength="500" data-parsley-minlength-message="Description must be at least 10 characters." data-parsley-maxlength-message="Description must be 500 characters or less."></textarea>
             </div>
             <div class="mb-3">
-              <label class="form-label">Product Image</label>
-              <input type="file" class="form-control" accept="image/*">
+              <label class="form-label d-flex align-items-center" for="productImage">
+                Product Image
+                <span class="help-dot bg-white" data-tippy-content="Required. Upload a clear product photo (JPG or PNG, up to 5MB)." aria-label="Product image help" tabindex="0">?</span>
+              </label>
+              <input id="productImage" name="product_image" type="file" class="form-control" accept=".jpg,.jpeg,.png,image/jpeg,image/png" data-help="Required. Upload JPG or PNG, up to 5MB." required data-parsley-required-message="Product image is required." data-parsley-fileextension="jpg,jpeg,png" data-parsley-maxfilesize="5" data-parsley-fileextension-message="Only JPG or PNG files are allowed." data-parsley-maxfilesize-message="Image must be 5MB or smaller.">
               <small class="text-muted">Max file size: 5MB. Supported formats: JPG, PNG</small>
             </div>
           </form>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn bg-gradient-secondary" data-bs-dismiss="modal">Cancel</button>
-          <button type="button" class="btn bg-gradient-primary">Add Product</button>
+          <button type="submit" class="btn bg-gradient-primary" form="addProductForm">Add Product</button>
         </div>
       </div>
     </div>
   </div>
 {% endblock %}
 
+{% block vendor_extra_css %}
+<style>
+  .help-dot {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    user-select: none;
+    margin-left: 6px;
+    border: 1px solid rgba(0, 0, 0, .2);
+    color: #344767;
+  }
+
+  .parsley-errors-list {
+    list-style: none;
+    margin: 6px 0 0;
+    padding: 0;
+  }
+
+  .parsley-errors-list li {
+    font-size: 12px;
+    color: #b21f2d;
+  }
+
+  .form-control.parsley-error {
+    border-color: rgba(220, 53, 69, 0.6);
+    box-shadow: 0 0 0 0.18rem rgba(220, 53, 69, 0.12);
+  }
+
+  .form-control.parsley-success {
+    border-color: rgba(8, 140, 22, 0.45);
+  }
+
+</style>
+{% endblock %}
+
 {% block vendor_extra_js %}
+<script src="https://unpkg.com/htmx.org@1.9.12"></script>
+<script src="https://unpkg.com/@popperjs/core@2"></script>
+<script src="https://unpkg.com/tippy.js@6"></script>
 <script src="{% static 'vendors/Js/index.js' %}"></script>
+<script>
+  (function () {
+    function showSwal(icon, title, text) {
+      if (typeof Swal === 'undefined') return;
+      Swal.fire({
+        icon: icon,
+        title: title,
+        text: text,
+        confirmButtonText: 'OK'
+      });
+    }
+
+    function closeAddProductModal() {
+      var modalEl = document.getElementById('addProductModal');
+      if (!modalEl || !window.bootstrap || !window.bootstrap.Modal) return;
+      var modalInstance = window.bootstrap.Modal.getOrCreateInstance(modalEl);
+      modalInstance.hide();
+    }
+
+    function resetAddProductForm() {
+      var form = document.getElementById('addProductForm');
+      if (!form) return;
+      form.reset();
+      if (window.jQuery && window.jQuery.fn && window.jQuery.fn.parsley) {
+        var parsleyInstance = window.jQuery(form).parsley();
+        parsleyInstance.reset();
+      }
+    }
+
+    function incrementProductCount() {
+      var countEl = document.getElementById('productCount');
+      if (!countEl) return;
+      var current = parseInt(countEl.textContent || '0', 10);
+      if (!Number.isNaN(current)) {
+        countEl.textContent = String(current + 1);
+      }
+    }
+
+    function clearEmptyProductsRow() {
+      var emptyRow = document.getElementById('emptyProductsRow');
+      if (emptyRow) {
+        emptyRow.remove();
+      }
+    }
+
+    function setupTooltips() {
+      if (typeof tippy !== 'function') return;
+
+      tippy('[data-tippy-content]', {
+        animation: 'shift-away',
+        delay: [150, 0],
+        arrow: true,
+        placement: 'top'
+      });
+
+      var helpTargets = document.querySelectorAll('#addProductForm input[data-help], #addProductForm select[data-help], #addProductForm textarea[data-help]');
+      helpTargets.forEach(function (el) {
+        tippy(el, {
+          content: el.getAttribute('data-help'),
+          trigger: 'focus',
+          placement: 'right',
+          interactive: true,
+          theme: 'light-border',
+          maxWidth: 260
+        });
+      });
+
+      tippy('#initialStockHelp', {
+        allowHTML: true,
+        theme: 'light-border',
+        placement: 'right',
+        interactive: true,
+        content:
+          '<div style="font-size: 13px; line-height: 1.3;">' +
+          '<div style="font-weight:700; margin-bottom:6px;">Stock rules</div>' +
+          '<ul style="margin:0; padding-left:18px;">' +
+          '<li>Use whole numbers only</li>' +
+          '<li>Set to <b>0</b> if out of stock</li>' +
+          '<li>Cannot be negative</li>' +
+          '</ul>' +
+          '</div>'
+      });
+    }
+
+    function setupParsley() {
+      if (!window.jQuery || !window.jQuery.fn || !window.jQuery.fn.parsley || !window.Parsley) {
+        return;
+      }
+
+      if (!window.Parsley.hasValidator || !window.Parsley.hasValidator('fileextension')) {
+        window.Parsley.addValidator('fileextension', {
+          requirementType: 'string',
+          validateString: function (_value, requirement, parsleyInstance) {
+            var file = parsleyInstance.$element[0] && parsleyInstance.$element[0].files ? parsleyInstance.$element[0].files[0] : null;
+            if (!file) return true;
+            var allowed = requirement.split(',').map(function (x) { return x.trim().toLowerCase(); });
+            var ext = file.name.split('.').pop();
+            ext = ext ? ext.toLowerCase() : '';
+            return allowed.indexOf(ext) !== -1;
+          },
+          messages: {
+            en: 'Allowed file types: %s.'
+          }
+        });
+      }
+
+      if (!window.Parsley.hasValidator || !window.Parsley.hasValidator('maxfilesize')) {
+        window.Parsley.addValidator('maxfilesize', {
+          requirementType: 'integer',
+          validateString: function (_value, maxSizeMb, parsleyInstance) {
+            var file = parsleyInstance.$element[0] && parsleyInstance.$element[0].files ? parsleyInstance.$element[0].files[0] : null;
+            if (!file) return true;
+            return file.size <= maxSizeMb * 1024 * 1024;
+          },
+          messages: {
+            en: 'File must be %sMB or smaller.'
+          }
+        });
+      }
+
+      window.jQuery('form[data-parsley-validate]').each(function () {
+        var $form = window.jQuery(this);
+        if ($form.data('Parsley')) return;
+
+        $form.parsley({
+          errorsWrapper: '<ul class="parsley-errors-list"></ul>',
+          errorTemplate: '<li></li>',
+          trigger: 'change input',
+          validateIfEmpty: true
+        });
+      });
+    }
+
+    function initProductPageUi() {
+      setupTooltips();
+      setupParsley();
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initProductPageUi);
+    } else {
+      initProductPageUi();
+    }
+
+    document.addEventListener('shown.bs.modal', function (event) {
+      if (!event.target || event.target.id !== 'addProductModal') return;
+      setupParsley();
+    });
+
+    document.body.addEventListener('product:create:success', function (event) {
+      var detail = event && event.detail ? event.detail : {};
+      clearEmptyProductsRow();
+      incrementProductCount();
+      closeAddProductModal();
+      resetAddProductForm();
+      showSwal('success', 'Success', detail.message || 'Product added successfully.');
+    });
+
+    document.body.addEventListener('product:create:error', function (event) {
+      var detail = event && event.detail ? event.detail : {};
+      showSwal('error', 'Error', detail.message || 'Unable to add product. Please try again.');
+    });
+  })();
+</script>
+{% if messages %}
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    {% for message in messages %}
+      Swal.fire({
+        icon: '{% if "success" in message.tags %}success{% elif "warning" in message.tags %}warning{% else %}error{% endif %}',
+        title: '{% if "success" in message.tags %}Success{% elif "warning" in message.tags %}Warning{% else %}Error{% endif %}',
+        text: '{{ message|escapejs }}',
+        confirmButtonText: 'OK'
+      });
+    {% endfor %}
+  });
+</script>
+{% endif %}
 {% endblock %}
