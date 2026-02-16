@@ -5,6 +5,7 @@
     setupStrengthMeter();
     setupEmailNormalizer();
     setupAccountTypeToggle();
+    setupDirectLoginSubmitLoading();
   }
 
   function setupParsley() {
@@ -135,8 +136,80 @@
     applyView();
   }
 
+  function getAuthLoadingOverlay() {
+    return document.getElementById("auth-loading");
+  }
+
+  function showAuthLoading() {
+    const overlay = getAuthLoadingOverlay();
+    if (!overlay) return;
+    overlay.classList.add("is-active");
+    overlay.setAttribute("aria-hidden", "false");
+  }
+
+  function hideAuthLoading() {
+    const overlay = getAuthLoadingOverlay();
+    if (!overlay) return;
+    overlay.classList.remove("is-active");
+    overlay.setAttribute("aria-hidden", "true");
+  }
+
+  function isAuthHtmxRequest(event) {
+    const detail = event && event.detail ? event.detail : {};
+    const path = (detail.pathInfo && detail.pathInfo.requestPath) || "";
+    const elt = detail.elt;
+
+    if (typeof path === "string" && (path.startsWith("/login/") || path.startsWith("/signup/") || path.startsWith("/forgot-password/"))) {
+      return true;
+    }
+
+    if (elt && elt.closest) {
+      if (elt.closest("#auth-page")) return true;
+      if (elt.closest("form[action*='/login/']")) return true;
+      if (elt.closest("form[action*='/signup/']")) return true;
+      if (elt.closest("form[action*='/forgot-password/']")) return true;
+    }
+
+    return false;
+  }
+
+  function setupDirectLoginSubmitLoading() {
+    const forms = document.querySelectorAll("form[action*='/login/']");
+    forms.forEach((form) => {
+      if (form.dataset.loadingBound === "1") return;
+      form.dataset.loadingBound = "1";
+      form.addEventListener("submit", function () {
+        showAuthLoading();
+      });
+    });
+  }
+
   document.addEventListener("DOMContentLoaded", function () {
     initAuthUi();
+  });
+
+  document.addEventListener("htmx:beforeRequest", function (event) {
+    if (isAuthHtmxRequest(event)) {
+      showAuthLoading();
+    }
+  });
+
+  document.addEventListener("htmx:afterRequest", function (event) {
+    if (isAuthHtmxRequest(event)) {
+      hideAuthLoading();
+    }
+  });
+
+  document.addEventListener("htmx:responseError", function (event) {
+    if (isAuthHtmxRequest(event)) {
+      hideAuthLoading();
+    }
+  });
+
+  document.addEventListener("htmx:sendError", function (event) {
+    if (isAuthHtmxRequest(event)) {
+      hideAuthLoading();
+    }
   });
 
   document.addEventListener("htmx:afterSwap", function (event) {
@@ -144,6 +217,7 @@
     if (!target) return;
     if (target.id === "auth-page" || (target.closest && target.closest("#auth-page"))) {
       initAuthUi();
+      hideAuthLoading();
     }
   });
 })();

@@ -4,7 +4,8 @@ from django.contrib import messages
 from django.contrib.auth import login, logout
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import User
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
+from django.shortcuts import get_object_or_404
 from django.shortcuts import redirect
 from django.db import transaction
 from django.template.loader import render_to_string
@@ -52,6 +53,49 @@ class VendorProductsView(VendorAccessMixin, TemplateView):
         return context
 
 
+class VendorProductRowsView(VendorAccessMixin, View):
+    http_method_names = ["get"]
+
+    def get(self, request, *args, **kwargs):
+        products = (
+            request.user.products.only(
+                "id",
+                "name",
+                "category",
+                "current_stock",
+                "initial_stock",
+                "reorder_level",
+                "price",
+                "description",
+                "vin",
+            )
+            .order_by("-created_at")
+        )
+        rows_html = render_to_string(
+            "vendors/partials/product_rows.html",
+            {"products": products},
+            request=request,
+        )
+        return HttpResponse(rows_html)
+
+
+def _vendor_products_queryset(user):
+    return (
+        user.products.only(
+            "id",
+            "name",
+            "category",
+            "current_stock",
+            "initial_stock",
+            "reorder_level",
+            "price",
+            "description",
+            "vin",
+        )
+        .order_by("-created_at")
+    )
+
+
 class VendorAnalyticsView(VendorAccessMixin, TemplateView):
     template_name = "vendors/analytics.html"
 
@@ -61,6 +105,7 @@ class VendorProductCreateView(VendorAccessMixin, View):
 
     def post(self, request, *args, **kwargs):
         is_htmx = getattr(request, "htmx", False)
+        is_ajax = request.headers.get("X-Requested-With") == "XMLHttpRequest"
         account = (
             AccountRegistration.objects.filter(user_id=request.user.id)
             .only("account_type")
@@ -72,6 +117,8 @@ class VendorProductCreateView(VendorAccessMixin, View):
                 response = HttpResponse("", status=403)
                 response["HX-Trigger"] = json.dumps({"product:create:error": {"message": error_text}})
                 return response
+            if is_ajax:
+                return JsonResponse({"ok": False, "message": error_text}, status=403)
             messages.error(request, error_text)
             return redirect("vendor_products")
 
@@ -82,6 +129,8 @@ class VendorProductCreateView(VendorAccessMixin, View):
                 response = HttpResponse("", status=422)
                 response["HX-Trigger"] = json.dumps({"product:create:error": {"message": str(first_error)}})
                 return response
+            if is_ajax:
+                return JsonResponse({"ok": False, "message": str(first_error)}, status=422)
             messages.error(request, first_error)
             return redirect("vendor_products")
 
@@ -98,7 +147,89 @@ class VendorProductCreateView(VendorAccessMixin, View):
             response = HttpResponse(row_html)
             response["HX-Trigger"] = json.dumps({"product:create:success": {"message": success_message}})
             return response
+        if is_ajax:
+            products = _vendor_products_queryset(request.user)
+            rows_html = render_to_string(
+                "vendors/partials/product_rows.html",
+                {"products": products},
+                request=request,
+            )
+            return JsonResponse(
+                {
+                    "ok": True,
+                    "message": success_message,
+                    "rows_html": rows_html,
+                    "count": products.count(),
+                }
+            )
+        messages.success(request, success_message)
+        return redirect("vendor_products")
 
+
+class VendorProductUpdateView(VendorAccessMixin, View):
+    http_method_names = ["post"]
+
+    def post(self, request, *args, **kwargs):
+        is_htmx = getattr(request, "htmx", False)
+        is_ajax = request.headers.get("X-Requested-With") == "XMLHttpRequest"
+        account = (
+            AccountRegistration.objects.filter(user_id=request.user.id)
+            .only("account_type")
+            .first()
+        )
+        if not account or account.account_type != AccountRegistration.ACCOUNT_TYPE_SELLER:
+            error_text = "Only seller accounts can update products."
+            if is_htmx:
+                response = HttpResponse("", status=403)
+                response["HX-Trigger"] = json.dumps({"product:update:error": {"message": error_text}})
+                return response
+            if is_ajax:
+                return JsonResponse({"ok": False, "message": error_text}, status=403)
+            messages.error(request, error_text)
+            return redirect("vendor_products")
+
+        product = get_object_or_404(request.user.products, pk=kwargs.get("pk"))
+        form = ProductForm(request.POST, request.FILES, vendor=request.user, instance=product)
+        if not form.is_valid():
+            first_error = next(iter(form.errors.values()))[0] if form.errors else "Please check your input and try again."
+            if is_htmx:
+                response = HttpResponse("", status=422)
+                response["HX-Trigger"] = json.dumps({"product:update:error": {"message": str(first_error)}})
+                return response
+            if is_ajax:
+                return JsonResponse({"ok": False, "message": str(first_error)}, status=422)
+            messages.error(request, first_error)
+            return redirect("vendor_products")
+
+        with transaction.atomic():
+            product = form.save()
+
+        success_message = f"Product '{product.name}' was updated successfully."
+        if is_htmx:
+            products = _vendor_products_queryset(request.user)
+            rows_html = render_to_string(
+                "vendors/partials/product_rows.html",
+                {"products": products},
+                request=request,
+            )
+            response = HttpResponse(rows_html)
+            response["HX-Trigger"] = json.dumps({"product:update:success": {"message": success_message}})
+            return response
+        if is_ajax:
+            products = _vendor_products_queryset(request.user)
+            rows_html = render_to_string(
+                "vendors/partials/product_rows.html",
+                {"products": products},
+                request=request,
+            )
+            return JsonResponse(
+                {
+                    "ok": True,
+                    "message": success_message,
+                    "rows_html": rows_html,
+                    "count": products.count(),
+                }
+            )
         messages.success(request, success_message)
         return redirect("vendor_products")
 
@@ -143,8 +274,14 @@ class LoginView(HtmxTemplateMixin, FormView):
         return self.client_redirect(str(self.success_url))
 
     def form_invalid(self, form):
-        for error in form.non_field_errors():
-            messages.error(self.request, error)
+        for field_name, errors in form.errors.items():
+            if field_name == "__all__":
+                for error in errors:
+                    messages.error(self.request, error)
+                continue
+            field_label = form.fields[field_name].label or field_name.replace("_", " ").title()
+            for error in errors:
+                messages.error(self.request, f"{field_label}: {error}")
         return super().form_invalid(form)
 
     def get_context_data(self, **kwargs):
@@ -167,6 +304,7 @@ class SignupView(HtmxTemplateMixin, FormView):
 
     def form_valid(self, form):
         account_type = form.cleaned_data["account_type"]
+        profile_picture = form.cleaned_data["profile_picture"]
         license_file = form.cleaned_data.get("license_file")
 
         user = User.objects.create_user(
@@ -180,6 +318,7 @@ class SignupView(HtmxTemplateMixin, FormView):
         AccountRegistration.objects.create(
             user=user,
             account_type=account_type,
+            profile_picture=profile_picture,
             license_file=license_file if account_type == "seller" else None,
         )
 
@@ -194,8 +333,14 @@ class SignupView(HtmxTemplateMixin, FormView):
         return self.client_redirect(self.get_success_url())
 
     def form_invalid(self, form):
-        for error in form.non_field_errors():
-            messages.error(self.request, error)
+        for field_name, errors in form.errors.items():
+            if field_name == "__all__":
+                for error in errors:
+                    messages.error(self.request, error)
+                continue
+            field_label = form.fields[field_name].label or field_name.replace("_", " ").title()
+            for error in errors:
+                messages.error(self.request, f"{field_label}: {error}")
         return super().form_invalid(form)
 
     def get_context_data(self, **kwargs):

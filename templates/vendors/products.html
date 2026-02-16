@@ -1,54 +1,6 @@
 {% extends "vendors/base.html" %}
 {% load static %}
 {% block vendor_content %}
-
-      <!-- Filters and Add Product Button -->
-      <div class="row mb-4">
-        <div class="col-12">
-          <div class="card">
-            <div class="card-body p-3">
-              <div class="row align-items-center">
-                <div class="col-lg-3 col-md-6 mb-3 mb-md-0">
-                  <label class="form-label text-sm font-weight-bold">Stock Status</label>
-                  <select class="form-control" id="stockFilter">
-                    <option value="all">All Items</option>
-                    <option value="in-stock">In Stock</option>
-                    <option value="low-stock">Low Stock</option>
-                    <option value="out-of-stock">Out of Stock</option>
-                  </select>
-                </div>
-                <div class="col-lg-3 col-md-6 mb-3 mb-md-0">
-                  <label class="form-label text-sm font-weight-bold">Category</label>
-                  <select class="form-control" id="categoryFilter">
-                    <option value="all">All Categories</option>
-                    <option value="brake-parts">Brake Parts</option>
-                    <option value="filters">Filters</option>
-                    <option value="suspension">Suspension</option>
-                    <option value="engine">Engine Parts</option>
-                    <option value="electrical">Electrical</option>
-                  </select>
-                </div>
-                <div class="col-lg-3 col-md-6 mb-3 mb-md-0">
-                  <label class="form-label text-sm font-weight-bold">Sort By</label>
-                  <select class="form-control" id="sortFilter">
-                    <option value="name-asc">Name: A-Z</option>
-                    <option value="name-desc">Name: Z-A</option>
-                    <option value="stock-low">Stock: Low to High</option>
-                    <option value="stock-high">Stock: High to Low</option>
-                    <option value="recent">Recently Added</option>
-                  </select>
-                </div>
-                <div class="col-lg-3 col-md-6 d-flex align-items-end">
-                  <button class="btn bg-gradient-primary w-100 mb-0" type="button" data-bs-toggle="modal" data-bs-target="#addProductModal">
-                    <i class="fas fa-plus me-2"></i>Add Product
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
       <!-- Inventory Table -->
       <div class="row">
         <div class="col-12">
@@ -63,57 +15,31 @@
                   </p>
                 </div>
                 <div class="col-lg-6 col-5 my-auto text-end">
-                  <button class="btn btn-sm bg-gradient-dark mb-0" type="button">
-                    <i class="fas fa-download me-1"></i>Export
+                  <button class="btn btn-sm bg-gradient-primary mb-0" type="button" data-bs-toggle="modal" data-bs-target="#addProductModal">
+                    <i class="fas fa-plus me-2"></i>Add Product
                   </button>
+                  <span id="productsExportButtons" class="d-inline-block ms-2"></span>
                 </div>
               </div>
             </div>
             <div class="card-body px-0 pb-2">
               <div class="table-responsive p-0">
-                <table class="table align-items-center mb-0">
+                <table id="productsTable" class="table table-striped">
                   <thead>
                     <tr>
-                      <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Product</th>
-                      <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Category</th>
-                      <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Stock Qty</th>
-                      <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Price</th>
-                      <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Status</th>
-                      <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Actions</th>
+                      <th>Product</th>
+                      <th class="text-center">Category</th>
+                      <th class="text-center">Stock Qty</th>
+                      <th class="text-center">Price</th>
+                      <th class="text-center">Status</th>
+                      <th class="text-center">Actions</th>
                     </tr>
                   </thead>
-                  <tbody id="productsTableBody">
-                    {% for product in products %}
-                      {% include "vendors/partials/product_row.html" with product=product %}
-                    {% empty %}
-                    <tr id="emptyProductsRow">
-                      <td colspan="6" class="text-center text-muted py-4">No products yet. Add your first product.</td>
-                    </tr>
-                    {% endfor %}
+                  <tbody id="productsTableBody" data-rows-url="{% url 'vendor_product_rows' %}">
+                    {% include "vendors/partials/product_rows.html" with products=products %}
                   </tbody>
                   </table>
               </div>
-            </div>
-            <div class="card-footer pt-3 pb-2">
-              <nav aria-label="Page navigation">
-                <ul class="pagination justify-content-center mb-0">
-                  <li class="page-item disabled">
-                    <a class="page-link" href="javascript:;" tabindex="-1">
-                      <i class="fa fa-angle-left"></i>
-                      <span class="sr-only">Previous</span>
-                    </a>
-                  </li>
-                  <li class="page-item active"><a class="page-link" href="javascript:;">1</a></li>
-                  <li class="page-item"><a class="page-link" href="javascript:;">2</a></li>
-                  <li class="page-item"><a class="page-link" href="javascript:;">3</a></li>
-                  <li class="page-item">
-                    <a class="page-link" href="javascript:;">
-                      <i class="fa fa-angle-right"></i>
-                      <span class="sr-only">Next</span>
-                    </a>
-                  </li>
-                </ul>
-              </nav>
             </div>
           </div>
         </div>
@@ -130,7 +56,7 @@
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
-          <form id="addProductForm" method="post" action="{% url 'vendor_product_create' %}" enctype="multipart/form-data" novalidate data-parsley-validate hx-post="{% url 'vendor_product_create' %}" hx-encoding="multipart/form-data" hx-target="#productsTableBody" hx-swap="afterbegin">
+          <form id="addProductForm" method="post" action="{% url 'vendor_product_create' %}" enctype="multipart/form-data" novalidate data-parsley-validate hx-post="{% url 'vendor_product_create' %}" hx-encoding="multipart/form-data" hx-target="#productsTableBody" hx-swap="none">
             {% csrf_token %}
             <div class="row">
               <div class="col-md-6 mb-3">
@@ -215,9 +141,90 @@
       </div>
     </div>
   </div>
+
+  <!-- Edit Product Modal -->
+  <div class="modal fade" id="editProductModal" tabindex="-1" aria-labelledby="editProductModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="editProductModalLabel">Edit Product</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form
+            id="editProductForm"
+            method="post"
+            action=""
+            enctype="multipart/form-data"
+            novalidate
+            data-parsley-validate
+            hx-post=""
+            hx-encoding="multipart/form-data"
+            hx-target="#productsTableBody"
+            hx-swap="none"
+          >
+            {% csrf_token %}
+            <input type="hidden" id="editProductId" name="product_id" value="">
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label class="form-label" for="editProductName">Product Name *</label>
+                <input id="editProductName" name="name" type="text" class="form-control" required minlength="3">
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label" for="editVin">VIN *</label>
+                <input id="editVin" name="vin" type="text" class="form-control" maxlength="17" required>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label class="form-label" for="editCategory">Category *</label>
+                <select id="editCategory" name="category" class="form-control" required>
+                  <option value="">Select category</option>
+                  <option value="brake-parts">Brake Parts</option>
+                  <option value="filters">Filters</option>
+                  <option value="suspension">Suspension</option>
+                  <option value="engine">Engine Parts</option>
+                  <option value="electrical">Electrical</option>
+                </select>
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label" for="editPrice">Price *</label>
+                <input id="editPrice" name="price" type="number" class="form-control" step="0.01" min="0.01" required>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label class="form-label" for="editInitialStock">Initial Stock Quantity *</label>
+                <input id="editInitialStock" name="initial_stock" type="number" class="form-control" min="0" required>
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label" for="editReorderLevel">Reorder Level (Optional)</label>
+                <input id="editReorderLevel" name="reorder_level" type="number" class="form-control" min="0">
+              </div>
+            </div>
+            <div class="mb-3">
+              <label class="form-label" for="editDescription">Description *</label>
+              <textarea id="editDescription" name="description" class="form-control" rows="3" required maxlength="500"></textarea>
+            </div>
+            <div class="mb-3">
+              <label class="form-label" for="editProductImage">Product Image (Optional)</label>
+              <input id="editProductImage" name="product_image" type="file" class="form-control" accept=".jpg,.jpeg,.png,image/jpeg,image/png">
+              <small class="text-muted">Leave empty to keep existing image.</small>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn bg-gradient-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn bg-gradient-primary" form="editProductForm">Save Changes</button>
+        </div>
+      </div>
+    </div>
+  </div>
 {% endblock %}
 
 {% block vendor_extra_css %}
+<link rel="stylesheet" href="https://cdn.datatables.net/2.1.8/css/dataTables.bootstrap5.min.css">
+<link rel="stylesheet" href="https://cdn.datatables.net/buttons/3.1.2/css/buttons.bootstrap5.min.css">
 <style>
   .help-dot {
     display: inline-flex;
@@ -255,6 +262,24 @@
     border-color: rgba(8, 140, 22, 0.45);
   }
 
+  #productsTable_wrapper .pagination .page-item.active .page-link {
+    background-color: rgba(33, 37, 41, 0.75);
+    border-color: rgba(33, 37, 41, 0.75);
+    color: #fff;
+  }
+
+  #productsTable_wrapper .pagination .page-link:focus {
+    box-shadow: none;
+  }
+
+  #productsExportButtons .dt-buttons {
+    display: inline-flex;
+  }
+
+  #productsExportButtons .btn {
+    margin-bottom: 0;
+  }
+
 </style>
 {% endblock %}
 
@@ -262,9 +287,68 @@
 <script src="https://unpkg.com/htmx.org@1.9.12"></script>
 <script src="https://unpkg.com/@popperjs/core@2"></script>
 <script src="https://unpkg.com/tippy.js@6"></script>
+<script src="https://cdn.datatables.net/2.1.8/js/dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/2.1.8/js/dataTables.bootstrap5.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/3.1.2/js/dataTables.buttons.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/3.1.2/js/buttons.bootstrap5.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
+<script src="https://cdn.datatables.net/buttons/3.1.2/js/buttons.html5.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/3.1.2/js/buttons.print.min.js"></script>
 <script src="{% static 'vendors/Js/index.js' %}"></script>
 <script>
   (function () {
+    var productsDataTable = null;
+
+    function initProductsDataTable() {
+      var tableEl = document.getElementById('productsTable');
+      if (!tableEl || typeof DataTable === 'undefined') return;
+
+      if (productsDataTable) {
+        productsDataTable.destroy();
+      }
+
+      productsDataTable = new DataTable('#productsTable', {
+        pageLength: 10,
+        order: [],
+        buttons: [
+          {
+            extend: 'collection',
+            text: '<i class="fas fa-download me-1"></i>Export',
+            className: 'btn btn-sm bg-gradient-dark',
+            autoClose: true,
+            buttons: [
+              { extend: 'copyHtml5', text: 'Copy' },
+              { extend: 'csvHtml5', text: 'CSV' },
+              { extend: 'excelHtml5', text: 'Excel' },
+              { extend: 'pdfHtml5', text: 'PDF' },
+              { extend: 'print', text: 'Print' }
+            ]
+          }
+        ],
+        layout: {
+          topStart: 'pageLength',
+          topEnd: 'search',
+          bottomStart: 'info',
+          bottomEnd: 'paging'
+        },
+        language: {
+          lengthMenu: '_MENU_ entries per page',
+          search: 'Search:'
+        },
+        columnDefs: [
+          { orderable: false, targets: [5] }
+        ]
+      });
+
+      var exportContainer = document.getElementById('productsExportButtons');
+      if (exportContainer && productsDataTable.buttons) {
+        exportContainer.innerHTML = '';
+        productsDataTable.buttons().container().appendTo(exportContainer);
+      }
+    }
+
     function showSwal(icon, title, text) {
       if (typeof Swal === 'undefined') return;
       Swal.fire({
@@ -282,6 +366,13 @@
       modalInstance.hide();
     }
 
+    function closeEditProductModal() {
+      var modalEl = document.getElementById('editProductModal');
+      if (!modalEl || !window.bootstrap || !window.bootstrap.Modal) return;
+      var modalInstance = window.bootstrap.Modal.getOrCreateInstance(modalEl);
+      modalInstance.hide();
+    }
+
     function resetAddProductForm() {
       var form = document.getElementById('addProductForm');
       if (!form) return;
@@ -292,6 +383,45 @@
       }
     }
 
+    function resetEditProductForm() {
+      var form = document.getElementById('editProductForm');
+      if (!form) return;
+      form.reset();
+      if (window.jQuery && window.jQuery.fn && window.jQuery.fn.parsley) {
+        var parsleyInstance = window.jQuery(form).parsley();
+        parsleyInstance.reset();
+      }
+    }
+
+    function openEditProductModalFromTrigger(triggerEl) {
+      var form = document.getElementById('editProductForm');
+      if (!form || !triggerEl) return;
+
+      var productId = triggerEl.getAttribute('data-product-id');
+      var updateUrl = triggerEl.getAttribute('data-update-url');
+      if (!productId || !updateUrl) return;
+
+      form.setAttribute('action', updateUrl);
+      form.setAttribute('hx-post', updateUrl);
+      form.setAttribute('hx-target', '#productsTableBody');
+      document.getElementById('editProductId').value = productId;
+
+      document.getElementById('editProductName').value = triggerEl.getAttribute('data-name') || '';
+      document.getElementById('editVin').value = triggerEl.getAttribute('data-vin') || '';
+      document.getElementById('editCategory').value = triggerEl.getAttribute('data-category') || '';
+      document.getElementById('editPrice').value = triggerEl.getAttribute('data-price') || '';
+      document.getElementById('editInitialStock').value = triggerEl.getAttribute('data-current-stock') || '0';
+      document.getElementById('editReorderLevel').value = triggerEl.getAttribute('data-reorder-level') || '0';
+      document.getElementById('editDescription').value = triggerEl.getAttribute('data-description') || '';
+      document.getElementById('editProductImage').value = '';
+
+      if (window.bootstrap && window.bootstrap.Modal) {
+        var modalEl = document.getElementById('editProductModal');
+        var modalInstance = window.bootstrap.Modal.getOrCreateInstance(modalEl);
+        modalInstance.show();
+      }
+    }
+
     function incrementProductCount() {
       var countEl = document.getElementById('productCount');
       if (!countEl) return;
@@ -299,6 +429,28 @@
       if (!Number.isNaN(current)) {
         countEl.textContent = String(current + 1);
       }
+    }
+
+    function syncProductCountFromTable() {
+      var countEl = document.getElementById('productCount');
+      var bodyEl = document.getElementById('productsTableBody');
+      if (!countEl || !bodyEl) return;
+
+      var rows = bodyEl.querySelectorAll('tr[id^="product-row-"]');
+      countEl.textContent = String(rows.length);
+    }
+
+    function refreshProductsTableFromServer() {
+      var bodyEl = document.getElementById('productsTableBody');
+      if (!bodyEl) return;
+
+      var rowsUrl = bodyEl.getAttribute('data-rows-url');
+      if (!rowsUrl || typeof htmx === 'undefined') return;
+
+      htmx.ajax('GET', rowsUrl, {
+        target: '#productsTableBody',
+        swap: 'innerHTML'
+      });
     }
 
     function clearEmptyProductsRow() {
@@ -397,6 +549,7 @@
     }
 
     function initProductPageUi() {
+      initProductsDataTable();
       setupTooltips();
       setupParsley();
     }
@@ -408,22 +561,84 @@
     }
 
     document.addEventListener('shown.bs.modal', function (event) {
-      if (!event.target || event.target.id !== 'addProductModal') return;
+      if (!event.target || (event.target.id !== 'addProductModal' && event.target.id !== 'editProductModal')) return;
       setupParsley();
+    });
+
+    document.addEventListener('click', function (event) {
+      var editTrigger = event.target.closest('.js-edit-product');
+      if (!editTrigger) return;
+      event.preventDefault();
+      openEditProductModalFromTrigger(editTrigger);
+    });
+
+    var editProductForm = document.getElementById('editProductForm');
+    if (editProductForm) {
+      editProductForm.addEventListener('submit', function (event) {
+        event.preventDefault();
+
+        if (window.jQuery && window.jQuery.fn && window.jQuery.fn.parsley) {
+          var parsleyInstance = window.jQuery(editProductForm).parsley();
+          if (!parsleyInstance.validate()) {
+            return;
+          }
+        }
+
+        var actionUrl = editProductForm.getAttribute('action') || editProductForm.getAttribute('hx-post');
+        if (!actionUrl || typeof htmx === 'undefined') return;
+
+        htmx.ajax('POST', actionUrl, {
+          source: editProductForm,
+          target: '#productsTableBody',
+          swap: 'none'
+        });
+      });
+    }
+
+    document.body.addEventListener('htmx:afterSwap', function (event) {
+      if (!event.target || event.target.id !== 'productsTableBody') return;
+      syncProductCountFromTable();
+      initProductsDataTable();
+    });
+
+    document.body.addEventListener('htmx:afterRequest', function (event) {
+      if (!event.detail || event.detail.elt !== editProductForm) return;
+      if (!event.detail.successful) return;
+      if (!event.detail.xhr || event.detail.xhr.status < 200 || event.detail.xhr.status >= 300) return;
+
+      var triggerHeader = event.detail.xhr.getResponseHeader('HX-Trigger');
+      if (triggerHeader) return;
+
+      closeEditProductModal();
+      resetEditProductForm();
+      refreshProductsTableFromServer();
+      showSwal('success', 'Success', 'Product updated successfully.');
     });
 
     document.body.addEventListener('product:create:success', function (event) {
       var detail = event && event.detail ? event.detail : {};
-      clearEmptyProductsRow();
-      incrementProductCount();
       closeAddProductModal();
       resetAddProductForm();
+      refreshProductsTableFromServer();
       showSwal('success', 'Success', detail.message || 'Product added successfully.');
     });
 
     document.body.addEventListener('product:create:error', function (event) {
       var detail = event && event.detail ? event.detail : {};
       showSwal('error', 'Error', detail.message || 'Unable to add product. Please try again.');
+    });
+
+    document.body.addEventListener('product:update:success', function (event) {
+      var detail = event && event.detail ? event.detail : {};
+      closeEditProductModal();
+      resetEditProductForm();
+      refreshProductsTableFromServer();
+      showSwal('success', 'Success', detail.message || 'Product updated successfully.');
+    });
+
+    document.body.addEventListener('product:update:error', function (event) {
+      var detail = event && event.detail ? event.detail : {};
+      showSwal('error', 'Error', detail.message || 'Unable to update product. Please try again.');
     });
   })();
 </script>

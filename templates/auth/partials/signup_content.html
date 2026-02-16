@@ -31,13 +31,19 @@
       <p class="subline">All fields are required for account setup.</p>
 
       {% if messages %}
-      <div class="alert-stack">
-        {% for message in messages %}
-        <div class="alert-item {% if message.tags == 'error' %}error{% else %}success{% endif %}">
-          {{ message }}
-        </div>
-        {% endfor %}
-      </div>
+      <script>
+        (function () {
+          if (typeof Swal === 'undefined') return;
+          {% for message in messages %}
+          Swal.fire({
+            icon: '{% if "success" in message.tags %}success{% elif "warning" in message.tags %}warning{% else %}error{% endif %}',
+            title: '{% if "success" in message.tags %}Success{% elif "warning" in message.tags %}Warning{% else %}Error{% endif %}',
+            text: '{{ message|escapejs }}',
+            confirmButtonText: 'OK'
+          });
+          {% endfor %}
+        })();
+      </script>
       {% endif %}
 
       <form method="post" action="{% url 'signup' %}" class="form-grid" enctype="multipart/form-data" data-parsley-validate
@@ -129,6 +135,20 @@
                  data-parsley-maxfilesize="5">
           <div class="meta-row">
             <span>Accepted: PDF, PNG, JPG, JPEG</span>
+            <span>Max: 5MB</span>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="profile_picture">Profile Picture</label>
+          <input id="profile_picture" name="profile_picture" type="file" class="input"
+                 required
+                 accept=".png,.jpg,.jpeg,image/png,image/jpeg"
+                 data-parsley-required-message="Profile picture is required."
+                 data-parsley-fileextension="png,jpg,jpeg"
+                 data-parsley-maxfilesize="5">
+          <div class="meta-row">
+            <span>Accepted: PNG, JPG, JPEG</span>
             <span>Max: 5MB</span>
           </div>
         </div>

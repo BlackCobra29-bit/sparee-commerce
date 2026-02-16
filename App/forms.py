@@ -47,6 +47,7 @@ class SignupForm(forms.Form):
     email = forms.EmailField(max_length=254)
     password = forms.CharField(widget=forms.PasswordInput)
     confirm_password = forms.CharField(widget=forms.PasswordInput)
+    profile_picture = forms.ImageField(required=True)
     license_file = forms.FileField(required=False)
     terms = forms.BooleanField(required=True)
 
@@ -73,6 +74,18 @@ class SignupForm(forms.Form):
         if license_file.size > 5 * 1024 * 1024:
             raise forms.ValidationError("License file must be 5MB or smaller.")
         return license_file
+
+    def clean_profile_picture(self):
+        profile_picture = self.cleaned_data.get("profile_picture")
+        if not profile_picture:
+            raise forms.ValidationError("Profile picture is required.")
+        allowed_ext = {".png", ".jpg", ".jpeg"}
+        ext = os.path.splitext(profile_picture.name)[1].lower()
+        if ext not in allowed_ext:
+            raise forms.ValidationError("Profile picture must be PNG, JPG, or JPEG.")
+        if profile_picture.size > 5 * 1024 * 1024:
+            raise forms.ValidationError("Profile picture must be 5MB or smaller.")
+        return profile_picture
 
     def clean(self):
         cleaned_data = super().clean()
@@ -114,6 +127,7 @@ class ProductForm(forms.ModelForm):
             "category",
             "price",
             "initial_stock",
+            "current_stock",
             "reorder_level",
             "description",
             "product_image",
@@ -128,6 +142,8 @@ class ProductForm(forms.ModelForm):
     def clean_product_image(self):
         image = self.cleaned_data.get("product_image")
         if not image:
+            if self.instance and self.instance.pk and self.instance.product_image:
+                return self.instance.product_image
             raise forms.ValidationError("Product image is required.")
 
         allowed_ext = {".jpg", ".jpeg", ".png"}

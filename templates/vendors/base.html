@@ -26,6 +26,15 @@
   <link id="pagestyle" href="{% static 'vendors/css/soft-ui-dashboard.css' %}" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.1.0/css/all.min.css">
   <script src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.1.0/js/all.min.js"></script>
+  <style>
+    .btn-primary,
+    .btn.bg-gradient-primary {
+      background-color: #088c16 !important;
+      border-color: #009002 !important;
+      background-image: none !important;
+      color: #fff;
+    }
+  </style>
   {% block vendor_extra_css %}{% endblock %}
 </head>
 
@@ -101,12 +110,12 @@
             </li>
           </ul>
           <ul class="navbar-nav ms-lg-auto mb-2 mb-lg-0 align-items-lg-center">
-            <li class="nav-item me-lg-2">
-              <a href="../vendor/profile.html" class="nav-link text-body font-weight-bold d-flex align-items-center px-0">
-                <img src="{% static 'vendors/img/team-2.jpg' %}" class="avatar avatar-sm me-2" alt="vendor">
-                <span>My Store</span>
-              </a>
-            </li>
+	            <li class="nav-item me-lg-2">
+	              <a href="../vendor/profile.html" class="nav-link text-body font-weight-bold d-flex align-items-center px-0">
+	                <img src="{% static 'vendors/img/team-2.jpg' %}" class="avatar avatar-sm me-2" alt="vendor">
+	                <span>{% if request.user.get_full_name %}{{ request.user.get_full_name }}{% else %}{{ request.user.username }}{% endif %}</span>
+	              </a>
+	            </li>
             <li class="nav-item me-lg-3">
               <a href="../vendor/settings.html" class="nav-link text-body p-0" title="Settings">
                 <i class="fa fa-cog cursor-pointer"></i>

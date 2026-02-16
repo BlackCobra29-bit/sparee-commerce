@@ -1,0 +1,7 @@
+{% for product in products %}
+  {% include "vendors/partials/product_row.html" with product=product %}
+{% empty %}
+<tr id="emptyProductsRow">
+  <td colspan="6" class="text-center text-muted py-4">No products yet. Add your first product.</td>
+</tr>
+{% endfor %}

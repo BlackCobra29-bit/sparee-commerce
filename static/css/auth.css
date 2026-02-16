@@ -303,6 +303,28 @@ body.auth-body {
   display: none !important;
 }
 
+.auth-loading-overlay {
+  position: fixed;
+  inset: 0;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.55);
+  backdrop-filter: blur(1px);
+  z-index: 9999;
+}
+
+.auth-loading-overlay.is-active {
+  display: flex;
+}
+
+.auth-loading-gif {
+  width: 72px;
+  height: 72px;
+  border-radius: 12px;
+  box-shadow: 0 14px 35px rgba(12, 20, 55, 0.22);
+}
+
 @media (max-width: 991px) {
   .auth-grid {
     grid-template-columns: 1fr;

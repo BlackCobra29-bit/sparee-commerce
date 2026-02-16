@@ -1,21 +1,20 @@
 {% with stock=product.current_stock|default_if_none:0 %}
-<tr>
+<tr id="product-row-{{ product.id }}">
   <td>
-    <div class="d-flex px-2 py-1">
+    <div class="py-1">
       <div class="d-flex flex-column justify-content-center">
-        <h6 class="mb-0 text-sm">{{ product.name }}</h6>
-        <p class="text-xs text-secondary mb-0">{{ product.description|truncatechars:48 }}</p>
+        <h6 class="mb-0">{{ product.name }}</h6>
       </div>
     </div>
   </td>
-  <td class="align-middle text-center text-sm">
-    <span class="text-xs font-weight-bold">{{ product.get_category_display }}</span>
+  <td class="align-middle text-center">
+    <span>{{ product.get_category_display }}</span>
   </td>
-  <td class="align-middle text-center text-sm">
-    <span class="text-xs font-weight-bold{% if stock <= product.reorder_level and stock > 0 %} text-danger{% endif %}">{{ stock }}</span>
+  <td class="align-middle text-center">
+    <span class="{% if stock <= product.reorder_level and stock > 0 %}text-danger{% endif %}">{{ stock }}</span>
   </td>
-  <td class="align-middle text-center text-sm">
-    <span class="text-xs font-weight-bold">${{ product.price }}</span>
+  <td class="align-middle text-center">
+    <span>${{ product.price }}</span>
   </td>
   <td class="align-middle text-center">
     {% if stock <= 0 %}
@@ -27,13 +26,25 @@
     {% endif %}
   </td>
   <td class="align-middle text-center">
-    <a href="javascript:;" class="text-secondary font-weight-bold text-xs">
+    <a href="javascript:;" class="text-secondary">
       <i class="fas fa-eye me-2"></i>
     </a>
-    <a href="javascript:;" class="text-info font-weight-bold text-xs">
+    <a
+      href="javascript:;"
+      class="text-info js-edit-product"
+      data-product-id="{{ product.id }}"
+      data-update-url="{% url 'vendor_product_update' product.id %}"
+      data-name="{{ product.name|escape }}"
+      data-vin="{{ product.vin|escape }}"
+      data-category="{{ product.category }}"
+      data-price="{{ product.price }}"
+      data-current-stock="{{ product.current_stock|default_if_none:product.initial_stock }}"
+      data-reorder-level="{{ product.reorder_level }}"
+      data-description="{{ product.description|escape }}"
+    >
       <i class="fas fa-edit me-2"></i>
     </a>
-    <a href="javascript:;" class="text-danger font-weight-bold text-xs">
+    <a href="javascript:;" class="text-danger">
       <i class="fas fa-trash me-2"></i>
     </a>
   </td>
