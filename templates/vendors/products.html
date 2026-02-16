@@ -158,10 +158,6 @@
             enctype="multipart/form-data"
             novalidate
             data-parsley-validate
-            hx-post=""
-            hx-encoding="multipart/form-data"
-            hx-target="#productsTableBody"
-            hx-swap="none"
           >
             {% csrf_token %}
             <input type="hidden" id="editProductId" name="product_id" value="">
@@ -300,16 +296,26 @@
 <script>
   (function () {
     var productsDataTable = null;
+    var SELECTORS = {
+      table: '#productsTable',
+      tableBody: '#productsTableBody',
+      productCount: '#productCount',
+      addForm: '#addProductForm',
+      editForm: '#editProductForm',
+      addModal: '#addProductModal',
+      editModal: '#editProductModal',
+      exportButtons: '#productsExportButtons'
+    };
 
     function initProductsDataTable() {
-      var tableEl = document.getElementById('productsTable');
+      var tableEl = document.querySelector(SELECTORS.table);
       if (!tableEl || typeof DataTable === 'undefined') return;
 
       if (productsDataTable) {
         productsDataTable.destroy();
       }
 
-      productsDataTable = new DataTable('#productsTable', {
+      productsDataTable = new DataTable(SELECTORS.table, {
         pageLength: 10,
         order: [],
         buttons: [
@@ -342,7 +348,7 @@
         ]
       });
 
-      var exportContainer = document.getElementById('productsExportButtons');
+      var exportContainer = document.querySelector(SELECTORS.exportButtons);
       if (exportContainer && productsDataTable.buttons) {
         exportContainer.innerHTML = '';
         productsDataTable.buttons().container().appendTo(exportContainer);
@@ -360,21 +366,21 @@
     }
 
     function closeAddProductModal() {
-      var modalEl = document.getElementById('addProductModal');
+      var modalEl = document.querySelector(SELECTORS.addModal);
       if (!modalEl || !window.bootstrap || !window.bootstrap.Modal) return;
       var modalInstance = window.bootstrap.Modal.getOrCreateInstance(modalEl);
       modalInstance.hide();
     }
 
     function closeEditProductModal() {
-      var modalEl = document.getElementById('editProductModal');
+      var modalEl = document.querySelector(SELECTORS.editModal);
       if (!modalEl || !window.bootstrap || !window.bootstrap.Modal) return;
       var modalInstance = window.bootstrap.Modal.getOrCreateInstance(modalEl);
       modalInstance.hide();
     }
 
     function resetAddProductForm() {
-      var form = document.getElementById('addProductForm');
+      var form = document.querySelector(SELECTORS.addForm);
       if (!form) return;
       form.reset();
       if (window.jQuery && window.jQuery.fn && window.jQuery.fn.parsley) {
@@ -384,7 +390,7 @@
     }
 
     function resetEditProductForm() {
-      var form = document.getElementById('editProductForm');
+      var form = document.querySelector(SELECTORS.editForm);
       if (!form) return;
       form.reset();
       if (window.jQuery && window.jQuery.fn && window.jQuery.fn.parsley) {
@@ -394,7 +400,7 @@
     }
 
     function openEditProductModalFromTrigger(triggerEl) {
-      var form = document.getElementById('editProductForm');
+      var form = document.querySelector(SELECTORS.editForm);
       if (!form || !triggerEl) return;
 
       var productId = triggerEl.getAttribute('data-product-id');
@@ -402,8 +408,6 @@
       if (!productId || !updateUrl) return;
 
       form.setAttribute('action', updateUrl);
-      form.setAttribute('hx-post', updateUrl);
-      form.setAttribute('hx-target', '#productsTableBody');
       document.getElementById('editProductId').value = productId;
 
       document.getElementById('editProductName').value = triggerEl.getAttribute('data-name') || '';
@@ -416,24 +420,15 @@
       document.getElementById('editProductImage').value = '';
 
       if (window.bootstrap && window.bootstrap.Modal) {
-        var modalEl = document.getElementById('editProductModal');
+        var modalEl = document.querySelector(SELECTORS.editModal);
         var modalInstance = window.bootstrap.Modal.getOrCreateInstance(modalEl);
         modalInstance.show();
       }
     }
 
-    function incrementProductCount() {
-      var countEl = document.getElementById('productCount');
-      if (!countEl) return;
-      var current = parseInt(countEl.textContent || '0', 10);
-      if (!Number.isNaN(current)) {
-        countEl.textContent = String(current + 1);
-      }
-    }
-
     function syncProductCountFromTable() {
-      var countEl = document.getElementById('productCount');
-      var bodyEl = document.getElementById('productsTableBody');
+      var countEl = document.querySelector(SELECTORS.productCount);
+      var bodyEl = document.querySelector(SELECTORS.tableBody);
       if (!countEl || !bodyEl) return;
 
       var rows = bodyEl.querySelectorAll('tr[id^="product-row-"]');
@@ -441,23 +436,82 @@
     }
 
     function refreshProductsTableFromServer() {
-      var bodyEl = document.getElementById('productsTableBody');
+      var bodyEl = document.querySelector(SELECTORS.tableBody);
       if (!bodyEl) return;
 
       var rowsUrl = bodyEl.getAttribute('data-rows-url');
       if (!rowsUrl || typeof htmx === 'undefined') return;
 
       htmx.ajax('GET', rowsUrl, {
-        target: '#productsTableBody',
+        target: SELECTORS.tableBody,
         swap: 'innerHTML'
       });
     }
 
-    function clearEmptyProductsRow() {
-      var emptyRow = document.getElementById('emptyProductsRow');
-      if (emptyRow) {
-        emptyRow.remove();
+    function replaceProductsTableRows(rowsHtml) {
+      var bodyEl = document.querySelector(SELECTORS.tableBody);
+      if (!bodyEl) return;
+
+      if (productsDataTable) {
+        productsDataTable.destroy();
+        productsDataTable = null;
       }
+
+      bodyEl.innerHTML = rowsHtml;
+      syncProductCountFromTable();
+      initProductsDataTable();
+    }
+
+    function parseJsonSafely(response) {
+      return response.text().then(function (text) {
+        if (!text) return {};
+        try {
+          return JSON.parse(text);
+        } catch (_error) {
+          return {};
+        }
+      });
+    }
+
+    function submitEditProduct(formEl) {
+      var actionUrl = formEl.getAttribute('action');
+      if (!actionUrl) return Promise.resolve(false);
+
+      var formData = new FormData(formEl);
+      return fetch(actionUrl, {
+        method: 'POST',
+        body: formData,
+        headers: {
+          'X-Requested-With': 'XMLHttpRequest'
+        },
+        credentials: 'same-origin'
+      })
+        .then(function (response) {
+          return parseJsonSafely(response).then(function (data) {
+            return { ok: response.ok, data: data };
+          });
+        })
+        .then(function (result) {
+          if (!result.ok || !result.data || !result.data.ok) {
+            showSwal('error', 'Error', (result.data && result.data.message) || 'Unable to update product. Please try again.');
+            return false;
+          }
+
+          if (typeof result.data.rows_html === 'string') {
+            replaceProductsTableRows(result.data.rows_html);
+          } else {
+            refreshProductsTableFromServer();
+          }
+
+          closeEditProductModal();
+          resetEditProductForm();
+          showSwal('success', 'Success', result.data.message || 'Product updated successfully.');
+          return true;
+        })
+        .catch(function () {
+          showSwal('error', 'Error', 'Unable to update product. Please try again.');
+          return false;
+        });
     }
 
     function setupTooltips() {
@@ -572,7 +626,7 @@
       openEditProductModalFromTrigger(editTrigger);
     });
 
-    var editProductForm = document.getElementById('editProductForm');
+    var editProductForm = document.querySelector(SELECTORS.editForm);
     if (editProductForm) {
       editProductForm.addEventListener('submit', function (event) {
         event.preventDefault();
@@ -584,14 +638,7 @@
           }
         }
 
-        var actionUrl = editProductForm.getAttribute('action') || editProductForm.getAttribute('hx-post');
-        if (!actionUrl || typeof htmx === 'undefined') return;
-
-        htmx.ajax('POST', actionUrl, {
-          source: editProductForm,
-          target: '#productsTableBody',
-          swap: 'none'
-        });
+        submitEditProduct(editProductForm);
       });
     }
 
@@ -599,20 +646,6 @@
       if (!event.target || event.target.id !== 'productsTableBody') return;
       syncProductCountFromTable();
       initProductsDataTable();
-    });
-
-    document.body.addEventListener('htmx:afterRequest', function (event) {
-      if (!event.detail || event.detail.elt !== editProductForm) return;
-      if (!event.detail.successful) return;
-      if (!event.detail.xhr || event.detail.xhr.status < 200 || event.detail.xhr.status >= 300) return;
-
-      var triggerHeader = event.detail.xhr.getResponseHeader('HX-Trigger');
-      if (triggerHeader) return;
-
-      closeEditProductModal();
-      resetEditProductForm();
-      refreshProductsTableFromServer();
-      showSwal('success', 'Success', 'Product updated successfully.');
     });
 
     document.body.addEventListener('product:create:success', function (event) {
@@ -634,11 +667,6 @@
       resetEditProductForm();
       refreshProductsTableFromServer();
       showSwal('success', 'Success', detail.message || 'Product updated successfully.');
-    });
-
-    document.body.addEventListener('product:update:error', function (event) {
-      var detail = event && event.detail ? event.detail : {};
-      showSwal('error', 'Error', detail.message || 'Unable to update product. Please try again.');
     });
   })();
 </script>
