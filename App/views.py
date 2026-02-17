@@ -23,7 +23,7 @@ class HomeView(TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         products = (
-            Product.objects.filter(is_active=True)
+            Product.objects.filter(is_active=True, current_stock__gt=0)
             .select_related("vendor", "vendor__account_registration")
             .only(
                 "vin",

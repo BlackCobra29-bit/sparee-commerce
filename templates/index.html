@@ -353,7 +353,7 @@
 
             <div class="col-lg-6">
               <div class="panel mb-3">
-                <div class="panel-h font-weight-bold">Price Range (USD)</div>
+                <div class="panel-h font-weight-bold">Price Range (ETB)</div>
                 <div class="panel-b">
                   <div class="form-row">
                     <div class="col-6">
@@ -434,15 +434,45 @@
 
               <div class="panel mt-3" style="background:var(--glass2)">
                 <div class="panel-b">
-                  <div class="font-weight-bold mb-2"><i class="fas fa-link mr-2"></i>OEM Cross (sample)</div>
-                  <div class="muted small" id="qvCross">â€”</div>
+                  <div class="font-weight-bold mb-2"><i class="fas fa-user-tie mr-2"></i>Seller</div>
+                  <div class="d-flex align-items-center">
+                    <img
+                      id="qvSellerPhoto"
+                      src=""
+                      alt="Seller profile"
+                      class="rounded-circle mr-2"
+                      style="width:44px; height:44px; object-fit:cover; border:1px solid var(--line);">
+                    <div>
+                      <div class="font-weight-bold d-flex align-items-center">
+                        <span id="qvSellerName">Unknown Seller</span>
+                        <span
+                          class="ml-2 d-inline-flex align-items-center justify-content-center"
+                          aria-label="Verified seller"
+                          title="Verified seller"
+                          style="width:20px;height:20px;line-height:0;flex:0 0 20px;">
+                          <svg
+                            width="20"
+                            height="20"
+                            viewBox="0 0 24 24"
+                            role="img"
+                            aria-hidden="true"
+                            style="display:block;">
+                            <path fill="#18A7E0"
+                              d="M12 1.8l2.18 1.57 2.64-.45 1.57 2.18 2.61.62.45 2.64 2.18 1.57-.62 2.61.62 2.61-2.18 1.57-.45 2.64-2.61.62-1.57 2.18-2.64-.45L12 22.2l-2.18-1.57-2.64.45-1.57-2.18-2.61-.62-.45-2.64L.37 14.07.99 11.46.37 8.85l2.18-1.57.45-2.64 2.61-.62 1.57-2.18 2.64.45L12 1.8z" />
+                            <path fill="#fff" d="M10.2 15.9l-3-3 1.4-1.4 1.6 1.6 5.2-5.2 1.4 1.4-6.6 6.6z" />
+                          </svg>
+                        </span>
+                      </div>
+                      <div class="muted small">Verified seller panel</div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
 
             <div class="col-md-6">
               <div class="d-flex align-items-center justify-content-between">
-                <div class="price h3 mb-0" id="qvPrice">$0</div>
+                <div class="price h3 mb-0" id="qvPrice">0.00 ETB</div>
                 <div class="rating" id="qvRating"></div>
               </div>
 
@@ -451,13 +481,13 @@
               <div class="panel" style="background:var(--glass2)">
                 <div class="panel-b">
                   <div class="d-flex align-items-center justify-content-between mb-2">
-                    <div class="font-weight-bold"><i class="fas fa-car mr-2"></i>Fitment</div>
-                    <span class="badge badge-soft" id="qvFitBadge">Not checked</span>
+                    <span class="badge badge-soft" id="qvFitBadge">Details</span>
                   </div>
                   <ul class="muted mb-0" style="padding-left:18px">
-                    <li>Vehicle: Sedan / Hatchback (placeholder)</li>
-                    <li>Engine: 1.6â€“2.0L (placeholder)</li>
-                    <li>OEM cross: shown above (placeholder)</li>
+                    <li>Category: <span id="qvCategory"></span></li>
+                    <li>Stock: <span id="qvStock"></span></li>
+                    <li>Seller: <span id="qvSeller"></span></li>
+                    <li>VIN: <span id="qvSku"></span></li>
                   </ul>
                 </div>
               </div>
@@ -574,28 +604,29 @@
             data-dismiss="modal"><span>&times;</span></button>
         </div>
         <div class="modal-body">
-          <div class="table-responsive">
-            <table class="table table-dark table-hover mb-0" style="background:transparent;">
-              <thead>
+          <div class="table-responsive cart-table-wrap rounded-4">
+            <table class="table table-hover align-middle mb-0 cart-table">
+              <thead class="table-dark">
                 <tr>
-                  <th>Item</th>
-                  <th class="text-right">Price</th>
-                  <th class="text-center">Qty</th>
-                  <th class="text-right">Total</th>
-                  <th></th>
+                  <th scope="col" class="ps-3">Seller</th>
+                  <th scope="col">Item</th>
+                  <th scope="col" class="text-end">Price</th>
+                  <th scope="col" class="text-center">Qty</th>
+                  <th scope="col" class="text-end">Total</th>
+                  <th scope="col" class="text-end pe-3" style="width:56px;">Remove</th>
                 </tr>
               </thead>
-              <tbody id="cartTable"></tbody>
+              <tbody id="cartTable" class="table-group-divider"></tbody>
             </table>
           </div>
 
           <div class="d-flex align-items-center justify-content-between mt-3">
             <div class="muted">
-              Shipping calculated at checkout (demo).
+              Total amount of money you will cost.
             </div>
             <div class="text-right">
               <div class="muted">Subtotal</div>
-              <div class="h3 price mb-0" id="cartSubtotal">$0</div>
+              <div class="h3 price mb-0" id="cartSubtotal">0.00 ETB</div>
             </div>
           </div>
 
@@ -605,12 +636,9 @@
             <button class="btn btn-outline-light mr-2 mb-2" onclick="clearCart()">
               <i class="fas fa-trash mr-2"></i>Clear
             </button>
-            <button class="btn btn-outline-light mr-2 mb-2" data-dismiss="modal">
-              <i class="fas fa-arrow-left mr-2"></i>Continue Shopping
-            </button>
             <button class="btn btn-success ml-auto mb-2"
               onclick="toast('Checkout', 'Checkout flow is UI-only in this template.')">
-              <i class="fas fa-lock mr-2"></i>Secure Checkout
+              <i class="fas fa-lock mr-2"></i>Submit Order
             </button>
           </div>
         </div>
