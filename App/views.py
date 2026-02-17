@@ -14,11 +14,77 @@ from django.views.generic import FormView, TemplateView, View
 from django_htmx.http import HttpResponseClientRedirect
 
 from .forms import ForgotPasswordForm, LoginForm, ProductForm, SignupForm
-from .models import AccountRegistration
+from .models import AccountRegistration, Product
 
 
 class HomeView(TemplateView):
     template_name = "index.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        products = (
+            Product.objects.filter(is_active=True)
+            .select_related("vendor", "vendor__account_registration")
+            .only(
+                "vin",
+                "name",
+                "category",
+                "price",
+                "current_stock",
+                "description",
+                "product_image",
+                "vendor__username",
+                "vendor__first_name",
+                "vendor__last_name",
+                "vendor__account_registration__profile_picture",
+            )
+            .order_by("-created_at")
+        )
+
+        category_options = []
+        for value, label in Product.CATEGORY_CHOICES:
+            category_options.append({"value": label, "label": label})
+
+        shop_products = []
+        for product in products:
+            image_url = product.product_image.url if product.product_image else ""
+            stock = product.current_stock if product.current_stock is not None else 0
+            seller_name = product.vendor.get_full_name().strip() or product.vendor.username
+            seller_photo = ""
+            try:
+                account = product.vendor.account_registration
+                if account and account.profile_picture:
+                    seller_photo = account.profile_picture.url
+            except AccountRegistration.DoesNotExist:
+                seller_photo = ""
+            stock_badges = []
+            if stock <= 5:
+                stock_badges.append("Low Stock")
+
+            shop_products.append(
+                {
+                    "sku": product.vin,
+                    "name": product.name,
+                    "category": product.get_category_display(),
+                    "brand": seller_name,
+                    "seller_name": seller_name,
+                    "seller_photo": seller_photo,
+                    "condition": "New",
+                    "rating": 4.5,
+                    "reviews": 0,
+                    "price": float(product.price),
+                    "stock": stock,
+                    "badges": stock_badges,
+                    "oem": product.vin,
+                    "img": image_url,
+                    "desc": product.description,
+                }
+            )
+
+        context["shop_products"] = shop_products
+        context["shop_category_options"] = category_options
+        context["shop_brand_options"] = sorted({p["brand"] for p in shop_products})
+        return context
 
 
 class VendorAccessMixin(LoginRequiredMixin):
@@ -43,10 +109,13 @@ class VendorProductsView(VendorAccessMixin, TemplateView):
                 "id",
                 "name",
                 "category",
+                "vin",
                 "current_stock",
+                "initial_stock",
                 "reorder_level",
                 "price",
                 "description",
+                "product_image",
             )
             .order_by("-created_at")
         )
@@ -68,6 +137,7 @@ class VendorProductRowsView(VendorAccessMixin, View):
                 "price",
                 "description",
                 "vin",
+                "product_image",
             )
             .order_by("-created_at")
         )
@@ -91,6 +161,7 @@ def _vendor_products_queryset(user):
             "price",
             "description",
             "vin",
+            "product_image",
         )
         .order_by("-created_at")
     )
@@ -214,6 +285,62 @@ class VendorProductUpdateView(VendorAccessMixin, View):
             )
             response = HttpResponse(rows_html)
             response["HX-Trigger"] = json.dumps({"product:update:success": {"message": success_message}})
+            return response
+        if is_ajax:
+            products = _vendor_products_queryset(request.user)
+            rows_html = render_to_string(
+                "vendors/partials/product_rows.html",
+                {"products": products},
+                request=request,
+            )
+            return JsonResponse(
+                {
+                    "ok": True,
+                    "message": success_message,
+                    "rows_html": rows_html,
+                    "count": products.count(),
+                }
+            )
+        messages.success(request, success_message)
+        return redirect("vendor_products")
+
+
+class VendorProductDeleteView(VendorAccessMixin, View):
+    http_method_names = ["post"]
+
+    def post(self, request, *args, **kwargs):
+        is_htmx = getattr(request, "htmx", False)
+        is_ajax = request.headers.get("X-Requested-With") == "XMLHttpRequest"
+        account = (
+            AccountRegistration.objects.filter(user_id=request.user.id)
+            .only("account_type")
+            .first()
+        )
+        if not account or account.account_type != AccountRegistration.ACCOUNT_TYPE_SELLER:
+            error_text = "Only seller accounts can delete products."
+            if is_htmx:
+                response = HttpResponse("", status=403)
+                response["HX-Trigger"] = json.dumps({"product:delete:error": {"message": error_text}})
+                return response
+            if is_ajax:
+                return JsonResponse({"ok": False, "message": error_text}, status=403)
+            messages.error(request, error_text)
+            return redirect("vendor_products")
+
+        product = get_object_or_404(request.user.products.only("id", "name"), pk=kwargs.get("pk"))
+        product_name = product.name
+        product.delete()
+
+        success_message = f"Product '{product_name}' was deleted successfully."
+        if is_htmx:
+            products = _vendor_products_queryset(request.user)
+            rows_html = render_to_string(
+                "vendors/partials/product_rows.html",
+                {"products": products},
+                request=request,
+            )
+            response = HttpResponse(rows_html)
+            response["HX-Trigger"] = json.dumps({"product:delete:success": {"message": success_message}})
             return response
         if is_ajax:
             products = _vendor_products_queryset(request.user)

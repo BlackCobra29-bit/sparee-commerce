@@ -112,7 +112,11 @@
           <ul class="navbar-nav ms-lg-auto mb-2 mb-lg-0 align-items-lg-center">
 	            <li class="nav-item me-lg-2">
 	              <a href="../vendor/profile.html" class="nav-link text-body font-weight-bold d-flex align-items-center px-0">
-	                <img src="{% static 'vendors/img/team-2.jpg' %}" class="avatar avatar-sm me-2" alt="vendor">
+                  {% if request.user.account_registration.profile_picture %}
+	                <img src="{{ request.user.account_registration.profile_picture.url }}" class="avatar avatar-sm me-2 rounded-circle" style="object-fit: cover;" alt="vendor profile photo">
+                  {% else %}
+	                <img src="{% static 'vendors/img/team-2.jpg' %}" class="avatar avatar-sm me-2 rounded-circle" style="object-fit: cover;" alt="vendor profile photo">
+                  {% endif %}
 	                <span>{% if request.user.get_full_name %}{{ request.user.get_full_name }}{% else %}{{ request.user.username }}{% endif %}</span>
 	              </a>
 	            </li>

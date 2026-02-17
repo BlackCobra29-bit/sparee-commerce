@@ -1,7 +1,7 @@
 ﻿// ==========================
     // PRODUCT DATA (edit here)
     // ==========================
-    const PRODUCTS = [
+    const DEMO_PRODUCTS = [
       {
         sku: "BRK-PAD-214", name: "Ceramic Brake Pads Set", category: "Brakes", brand: "Brembo", condition: "New",
         rating: 4.6, reviews: 312, price: 48.99, stock: 12, badges: ["Best Seller"], oem: "04465-0D080",
@@ -68,6 +68,19 @@
       }
     ];
 
+    function readServerProducts() {
+      const sourceEl = document.getElementById('shop-products-data');
+      if (!sourceEl) return [];
+      try {
+        const parsed = JSON.parse(sourceEl.textContent || '[]');
+        return Array.isArray(parsed) ? parsed : [];
+      } catch (e) {
+        return [];
+      }
+    }
+
+    const PRODUCTS = readServerProducts();
+
     // ==========================
     // STATE (persisted)
     // ==========================
@@ -100,6 +113,12 @@
       return String(str)
         .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
         .replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+    }
+
+    function truncateWords(text, maxWords) {
+      const words = String(text || "").trim().split(/\s+/).filter(Boolean);
+      if (words.length <= maxWords) return String(text || "");
+      return words.slice(0, maxWords).join(" ") + "...";
     }
 
     function stars(rating) {
@@ -154,7 +173,7 @@
             <div class="d-flex align-items-center justify-content-between">
               <div>
                 <div class="font-weight-bold">${escapeHtml(p.name)}</div>
-                <div class="muted small">${escapeHtml(p.brand)} â€¢ ${escapeHtml(p.category)} â€¢ SKU: ${escapeHtml(p.sku)}</div>
+                <div class="muted small">${escapeHtml(p.brand)} â€¢ ${escapeHtml(p.category)} â€¢ VIN: ${escapeHtml(p.sku)}</div>
               </div>
               <div class="font-weight-bold">${money(p.price)}</div>
             </div>
@@ -238,20 +257,15 @@
                 <div class="d-flex justify-content-between align-items-start">
                   <div style="min-width:0">
                     <div class="font-weight-bold text-truncate">${escapeHtml(p.name)}</div>
-                    <div class="muted small">${escapeHtml(p.brand)} â€¢ ${escapeHtml(p.category)} ${fitHint}</div>
+                    <div class="muted small">${escapeHtml(p.category)} ${fitHint}</div>
                   </div>
                   <div class="text-right">
                     <div class="price">${money(p.price)}</div>
-                    <div class="muted small">${stockBadge} â€¢ Stock: <b>${p.stock}</b></div>
                   </div>
                 </div>
 
                 <div class="d-flex align-items-center justify-content-between mt-2">
                   <div class="rating">${stars(p.rating)} <span class="muted small ml-1">${p.rating.toFixed(1)} (${p.reviews})</span></div>
-                </div>
-
-                <div class="muted small mt-2" style="min-height:42px">
-                  ${escapeHtml(p.desc)}
                 </div>
 
                 <div class="d-flex mt-3">
@@ -264,8 +278,7 @@
                 </div>
 
                 <div class="mt-3 muted small">
-                  OEM: <span class="kbd">${escapeHtml(p.oem || 'â€”')}</span>
-                  <span class="ml-2">SKU:</span> <span class="kbd">${escapeHtml(p.sku)}</span>
+                  VIN: <span class="kbd">${escapeHtml(p.sku)}</span>
                 </div>
               </div>
             </div>
@@ -291,7 +304,7 @@
       $('#qvSku').text(p.sku);
       $('#qvStock').text(p.stock);
       $('#qvMeta').text(`${p.brand} â€¢ ${p.category} â€¢ Condition: ${p.condition} â€¢ Stock: ${p.stock}`);
-      $('#qvCross').text(`Cross refs: ${p.oem || 'â€”'} â€¢ ALT-${p.sku} â€¢ ${p.brand.toUpperCase()}-${p.oem || 'X'}`);
+      $('#qvCross').text(`VIN: ${p.sku}`);
       $('#qvRating').html(stars(p.rating) + ` <span class="muted small ml-1">${p.rating.toFixed(1)} (${p.reviews})</span>`);
 
       $('#qvFitBadge').text(savedVehicle ? 'Vehicle saved' : 'Not checked');
@@ -350,10 +363,9 @@
 
       // table
       const rows = [
-        { k: 'SKU', v: p => p?.sku || 'â€”' },
+        { k: 'VIN', v: p => p?.sku || 'â€”' },
         { k: 'Brand', v: p => p?.brand || 'â€”' },
         { k: 'Category', v: p => p?.category || 'â€”' },
-        { k: 'OEM', v: p => p?.oem || 'â€”' },
         { k: 'Condition', v: p => p?.condition || 'â€”' },
         { k: 'Rating', v: p => p ? `${p.rating.toFixed(1)} (${p.reviews})` : 'â€”' },
         { k: 'Price', v: p => p ? money(p.price) : 'â€”' },
@@ -422,9 +434,13 @@
       const tbody = $('#cartTable');
       tbody.empty();
 
+      cart = cart.filter(item => !!bySku(item.sku));
+      saveLS(LS.cart, cart);
+
       let subtotal = 0;
       cart.forEach(item => {
         const p = bySku(item.sku);
+        if (!p) return;
         const line = p.price * item.qty;
         subtotal += line;
 
@@ -562,7 +578,7 @@
                   <div class="font-weight-bold">${escapeHtml(p.name)}</div>
                   <div class="font-weight-bold">${money(p.price)}</div>
                 </div>
-                <div class="muted small">${escapeHtml(p.brand)} â€¢ ${escapeHtml(p.category)} â€¢ OEM: ${escapeHtml(p.oem || 'â€”')}</div>
+                <div class="muted small">${escapeHtml(p.brand)} â€¢ ${escapeHtml(p.category)} â€¢ VIN: ${escapeHtml(p.sku)}</div>
                 <div class="d-flex mt-2">
                   <button class="btn btn-success btn-sm btn-block mr-2" onclick="addToCartBySku('${p.sku}')"><i class="fas fa-cart-plus mr-1"></i>Add</button>
                   <button class="btn btn-outline-light btn-sm btn-block" onclick="openQuickView('${p.sku}')">Details</button>

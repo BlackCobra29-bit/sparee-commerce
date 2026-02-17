@@ -24,7 +24,7 @@
             </div>
             <div class="card-body px-0 pb-2">
               <div class="table-responsive p-0">
-                <table id="productsTable" class="table table-striped">
+                <table id="productsTable" class="table table-striped table-sm mb-0">
                   <thead>
                     <tr>
                       <th>Product</th>
@@ -49,7 +49,7 @@
 
   <!-- Add Product Modal -->
   <div class="modal fade" id="addProductModal" tabindex="-1" aria-labelledby="addProductModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
       <div class="modal-content">
         <div class="modal-header">
           <h5 class="modal-title" id="addProductModalLabel">Add New Product</h5>
@@ -142,9 +142,74 @@
     </div>
   </div>
 
+  <!-- View Product Modal -->
+  <div class="modal fade" id="viewProductModal" tabindex="-1" aria-labelledby="viewProductModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="viewProductModalLabel">Product Details</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="row g-4">
+            <div class="col-lg-5">
+              <div class="card border h-100">
+                <div class="card-body p-3 d-flex align-items-center justify-content-center bg-light border-radius-lg">
+                  <img id="viewProductImage" src="" alt="Product image" class="img-fluid border-radius-lg" style="max-height: 360px; object-fit: cover;">
+                </div>
+              </div>
+            </div>
+            <div class="col-lg-7">
+              <h4 class="mb-3" id="viewProductTitle">Product</h4>
+              <div class="row g-3 mb-3">
+                <div class="col-md-6">
+                  <div class="border rounded p-2">
+                    <small class="text-muted d-block">Category</small>
+                    <strong id="viewProductCategory">-</strong>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="border rounded p-2">
+                    <small class="text-muted d-block">VIN</small>
+                    <strong id="viewProductVin">-</strong>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="border rounded p-2">
+                    <small class="text-muted d-block">Price</small>
+                    <strong id="viewProductPrice">-</strong>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="border rounded p-2">
+                    <small class="text-muted d-block">Stock</small>
+                    <strong id="viewProductStock">-</strong>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="border rounded p-2">
+                    <small class="text-muted d-block">Reorder Level</small>
+                    <strong id="viewProductReorderLevel">-</strong>
+                  </div>
+                </div>
+              </div>
+              <div class="border rounded p-3">
+                <small class="text-muted d-block mb-2">Description</small>
+                <p class="mb-0 text-sm" id="viewProductDescription">-</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn bg-gradient-secondary" data-bs-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Edit Product Modal -->
   <div class="modal fade" id="editProductModal" tabindex="-1" aria-labelledby="editProductModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
       <div class="modal-content">
         <div class="modal-header">
           <h5 class="modal-title" id="editProductModalLabel">Edit Product</h5>
@@ -216,12 +281,35 @@
       </div>
     </div>
   </div>
+
+  <!-- Delete Product Modal -->
+  <div class="modal fade" id="deleteProductModal" tabindex="-1" aria-labelledby="deleteProductModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="deleteProductModalLabel">Delete Product</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <p class="mb-2">Are you sure you want to delete this product?</p>
+          <p class="mb-0 text-sm text-danger">
+            <strong id="deleteProductName"></strong>
+          </p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn bg-gradient-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="button" id="confirmDeleteProductBtn" class="btn bg-gradient-danger">Delete</button>
+        </div>
+      </div>
+    </div>
+  </div>
 {% endblock %}
 
 {% block vendor_extra_css %}
 <link rel="stylesheet" href="https://cdn.datatables.net/2.1.8/css/dataTables.bootstrap5.min.css">
 <link rel="stylesheet" href="https://cdn.datatables.net/buttons/3.1.2/css/buttons.bootstrap5.min.css">
-<style>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+  <style>
   .help-dot {
     display: inline-flex;
     align-items: center;
@@ -258,24 +346,6 @@
     border-color: rgba(8, 140, 22, 0.45);
   }
 
-  #productsTable_wrapper .pagination .page-item.active .page-link {
-    background-color: rgba(33, 37, 41, 0.75);
-    border-color: rgba(33, 37, 41, 0.75);
-    color: #fff;
-  }
-
-  #productsTable_wrapper .pagination .page-link:focus {
-    box-shadow: none;
-  }
-
-  #productsExportButtons .dt-buttons {
-    display: inline-flex;
-  }
-
-  #productsExportButtons .btn {
-    margin-bottom: 0;
-  }
-
 </style>
 {% endblock %}
 
@@ -283,6 +353,7 @@
 <script src="https://unpkg.com/htmx.org@1.9.12"></script>
 <script src="https://unpkg.com/@popperjs/core@2"></script>
 <script src="https://unpkg.com/tippy.js@6"></script>
+<script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
 <script src="https://cdn.datatables.net/2.1.8/js/dataTables.min.js"></script>
 <script src="https://cdn.datatables.net/2.1.8/js/dataTables.bootstrap5.min.js"></script>
 <script src="https://cdn.datatables.net/buttons/3.1.2/js/dataTables.buttons.min.js"></script>
@@ -302,9 +373,25 @@
       productCount: '#productCount',
       addForm: '#addProductForm',
       editForm: '#editProductForm',
+      viewModal: '#viewProductModal',
+      viewTitle: '#viewProductTitle',
+      viewImage: '#viewProductImage',
+      viewCategory: '#viewProductCategory',
+      viewVin: '#viewProductVin',
+      viewPrice: '#viewProductPrice',
+      viewStock: '#viewProductStock',
+      viewReorderLevel: '#viewProductReorderLevel',
+      viewDescription: '#viewProductDescription',
       addModal: '#addProductModal',
       editModal: '#editProductModal',
+      deleteModal: '#deleteProductModal',
+      deleteProductName: '#deleteProductName',
+      confirmDeleteBtn: '#confirmDeleteProductBtn',
       exportButtons: '#productsExportButtons'
+    };
+    var pendingDelete = {
+      url: '',
+      name: ''
     };
 
     function initProductsDataTable() {
@@ -322,7 +409,7 @@
           {
             extend: 'collection',
             text: '<i class="fas fa-download me-1"></i>Export',
-            className: 'btn btn-sm bg-gradient-dark',
+            className: 'btn btn-sm btn-secondary',
             autoClose: true,
             buttons: [
               { extend: 'copyHtml5', text: 'Copy' },
@@ -355,14 +442,25 @@
       }
     }
 
-    function showSwal(icon, title, text) {
-      if (typeof Swal === 'undefined') return;
-      Swal.fire({
-        icon: icon,
-        title: title,
+    function showToast(type, text) {
+      if (typeof Toastify === 'undefined') return;
+
+      var bg = '#17c1e8';
+      if (type === 'success') bg = '#088c16';
+      if (type === 'error') bg = '#f5365c';
+      if (type === 'warning') bg = '#fb6340';
+
+      Toastify({
         text: text,
-        confirmButtonText: 'OK'
-      });
+        duration: 3500,
+        gravity: 'bottom',
+        position: 'center',
+        close: true,
+        stopOnFocus: true,
+        style: {
+          background: bg
+        }
+      }).showToast();
     }
 
     function closeAddProductModal() {
@@ -374,6 +472,17 @@
 
     function closeEditProductModal() {
       var modalEl = document.querySelector(SELECTORS.editModal);
+      if (!modalEl || !window.bootstrap || !window.bootstrap.Modal) return;
+      var modalInstance = window.bootstrap.Modal.getOrCreateInstance(modalEl);
+      modalInstance.hide();
+    }
+
+    function defaultProductImage() {
+      return "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='640' height='420' viewBox='0 0 640 420'%3E%3Crect width='640' height='420' fill='%23f3f5f7'/%3E%3Cpath d='M180 280l88-104 64 72 44-52 84 84H180z' fill='%23d2d6da'/%3E%3Ccircle cx='252' cy='142' r='30' fill='%23d2d6da'/%3E%3C/svg%3E";
+    }
+
+    function closeDeleteProductModal() {
+      var modalEl = document.querySelector(SELECTORS.deleteModal);
       if (!modalEl || !window.bootstrap || !window.bootstrap.Modal) return;
       var modalInstance = window.bootstrap.Modal.getOrCreateInstance(modalEl);
       modalInstance.hide();
@@ -426,6 +535,66 @@
       }
     }
 
+    function openViewProductModalFromTrigger(triggerEl) {
+      if (!triggerEl) return;
+
+      var titleEl = document.querySelector(SELECTORS.viewTitle);
+      var imageEl = document.querySelector(SELECTORS.viewImage);
+      var categoryEl = document.querySelector(SELECTORS.viewCategory);
+      var vinEl = document.querySelector(SELECTORS.viewVin);
+      var priceEl = document.querySelector(SELECTORS.viewPrice);
+      var stockEl = document.querySelector(SELECTORS.viewStock);
+      var reorderEl = document.querySelector(SELECTORS.viewReorderLevel);
+      var descriptionEl = document.querySelector(SELECTORS.viewDescription);
+
+      var name = triggerEl.getAttribute('data-name') || 'Product';
+      var imageUrl = triggerEl.getAttribute('data-image-url') || '';
+      var categoryLabel = triggerEl.getAttribute('data-category-label') || '-';
+      var vin = triggerEl.getAttribute('data-vin') || '-';
+      var price = triggerEl.getAttribute('data-price') || '-';
+      var stock = triggerEl.getAttribute('data-current-stock') || '-';
+      var reorderLevel = triggerEl.getAttribute('data-reorder-level') || '0';
+      var description = triggerEl.getAttribute('data-description') || '-';
+
+      if (titleEl) titleEl.textContent = name;
+      if (imageEl) {
+        imageEl.src = imageUrl || defaultProductImage();
+        imageEl.alt = name;
+      }
+      if (categoryEl) categoryEl.textContent = categoryLabel;
+      if (vinEl) vinEl.textContent = vin;
+      if (priceEl) priceEl.textContent = '$' + price;
+      if (stockEl) stockEl.textContent = stock;
+      if (reorderEl) reorderEl.textContent = reorderLevel;
+      if (descriptionEl) descriptionEl.textContent = description;
+
+      if (window.bootstrap && window.bootstrap.Modal) {
+        var modalEl = document.querySelector(SELECTORS.viewModal);
+        var modalInstance = window.bootstrap.Modal.getOrCreateInstance(modalEl);
+        modalInstance.show();
+      }
+    }
+
+    function openDeleteProductModalFromTrigger(triggerEl) {
+      if (!triggerEl) return;
+
+      var deleteUrl = triggerEl.getAttribute('data-delete-url');
+      var productName = triggerEl.getAttribute('data-product-name') || 'Selected product';
+      if (!deleteUrl) return;
+
+      pendingDelete.url = deleteUrl;
+      pendingDelete.name = productName;
+
+      var nameEl = document.querySelector(SELECTORS.deleteProductName);
+      if (nameEl) nameEl.textContent = productName;
+
+      if (window.bootstrap && window.bootstrap.Modal) {
+        var modalEl = document.querySelector(SELECTORS.deleteModal);
+        var modalInstance = window.bootstrap.Modal.getOrCreateInstance(modalEl);
+        modalInstance.show();
+      }
+    }
+
     function syncProductCountFromTable() {
       var countEl = document.querySelector(SELECTORS.productCount);
       var bodyEl = document.querySelector(SELECTORS.tableBody);
@@ -473,6 +642,17 @@
       });
     }
 
+    function getCookie(name) {
+      if (!document.cookie) return '';
+      var csrfCookies = document.cookie.split(';').map(function (c) { return c.trim(); });
+      for (var i = 0; i < csrfCookies.length; i += 1) {
+        if (csrfCookies[i].substring(0, name.length + 1) === (name + '=')) {
+          return decodeURIComponent(csrfCookies[i].substring(name.length + 1));
+        }
+      }
+      return '';
+    }
+
     function submitEditProduct(formEl) {
       var actionUrl = formEl.getAttribute('action');
       if (!actionUrl) return Promise.resolve(false);
@@ -493,7 +673,7 @@
         })
         .then(function (result) {
           if (!result.ok || !result.data || !result.data.ok) {
-            showSwal('error', 'Error', (result.data && result.data.message) || 'Unable to update product. Please try again.');
+            showToast('error', (result.data && result.data.message) || 'Unable to update product. Please try again.');
             return false;
           }
 
@@ -505,11 +685,51 @@
 
           closeEditProductModal();
           resetEditProductForm();
-          showSwal('success', 'Success', result.data.message || 'Product updated successfully.');
+          showToast('success', result.data.message || 'Product updated successfully.');
           return true;
         })
         .catch(function () {
-          showSwal('error', 'Error', 'Unable to update product. Please try again.');
+          showToast('error', 'Unable to update product. Please try again.');
+          return false;
+        });
+    }
+
+    function submitDeleteProduct(deleteUrl) {
+      if (!deleteUrl) return Promise.resolve(false);
+
+      return fetch(deleteUrl, {
+        method: 'POST',
+        headers: {
+          'X-Requested-With': 'XMLHttpRequest',
+          'X-CSRFToken': getCookie('csrftoken')
+        },
+        credentials: 'same-origin'
+      })
+        .then(function (response) {
+          return parseJsonSafely(response).then(function (data) {
+            return { ok: response.ok, data: data };
+          });
+        })
+        .then(function (result) {
+          if (!result.ok || !result.data || !result.data.ok) {
+            showToast('error', (result.data && result.data.message) || 'Unable to delete product. Please try again.');
+            return false;
+          }
+
+          if (typeof result.data.rows_html === 'string') {
+            replaceProductsTableRows(result.data.rows_html);
+          } else {
+            refreshProductsTableFromServer();
+          }
+
+          closeDeleteProductModal();
+          showToast('success', result.data.message || 'Product deleted successfully.');
+          pendingDelete.url = '';
+          pendingDelete.name = '';
+          return true;
+        })
+        .catch(function () {
+          showToast('error', 'Unable to delete product. Please try again.');
           return false;
         });
     }
@@ -615,15 +835,30 @@
     }
 
     document.addEventListener('shown.bs.modal', function (event) {
-      if (!event.target || (event.target.id !== 'addProductModal' && event.target.id !== 'editProductModal')) return;
+      if (!event.target || (event.target.id !== 'addProductModal' && event.target.id !== 'viewProductModal' && event.target.id !== 'editProductModal' && event.target.id !== 'deleteProductModal')) return;
       setupParsley();
     });
 
     document.addEventListener('click', function (event) {
+      var viewTrigger = event.target.closest('.js-view-product');
+      if (viewTrigger) {
+        event.preventDefault();
+        openViewProductModalFromTrigger(viewTrigger);
+        return;
+      }
+
       var editTrigger = event.target.closest('.js-edit-product');
-      if (!editTrigger) return;
-      event.preventDefault();
-      openEditProductModalFromTrigger(editTrigger);
+      if (editTrigger) {
+        event.preventDefault();
+        openEditProductModalFromTrigger(editTrigger);
+        return;
+      }
+
+      var deleteTrigger = event.target.closest('.js-delete-product');
+      if (deleteTrigger) {
+        event.preventDefault();
+        openDeleteProductModalFromTrigger(deleteTrigger);
+      }
     });
 
     var editProductForm = document.querySelector(SELECTORS.editForm);
@@ -642,6 +877,14 @@
       });
     }
 
+    var confirmDeleteBtn = document.querySelector(SELECTORS.confirmDeleteBtn);
+    if (confirmDeleteBtn) {
+      confirmDeleteBtn.addEventListener('click', function () {
+        if (!pendingDelete.url) return;
+        submitDeleteProduct(pendingDelete.url);
+      });
+    }
+
     document.body.addEventListener('htmx:afterSwap', function (event) {
       if (!event.target || event.target.id !== 'productsTableBody') return;
       syncProductCountFromTable();
@@ -653,12 +896,12 @@
       closeAddProductModal();
       resetAddProductForm();
       refreshProductsTableFromServer();
-      showSwal('success', 'Success', detail.message || 'Product added successfully.');
+      showToast('success', detail.message || 'Product added successfully.');
     });
 
     document.body.addEventListener('product:create:error', function (event) {
       var detail = event && event.detail ? event.detail : {};
-      showSwal('error', 'Error', detail.message || 'Unable to add product. Please try again.');
+      showToast('error', detail.message || 'Unable to add product. Please try again.');
     });
 
     document.body.addEventListener('product:update:success', function (event) {
@@ -666,7 +909,19 @@
       closeEditProductModal();
       resetEditProductForm();
       refreshProductsTableFromServer();
-      showSwal('success', 'Success', detail.message || 'Product updated successfully.');
+      showToast('success', detail.message || 'Product updated successfully.');
+    });
+
+    document.body.addEventListener('product:delete:success', function (event) {
+      var detail = event && event.detail ? event.detail : {};
+      closeDeleteProductModal();
+      refreshProductsTableFromServer();
+      showToast('success', detail.message || 'Product deleted successfully.');
+    });
+
+    document.body.addEventListener('product:delete:error', function (event) {
+      var detail = event && event.detail ? event.detail : {};
+      showToast('error', detail.message || 'Unable to delete product. Please try again.');
     });
   })();
 </script>
@@ -674,12 +929,19 @@
 <script>
   document.addEventListener('DOMContentLoaded', function () {
     {% for message in messages %}
-      Swal.fire({
-        icon: '{% if "success" in message.tags %}success{% elif "warning" in message.tags %}warning{% else %}error{% endif %}',
-        title: '{% if "success" in message.tags %}Success{% elif "warning" in message.tags %}Warning{% else %}Error{% endif %}',
-        text: '{{ message|escapejs }}',
-        confirmButtonText: 'OK'
-      });
+      if (typeof Toastify !== 'undefined') {
+        Toastify({
+          text: '{{ message|escapejs }}',
+          duration: 3500,
+          gravity: 'bottom',
+          position: 'center',
+          close: true,
+          stopOnFocus: true,
+          style: {
+            background: '{% if "success" in message.tags %}#2dce89{% elif "warning" in message.tags %}#fb6340{% else %}#f5365c{% endif %}'
+          }
+        }).showToast();
+      }
     {% endfor %}
   });
 </script>

@@ -315,28 +315,24 @@
               <div class="panel mb-3">
                 <div class="panel-h font-weight-bold">Category</div>
                 <div class="panel-b">
-                  <select class="custom-select" id="filterCategory">
-                    <option value="All">All</option>
-                    <option value="Brakes">Brakes</option>
-                    <option value="Filters">Filters</option>
-                    <option value="Ignition">Ignition</option>
-                    <option value="Exhaust">Exhaust</option>
-                    <option value="Suspension">Suspension</option>
-                  </select>
+	                  <select class="custom-select" id="filterCategory">
+	                    <option value="All">All</option>
+	                    {% for category in shop_category_options %}
+	                    <option value="{{ category.value }}">{{ category.label }}</option>
+	                    {% endfor %}
+	                  </select>
                 </div>
               </div>
 
               <div class="panel mb-3">
                 <div class="panel-h font-weight-bold">Brand</div>
                 <div class="panel-b">
-                  <select class="custom-select" id="filterBrand">
-                    <option value="All">All</option>
-                    <option value="Bosch">Bosch</option>
-                    <option value="NGK">NGK</option>
-                    <option value="OEM">OEM</option>
-                    <option value="Brembo">Brembo</option>
-                    <option value="KYB">KYB</option>
-                  </select>
+	                  <select class="custom-select" id="filterBrand">
+	                    <option value="All">All</option>
+	                    {% for brand in shop_brand_options %}
+	                    <option value="{{ brand }}">{{ brand }}</option>
+	                    {% endfor %}
+	                  </select>
                 </div>
               </div>
 
@@ -634,4 +630,5 @@
       <div class="toast-body" id="toastBody">â€”</div>
     </div>
   </div>
+  {{ shop_products|json_script:"shop-products-data" }}
   {% endblock %}

@@ -486,24 +486,26 @@
   
     /* Product cards */
     .product-card {
-      border: 1px solid var(--line);
-      border-radius: 20px;
-      background: var(--glass2);
+      border: 1px solid rgba(12, 20, 55, .10);
+      border-radius: 22px;
+      background: linear-gradient(180deg, rgba(255, 255, 255, .98), rgba(247, 250, 255, .96));
       overflow: hidden;
-      transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+      transition: transform .22s ease, box-shadow .22s ease, border-color .22s ease;
       height: 100%;
       position: relative;
+      display: flex;
+      flex-direction: column;
     }
   
     .product-card:hover {
-      transform: translateY(-4px);
-      border-color: rgba(8, 140, 22, .28);
-      box-shadow: var(--shadow);
+      transform: translateY(-6px);
+      border-color: rgba(8, 140, 22, .30);
+      box-shadow: 0 26px 56px rgba(12, 20, 55, .18);
     }
   
     .p-img {
-      aspect-ratio: 4/3;
-      background: #0c1326;
+      aspect-ratio: 16/11;
+      background: linear-gradient(160deg, #f4f6fb, #e7edf8);
       overflow: hidden;
       position: relative;
     }
@@ -541,27 +543,134 @@
     }
   
     .icon-btn {
-      width: 38px;
-      height: 38px;
-      border-radius: 14px;
-      border: 1px solid var(--line);
-      background: rgba(255, 255, 255, .70);
+      width: 36px;
+      height: 36px;
+      border-radius: 12px;
+      border: 1px solid rgba(12, 20, 55, .12);
+      background: rgba(255, 255, 255, .86);
       color: var(--text);
       cursor: pointer;
       transition: .15s ease;
       display: inline-flex;
       align-items: center;
       justify-content: center;
+      backdrop-filter: blur(6px);
     }
   
     .icon-btn:hover {
-      background: rgba(255, 255, 255, .92);
+      background: #fff;
       transform: translateY(-1px);
+      box-shadow: 0 10px 22px rgba(12, 20, 55, .14);
+    }
+
+    .icon-btn.is-active {
+      border-color: rgba(8, 140, 22, .45);
+      background: rgba(8, 140, 22, .14);
+      color: #067812;
+    }
+
+    .p-content {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      flex: 1;
+    }
+
+    .product-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .category-pill {
+      display: inline-flex;
+      align-items: center;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .2px;
+      text-transform: uppercase;
+      background: rgba(8, 140, 22, .12);
+      border: 1px solid rgba(8, 140, 22, .24);
+      color: #076c12;
+      border-radius: 999px;
+      padding: 5px 10px;
+      max-width: 70%;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .price-wrap {
+      text-align: right;
+      flex-shrink: 0;
+    }
+
+    .product-title {
+      font-size: 1.55rem;
+      line-height: 1.28;
+      font-weight: 800;
+      letter-spacing: .1px;
+      color: #0b1220;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      min-height: 2.6em;
+    }
+
+    .stock-pill {
+      font-size: 11px;
+      font-weight: 700;
+      border-radius: 999px;
+      border: 1px solid rgba(8, 140, 22, .28);
+      background: rgba(8, 140, 22, .10);
+      color: #076c12;
+      padding: 4px 9px;
+      line-height: 1;
+    }
+
+    .stock-pill--low {
+      border-color: rgba(241, 184, 6, .42);
+      background: rgba(241, 184, 6, .14);
+      color: #9a6b00;
+    }
+
+    .meta-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      min-height: 24px;
+    }
+
+    .cta-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: auto;
+    }
+
+    .card-btn-add,
+    .card-btn-details {
+      min-height: 44px;
+      border-radius: 14px;
+      font-weight: 700;
+      letter-spacing: .2px;
+    }
+
+    .vin-row {
+      margin-top: 4px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
   
     .price {
       font-weight: 900;
+      font-size: 2rem;
       letter-spacing: .2px;
+      color: #0b1220;
     }
   
     .muted {
