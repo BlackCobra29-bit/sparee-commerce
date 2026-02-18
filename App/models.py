@@ -19,7 +19,13 @@ class AccountRegistration(models.Model):
         on_delete=models.CASCADE,
         related_name="account_registration",
     )
+
     account_type = models.CharField(max_length=20, choices=ACCOUNT_TYPE_CHOICES)
+    phone_number = models.CharField(
+        max_length=16,
+        blank=True,
+        null=True,
+    )
     profile_picture = models.ImageField(upload_to="profile_pictures/", blank=True, null=True)
     license_file = models.FileField(upload_to="license_uploads/", blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)

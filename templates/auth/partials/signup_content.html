@@ -125,6 +125,15 @@
           </div>
         </div>
 
+        <div class="field">
+          <label for="phone">Phone number</label>
+          <input id="phone" name="phone" type="tel" class="input" required
+                 data-parsley-required-message="Phone number is required."
+                 data-parsley-intlphone
+                 data-parsley-intlphone-message="Enter a valid phone number."
+                 value="{{ prefill.phone|default:'' }}" autocomplete="tel">
+        </div>
+
         <div class="field" id="licenseFieldWrap">
           <label for="license_file">Business/Company License File</label>
           <input id="license_file" name="license_file" type="file" class="input"

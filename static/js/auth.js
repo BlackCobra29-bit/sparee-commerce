@@ -1,6 +1,10 @@
 (function () {
+  const phoneInputInstances = new WeakMap();
+  let intlPhoneValidatorAdded = false;
+
   function initAuthUi() {
     setupParsley();
+    setupPhoneInput();
     setupPasswordToggles();
     setupStrengthMeter();
     setupEmailNormalizer();
@@ -39,11 +43,63 @@
       },
     });
 
+    if (!intlPhoneValidatorAdded) {
+      window.Parsley.addValidator("intlphone", {
+        validateString: function (_value, _requirement, parsleyInstance) {
+          const input = parsleyInstance.$element[0];
+          const iti = phoneInputInstances.get(input);
+          if (!iti) return false;
+          return input.value.trim() !== "" && iti.isValidNumber();
+        },
+        messages: {
+          en: "Enter a valid phone number.",
+        },
+      });
+      intlPhoneValidatorAdded = true;
+    }
+
     window.jQuery("form[data-parsley-validate]").parsley({
       errorsWrapper: '<ul class="parsley-errors-list"></ul>',
       errorTemplate: "<li></li>",
       trigger: "change input",
       validateIfEmpty: true,
+    });
+  }
+
+  function setupPhoneInput() {
+    if (typeof window.intlTelInput !== "function") return;
+
+    const input = document.getElementById("phone");
+    if (!input || phoneInputInstances.has(input)) return;
+
+    const iti = window.intlTelInput(input, {
+      initialCountry: "us",
+      separateDialCode: true,
+      autoPlaceholder: "polite",
+      nationalMode: false,
+      utilsScript: "https://cdn.jsdelivr.net/npm/intl-tel-input@19.5.7/build/js/utils.js",
+    });
+
+    phoneInputInstances.set(input, iti);
+
+    const form = input.closest("form");
+    if (!form || form.dataset.phoneBound === "1") return;
+    form.dataset.phoneBound = "1";
+
+    form.addEventListener("submit", function (event) {
+      const parsed = phoneInputInstances.get(input);
+      if (!parsed) return;
+
+      if (!parsed.isValidNumber()) {
+        event.preventDefault();
+        event.stopPropagation();
+        if (window.jQuery && window.jQuery.fn && window.jQuery.fn.parsley) {
+          window.jQuery(input).parsley().validate();
+        }
+        return;
+      }
+
+      input.value = parsed.getNumber();
     });
   }
 

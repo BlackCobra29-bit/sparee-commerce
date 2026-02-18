@@ -499,6 +499,7 @@ class SignupView(HtmxTemplateMixin, FormView):
         AccountRegistration.objects.create(
             user=user,
             account_type=account_type,
+            phone_number=form.cleaned_data["phone"],
             profile_picture=profile_picture,
             license_file=license_file if account_type == "seller" else None,
         )
@@ -534,6 +535,7 @@ class SignupView(HtmxTemplateMixin, FormView):
             "last_name": data.get("last_name", ""),
             "username": data.get("username", ""),
             "email": data.get("email", ""),
+            "phone": data.get("phone", ""),
         }
         return ctx
 

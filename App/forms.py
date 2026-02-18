@@ -45,6 +45,7 @@ class SignupForm(forms.Form):
     last_name = forms.CharField(max_length=150)
     username = forms.CharField(max_length=150)
     email = forms.EmailField(max_length=254)
+    phone = forms.CharField(max_length=16)
     password = forms.CharField(widget=forms.PasswordInput)
     confirm_password = forms.CharField(widget=forms.PasswordInput)
     profile_picture = forms.ImageField(required=True)
@@ -62,6 +63,12 @@ class SignupForm(forms.Form):
         if User.objects.filter(email=email).exists():
             raise forms.ValidationError("That email is already registered.")
         return email
+
+    def clean_phone(self):
+        phone = (self.cleaned_data.get("phone") or "").strip()
+        if not phone:
+            raise forms.ValidationError("Phone number is required.")
+        return phone
 
     def clean_license_file(self):
         license_file = self.cleaned_data.get("license_file")
