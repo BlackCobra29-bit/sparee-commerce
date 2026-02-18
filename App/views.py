@@ -8,6 +8,8 @@ from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.shortcuts import get_object_or_404
 from django.shortcuts import redirect
 from django.db import transaction
+from django.db.models import F, Sum
+from django.db.models.functions import Coalesce
 from django.template.loader import render_to_string
 from django.urls import reverse_lazy
 from django.views.generic import FormView, TemplateView, View
@@ -91,15 +93,63 @@ class VendorAccessMixin(LoginRequiredMixin):
     login_url = reverse_lazy("login")
 
 
-class VendorDashboardView(VendorAccessMixin, TemplateView):
+class SellerAccountRequiredMixin:
+    def dispatch(self, request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return self.handle_no_permission()
+
+        account = (
+            AccountRegistration.objects.filter(user_id=request.user.id)
+            .only("account_type")
+            .first()
+        )
+        if not account or account.account_type != AccountRegistration.ACCOUNT_TYPE_SELLER:
+            messages.error(request, "Only seller accounts can access this page.")
+            return redirect("login")
+
+        return super().dispatch(request, *args, **kwargs)
+
+
+class BuyerAccountRequiredMixin:
+    def dispatch(self, request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return self.handle_no_permission()
+
+        account = (
+            AccountRegistration.objects.filter(user_id=request.user.id)
+            .only("account_type")
+            .first()
+        )
+        if not account or account.account_type != AccountRegistration.ACCOUNT_TYPE_BUYER:
+            messages.error(request, "Only buyer accounts can access this page.")
+            return redirect("login")
+
+        return super().dispatch(request, *args, **kwargs)
+
+
+class VendorDashboardView(SellerAccountRequiredMixin, VendorAccessMixin, TemplateView):
     template_name = "vendors/index.html"
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        active_products = self.request.user.products.filter(is_active=True)
+        context["total_stock_quantity"] = active_products.aggregate(
+            total=Coalesce(Sum(Coalesce("current_stock", "initial_stock")), 0)
+        )["total"]
+        context["total_products_count"] = active_products.count()
+        context["product_types_count"] = active_products.values("category").distinct().count()
+        context["low_stock_count"] = active_products.filter(
+            current_stock__isnull=False,
+            current_stock__lte=F("reorder_level"),
+        ).count()
+        return context
 
-class VendorOrdersView(VendorAccessMixin, TemplateView):
+
+class VendorOrdersView(SellerAccountRequiredMixin, VendorAccessMixin, TemplateView):
     template_name = "vendors/orders.html"
 
 
-class VendorProductsView(VendorAccessMixin, TemplateView):
+class VendorProductsView(SellerAccountRequiredMixin, VendorAccessMixin, TemplateView):
     template_name = "vendors/products.html"
 
     def get_context_data(self, **kwargs):
@@ -122,7 +172,7 @@ class VendorProductsView(VendorAccessMixin, TemplateView):
         return context
 
 
-class VendorProductRowsView(VendorAccessMixin, View):
+class VendorProductRowsView(SellerAccountRequiredMixin, VendorAccessMixin, View):
     http_method_names = ["get"]
 
     def get(self, request, *args, **kwargs):
@@ -167,11 +217,15 @@ def _vendor_products_queryset(user):
     )
 
 
-class VendorAnalyticsView(VendorAccessMixin, TemplateView):
+class VendorAnalyticsView(SellerAccountRequiredMixin, VendorAccessMixin, TemplateView):
     template_name = "vendors/analytics.html"
 
 
-class VendorProductCreateView(VendorAccessMixin, View):
+class BuyerDashboardView(BuyerAccountRequiredMixin, VendorAccessMixin, TemplateView):
+    template_name = "vendors/buyer_dashboard.html"
+
+
+class VendorProductCreateView(SellerAccountRequiredMixin, VendorAccessMixin, View):
     http_method_names = ["post"]
 
     def post(self, request, *args, **kwargs):
@@ -237,7 +291,7 @@ class VendorProductCreateView(VendorAccessMixin, View):
         return redirect("vendor_products")
 
 
-class VendorProductUpdateView(VendorAccessMixin, View):
+class VendorProductUpdateView(SellerAccountRequiredMixin, VendorAccessMixin, View):
     http_method_names = ["post"]
 
     def post(self, request, *args, **kwargs):
@@ -305,7 +359,7 @@ class VendorProductUpdateView(VendorAccessMixin, View):
         return redirect("vendor_products")
 
 
-class VendorProductDeleteView(VendorAccessMixin, View):
+class VendorProductDeleteView(SellerAccountRequiredMixin, VendorAccessMixin, View):
     http_method_names = ["post"]
 
     def post(self, request, *args, **kwargs):

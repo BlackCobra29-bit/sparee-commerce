@@ -26,7 +26,36 @@
   <link id="pagestyle" href="{% static 'vendors/css/soft-ui-dashboard.css' %}" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.1.0/css/all.min.css">
   <script src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.1.0/js/all.min.js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
   <style>
+    html,
+    body {
+      height: 100%;
+    }
+
+    body.bg-gray-100 {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    main.main-content {
+      flex: 1 0 auto;
+      display: flex;
+      flex-direction: column;
+      max-height: none;
+    }
+
+    .vendor-page-content {
+      flex: 1 0 auto;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .vendor-page-footer {
+      margin-top: auto;
+    }
+
     .btn-primary,
     .btn.bg-gradient-primary {
       background-color: #088c16 !important;
@@ -49,9 +78,10 @@
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#vendorTopNav" aria-controls="vendorTopNav" aria-expanded="false" aria-label="Toggle navigation">
           <span class="navbar-toggler-icon"></span>
         </button>
-        <div class="collapse navbar-collapse" id="vendorTopNav">
-          <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-            <li class="nav-item">
+	        <div class="collapse navbar-collapse" id="vendorTopNav">
+	          <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+              {% if request.user.account_registration.account_type == 'seller' %}
+	            <li class="nav-item">
               <a class="nav-link d-flex align-items-center{% if current_url_name == 'vendor_dashboard' or current_url_name == 'vendor_dashboard_home' %} active fw-bold{% endif %}" href="{% url 'vendor_dashboard_home' %}" hx-boost="false">
                 <div class="icon icon-shape icon-sm border-radius-md {% if current_url_name == 'vendor_dashboard' or current_url_name == 'vendor_dashboard_home' %}bg-gradient-primary text-white{% else %}bg-white text-dark{% endif %} text-center me-2 d-flex align-items-center justify-content-center">
                   <svg width="12px" height="12px" viewBox="0 0 45 40" xmlns="http://www.w3.org/2000/svg">
@@ -94,8 +124,8 @@
                 <span class="nav-link-text ms-1">Products</span>
               </a>
             </li>
-            <li class="nav-item">
-              <a class="nav-link d-flex align-items-center{% if current_url_name == 'vendor_analytics' %} active fw-bold{% endif %}" href="{% url 'vendor_analytics' %}" hx-boost="false">
+	            <li class="nav-item">
+	              <a class="nav-link d-flex align-items-center{% if current_url_name == 'vendor_analytics' %} active fw-bold{% endif %}" href="{% url 'vendor_analytics' %}" hx-boost="false">
                 <div class="icon icon-shape icon-sm border-radius-md {% if current_url_name == 'vendor_analytics' %}bg-gradient-primary text-white{% else %}bg-white text-dark{% endif %} text-center me-2 d-flex align-items-center justify-content-center">
                   <svg width="12px" height="12px" viewBox="0 0 42 42" xmlns="http://www.w3.org/2000/svg">
                     <title>analytics</title>
@@ -106,9 +136,11 @@
                   </svg>
                 </div>
                 <span class="nav-link-text ms-1">Analytics</span>
-              </a>
-            </li>
-          </ul>
+	              </a>
+	            </li>
+              {% endif %}
+
+	          </ul>
           <ul class="navbar-nav ms-lg-auto mb-2 mb-lg-0 align-items-lg-center">
 	            <li class="nav-item me-lg-2">
 	              <a href="../vendor/profile.html" class="nav-link text-body font-weight-bold d-flex align-items-center px-0">
@@ -194,7 +226,7 @@
     {% endwith %}
     <!-- End Navbar -->
   
-        <div class="container-fluid py-4">
+        <div class="container-fluid py-4 vendor-page-content">
 
 {% block vendor_content %}
 
@@ -202,7 +234,7 @@
 
 {% block vendor_footer %}
 <!-- Vendor Footer -->
-      <footer class="footer pt-3">
+      <footer class="footer pt-3 vendor-page-footer">
         <div class="container-fluid">
           <div class="row align-items-center justify-content-lg-between">
             <div class="col-lg-6 mb-lg-0 mb-4">
@@ -339,6 +371,26 @@
   <script async defer src="https://buttons.github.io/buttons.js"></script>
   <!-- Control Center for Soft Dashboard: parallax effects, scripts for the example pages etc -->
   <script src="{% static 'vendors/js/soft-ui-dashboard.min.js' %}"></script>
+  <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+  <script>
+  document.addEventListener('DOMContentLoaded', function () {
+    {% for message in messages %}
+      if (typeof Toastify !== 'undefined') {
+        Toastify({
+          text: '{{ message|escapejs }}',
+          duration: 3500,
+          gravity: 'bottom',
+          position: 'center',
+          close: true,
+          stopOnFocus: true,
+          style: {
+            background: '{% if "success" in message.tags %}#2dce89{% elif "warning" in message.tags %}#fb6340{% else %}#f5365c{% endif %}'
+          }
+        }).showToast();
+      }
+    {% endfor %}
+  });
+</script>
 </body>
 </html>
 
