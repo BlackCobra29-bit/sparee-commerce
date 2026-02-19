@@ -77,9 +77,23 @@
           <button class="nav-btn" id="cartModalBtn" data-toggle="modal" data-target="#cartModal">
             <i class="fas fa-shopping-cart"></i>
             <span class="d-none d-md-inline ml-1">Cart</span>
-            <span class="badge ml-2" id="cartCount">0</span>
+            <span class="ml-1 text-danger" id="cartCount">0</span>
           </button>
 
+          {% if show_nav_user %}
+          <a class="nav-btn d-flex align-items-center" href="{% url 'login' %}">
+            {% if nav_user_photo_url %}
+            <img
+              src="{{ nav_user_photo_url }}"
+              alt="Profile photo"
+              class="rounded-circle mr-2"
+              style="width:28px; height:28px; object-fit:cover;">
+            {% endif %}
+            <span class="d-none d-md-inline">
+              {{ nav_user_name }}
+            </span>
+          </a>
+          {% else %}
           <a class="nav-btn" href="{% url 'login' %}">
             <i class="fas fa-sign-in-alt"></i>
             <span class="d-none d-md-inline ml-1">Login</span>
@@ -89,6 +103,7 @@
             <i class="fas fa-user-plus"></i>
             <span class="d-none d-md-inline ml-1">Create account</span>
           </a>
+          {% endif %}
         </div>
       </div>
     </div>
@@ -103,18 +118,24 @@
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
 
-    <script src='{% static "js/index.js" %}'></script>
+    <script src='{% static "js/index.js" %}?v=20260219-1'></script>
     {% if messages %}
     <script>
       (function () {
-        if (typeof Swal === 'undefined') return;
+        if (typeof Toastify === "undefined") return;
         {% for message in messages %}
-        Swal.fire({
-          icon: '{% if "success" in message.tags %}success{% elif "warning" in message.tags %}warning{% else %}error{% endif %}',
-          title: '{% if "success" in message.tags %}Success{% elif "warning" in message.tags %}Warning{% else %}Error{% endif %}',
-          text: '{{ message|escapejs }}',
-          confirmButtonText: 'OK'
-        });
+        Toastify({
+          text: "{{ message|escapejs }}",
+          duration: 3200,
+          gravity: "bottom",
+          position: "center",
+          close: true,
+          stopOnFocus: true,
+          style: {
+            background: "{% if 'success' in message.tags %}#088c16{% elif 'warning' in message.tags %}#b54708{% else %}#b42318{% endif %}",
+            color: "#f8fafc"
+          }
+        }).showToast();
         {% endfor %}
       })();
     </script>

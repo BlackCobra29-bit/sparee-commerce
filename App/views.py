@@ -4,6 +4,7 @@ from django.contrib import messages
 from django.contrib.auth import login, logout
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import User
+from django.core.paginator import Paginator
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.shortcuts import get_object_or_404
 from django.shortcuts import redirect
@@ -16,7 +17,14 @@ from django.views.generic import FormView, TemplateView, View
 from django_htmx.http import HttpResponseClientRedirect
 
 from .forms import ForgotPasswordForm, LoginForm, ProductForm, SignupForm
-from .models import AccountRegistration, Product
+from .models import AccountRegistration, Order, Product
+
+
+def _redirect_superuser_home(request):
+    if request.user.is_authenticated and request.user.is_superuser:
+        messages.error(request, "You are loggd in as a system admin")
+        return redirect("home")
+    return None
 
 
 class HomeView(TemplateView):
@@ -24,6 +32,21 @@ class HomeView(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        nav_user_name = ""
+        nav_user_photo_url = ""
+        show_nav_user = self.request.user.is_authenticated
+        if show_nav_user:
+            nav_user_name = (
+                self.request.user.get_full_name().strip() or self.request.user.username
+            )
+            account = (
+                AccountRegistration.objects.filter(user_id=self.request.user.id)
+                .only("profile_picture")
+                .first()
+            )
+            if account and account.profile_picture:
+                nav_user_photo_url = account.profile_picture.url
+
         products = (
             Product.objects.filter(is_active=True, current_stock__gt=0)
             .select_related("vendor", "vendor__account_registration")
@@ -86,6 +109,9 @@ class HomeView(TemplateView):
         context["shop_products"] = shop_products
         context["shop_category_options"] = category_options
         context["shop_brand_options"] = sorted({p["brand"] for p in shop_products})
+        context["show_nav_user"] = show_nav_user
+        context["nav_user_name"] = nav_user_name
+        context["nav_user_photo_url"] = nav_user_photo_url
         return context
 
 
@@ -95,6 +121,10 @@ class VendorAccessMixin(LoginRequiredMixin):
 
 class SellerAccountRequiredMixin:
     def dispatch(self, request, *args, **kwargs):
+        superuser_redirect = _redirect_superuser_home(request)
+        if superuser_redirect:
+            return superuser_redirect
+
         if not request.user.is_authenticated:
             return self.handle_no_permission()
 
@@ -112,6 +142,10 @@ class SellerAccountRequiredMixin:
 
 class BuyerAccountRequiredMixin:
     def dispatch(self, request, *args, **kwargs):
+        superuser_redirect = _redirect_superuser_home(request)
+        if superuser_redirect:
+            return superuser_redirect
+
         if not request.user.is_authenticated:
             return self.handle_no_permission()
 
@@ -222,7 +256,181 @@ class VendorAnalyticsView(SellerAccountRequiredMixin, VendorAccessMixin, Templat
 
 
 class BuyerDashboardView(BuyerAccountRequiredMixin, VendorAccessMixin, TemplateView):
-    template_name = "vendors/buyer_dashboard.html"
+    template_name = "vendors/buyer/buyer_dashboard.html"
+    paginate_by = 20
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        orders_qs = (
+            Order.objects.filter(buyer_id=self.request.user.id)
+            .select_related("product__vendor__account_registration")
+            .only(
+                "id",
+                "quantity",
+                "total_price",
+                "created_at",
+                "product__name",
+                "product__vin",
+                "product__vendor__username",
+                "product__vendor__first_name",
+                "product__vendor__last_name",
+                "product__vendor__email",
+                "product__vendor__account_registration__phone_number",
+                "product__vendor__account_registration__profile_picture",
+            )
+            .order_by("-created_at")
+        )
+        paginator = Paginator(orders_qs, self.paginate_by)
+        page_obj = paginator.get_page(self.request.GET.get("page"))
+
+        buyer_orders = []
+        for order in page_obj.object_list:
+            seller = order.product.vendor
+            seller_name = seller.get_full_name().strip() or seller.username
+            seller_account = getattr(seller, "account_registration", None)
+            seller_phone = (
+                seller_account.phone_number
+                if seller_account and seller_account.phone_number
+                else "-"
+            )
+            seller_photo_url = (
+                seller_account.profile_picture.url
+                if seller_account and seller_account.profile_picture
+                else ""
+            )
+
+            buyer_orders.append(
+                {
+                    "seller_name": seller_name,
+                    "seller_email": seller.email or "-",
+                    "seller_phone": seller_phone,
+                    "seller_photo_url": seller_photo_url,
+                    "product_name": order.product.name,
+                    "quantity": order.quantity,
+                    "total_price": order.total_price,
+                    "vin": order.product.vin,
+                }
+            )
+
+        context["buyer_orders"] = buyer_orders
+        context["page_obj"] = page_obj
+        context["is_paginated"] = page_obj.has_other_pages()
+        context["orders_total"] = paginator.count
+        return context
+
+
+class OrderCreateView(View):
+    http_method_names = ["post"]
+
+    def post(self, request, *args, **kwargs):
+        if request.user.is_authenticated and request.user.is_superuser:
+            return JsonResponse(
+                {"error": "You are loggd in as a system admin"},
+                status=403,
+            )
+
+        if not request.user.is_authenticated:
+            return JsonResponse(
+                {
+                    "error": "Please log in to submit an order.",
+                    "login_url": str(reverse_lazy("login")),
+                },
+                status=401,
+            )
+
+        account = (
+            AccountRegistration.objects.filter(user_id=request.user.id)
+            .only("account_type")
+            .first()
+        )
+        if not account or account.account_type != AccountRegistration.ACCOUNT_TYPE_BUYER:
+            return JsonResponse(
+                {"error": "Only buyer accounts can submit orders."},
+                status=403,
+            )
+
+        try:
+            payload = json.loads(request.body or "{}")
+        except json.JSONDecodeError:
+            return JsonResponse({"error": "Invalid request payload."}, status=400)
+
+        items = payload.get("items")
+        if not isinstance(items, list) or not items:
+            return JsonResponse({"error": "Cart is empty."}, status=400)
+
+        quantity_by_sku = {}
+        for item in items:
+            if not isinstance(item, dict):
+                continue
+            sku = str(item.get("sku", "")).strip().upper()
+            qty_raw = item.get("qty", 1)
+            try:
+                qty = int(qty_raw)
+            except (TypeError, ValueError):
+                qty = 0
+            if not sku or qty <= 0:
+                continue
+            quantity_by_sku[sku] = quantity_by_sku.get(sku, 0) + qty
+
+        if not quantity_by_sku:
+            return JsonResponse({"error": "No valid order items found."}, status=400)
+
+        with transaction.atomic():
+            products = (
+                Product.objects.select_for_update()
+                .filter(vin__in=quantity_by_sku.keys(), is_active=True)
+                .only("id", "vin", "name", "price", "current_stock", "initial_stock")
+            )
+            products_by_vin = {product.vin: product for product in products}
+            missing_skus = [sku for sku in quantity_by_sku.keys() if sku not in products_by_vin]
+            if missing_skus:
+                return JsonResponse(
+                    {"error": f"Some items are unavailable: {', '.join(missing_skus)}."},
+                    status=400,
+                )
+
+            stock_errors = []
+            for sku, qty in quantity_by_sku.items():
+                product = products_by_vin[sku]
+                available = (
+                    product.current_stock
+                    if product.current_stock is not None
+                    else product.initial_stock
+                )
+                if qty > available:
+                    stock_errors.append(
+                        f"{product.name} (VIN: {sku}) has only {available} in stock."
+                    )
+
+            if stock_errors:
+                return JsonResponse(
+                    {"error": "Insufficient stock.", "details": stock_errors},
+                    status=400,
+                )
+
+            for sku, qty in quantity_by_sku.items():
+                product = products_by_vin[sku]
+                available = (
+                    product.current_stock
+                    if product.current_stock is not None
+                    else product.initial_stock
+                )
+                new_stock = available - qty
+                Product.objects.filter(pk=product.pk).update(current_stock=new_stock)
+
+                Order.objects.create(
+                    buyer=request.user,
+                    product=product,
+                    quantity=qty,
+                    total_price=product.price * qty,
+                )
+
+        return JsonResponse(
+            {
+                "message": "Order submitted successfully.",
+                "created_count": len(quantity_by_sku),
+            }
+        )
 
 
 class VendorProductCreateView(SellerAccountRequiredMixin, VendorAccessMixin, View):
@@ -436,9 +644,24 @@ class LoginView(HtmxTemplateMixin, FormView):
     form_class = LoginForm
     success_url = reverse_lazy("vendor_dashboard")
 
+    @staticmethod
+    def get_dashboard_url_for_user(user):
+        account = (
+            AccountRegistration.objects.filter(user_id=user.id)
+            .only("account_type")
+            .first()
+        )
+        if account and account.account_type == AccountRegistration.ACCOUNT_TYPE_BUYER:
+            return reverse_lazy("buyer_dashboard")
+        return reverse_lazy("vendor_dashboard")
+
     def dispatch(self, request, *args, **kwargs):
+        superuser_redirect = _redirect_superuser_home(request)
+        if superuser_redirect:
+            return superuser_redirect
+
         if request.user.is_authenticated:
-            return redirect("vendor_dashboard")
+            return redirect(self.get_dashboard_url_for_user(request.user))
         return super().dispatch(request, *args, **kwargs)
 
     def get_form_kwargs(self):
@@ -452,7 +675,7 @@ class LoginView(HtmxTemplateMixin, FormView):
         if not form.cleaned_data.get("remember"):
             self.request.session.set_expiry(0)
         messages.success(self.request, f"Welcome back, {user.username}.")
-        return self.client_redirect(str(self.success_url))
+        return self.client_redirect(str(self.get_dashboard_url_for_user(user)))
 
     def form_invalid(self, form):
         for field_name, errors in form.errors.items():
@@ -479,6 +702,10 @@ class SignupView(HtmxTemplateMixin, FormView):
     success_url = reverse_lazy("home")
 
     def dispatch(self, request, *args, **kwargs):
+        superuser_redirect = _redirect_superuser_home(request)
+        if superuser_redirect:
+            return superuser_redirect
+
         if request.user.is_authenticated:
             return redirect("home")
         return super().dispatch(request, *args, **kwargs)
@@ -547,6 +774,10 @@ class ForgotPasswordView(HtmxTemplateMixin, FormView):
     success_url = reverse_lazy("forgot_password")
 
     def dispatch(self, request, *args, **kwargs):
+        superuser_redirect = _redirect_superuser_home(request)
+        if superuser_redirect:
+            return superuser_redirect
+
         if request.user.is_authenticated:
             return redirect("home")
         return super().dispatch(request, *args, **kwargs)
@@ -564,6 +795,12 @@ class ForgotPasswordView(HtmxTemplateMixin, FormView):
 class LogoutView(LoginRequiredMixin, View):
     login_url = reverse_lazy("login")
     http_method_names = ["post"]
+
+    def dispatch(self, request, *args, **kwargs):
+        superuser_redirect = _redirect_superuser_home(request)
+        if superuser_redirect:
+            return superuser_redirect
+        return super().dispatch(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
         logout(request)

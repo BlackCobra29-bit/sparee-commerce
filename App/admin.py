@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import AccountRegistration, Product
+from .models import AccountRegistration, Order, Product
 
 
 @admin.register(AccountRegistration)
@@ -25,3 +25,11 @@ class ProductAdmin(admin.ModelAdmin):
     list_filter = ("category", "is_active", "created_at")
     search_fields = ("name", "vin", "vendor__username", "vendor__email")
     readonly_fields = ("created_at", "updated_at")
+
+
+@admin.register(Order)
+class OrderAdmin(admin.ModelAdmin):
+    list_display = ("id", "buyer", "product", "quantity", "total_price", "created_at")
+    list_filter = ("created_at",)
+    search_fields = ("buyer__username", "buyer__email", "product__name", "product__vin")
+    readonly_fields = ("created_at",)

@@ -72,6 +72,17 @@ function loadLS(key, fallback) {
 function saveLS(key, val) {
   localStorage.setItem(key, JSON.stringify(val));
 }
+function getCsrfToken() {
+  const key = "csrftoken=";
+  const cookies = document.cookie ? document.cookie.split(";") : [];
+  for (let i = 0; i < cookies.length; i += 1) {
+    const cookie = cookies[i].trim();
+    if (cookie.startsWith(key)) {
+      return decodeURIComponent(cookie.substring(key.length));
+    }
+  }
+  return "";
+}
 
 const moneyFormatter = new Intl.NumberFormat("en-US", {
   minimumFractionDigits: 2,
@@ -516,7 +527,6 @@ function setQty(sku, qty) {
 function clearCart() {
   cart = [];
   saveLS(LS.cart, cart);
-  toast("Cart", "Cart cleared.");
   renderCartBadge();
   renderCartTable();
 }
@@ -603,6 +613,63 @@ function renderCartTable() {
   }
 
   $("#cartSubtotal").text(money(subtotal));
+}
+
+async function submitOrder() {
+  if (!cart.length) {
+    toast("Order", "Your cart is empty.", "error");
+    return;
+  }
+
+  const submitBtn = $("#submitOrderBtn");
+  const url = submitBtn.data("order-url");
+  if (!url) {
+    toast("Order", "Order endpoint is not configured.", "error");
+    return;
+  }
+
+  const items = cart.map((item) => ({
+    sku: item.sku,
+    qty: Math.max(1, Number(item.qty) || 1),
+  }));
+
+  submitBtn.prop("disabled", true);
+  try {
+    const response = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-CSRFToken": getCsrfToken(),
+        "X-Requested-With": "XMLHttpRequest",
+      },
+      body: JSON.stringify({ items }),
+    });
+
+    let data = {};
+    try {
+      data = await response.json();
+    } catch (e) {
+      data = {};
+    }
+
+    if (!response.ok) {
+      if (response.status === 401 && data.login_url) {
+        toast("Order", data.error || "Please log in first.", "error");
+        window.location.href = data.login_url;
+        return;
+      }
+      const details = Array.isArray(data.details) ? ` ${data.details.join(" ")}` : "";
+      throw new Error((data.error || "Could not submit order.") + details);
+    }
+
+    toast("Order", data.message || "Order submitted successfully.");
+    clearCart();
+    $("#cartModal").modal("hide");
+  } catch (error) {
+    toast("Order", error.message || "Could not submit order.", "error");
+  } finally {
+    submitBtn.prop("disabled", false);
+  }
 }
 
 // ==========================
@@ -1029,6 +1096,11 @@ $(function () {
   $("#btnLoadMore").on("click", () =>
     toast("Demo", "Pagination is UI-only in this template.")
   );
+
+  $(document).on("click", "#submitOrderBtn", function (e) {
+    e.preventDefault();
+    submitOrder();
+  });
 });
 
 // Expose some functions for inline onclick
@@ -1041,3 +1113,4 @@ window.clearCompare = clearCompare;
 window.toast = toast;
 window.setQty = setQty;
 window.removeFromCart = removeFromCart;
+window.submitOrder = submitOrder;

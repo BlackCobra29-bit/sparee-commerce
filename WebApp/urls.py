@@ -23,6 +23,7 @@ from App.views import (
     HomeView,
     LoginView,
     LogoutView,
+    OrderCreateView,
     BuyerDashboardView,
     VendorProductDeleteView,
     VendorProductCreateView,
@@ -51,6 +52,7 @@ urlpatterns = [
     path('vendor/products/<int:pk>/delete/', VendorProductDeleteView.as_view(), name='vendor_product_delete'),
     path('vendor/analytics/', VendorAnalyticsView.as_view(), name='vendor_analytics'),
     path('buyer/dashboard/', BuyerDashboardView.as_view(), name='buyer_dashboard'),
+    path('orders/create/', OrderCreateView.as_view(), name='order_create'),
     path('admin/', admin.site.urls),
 ]
 

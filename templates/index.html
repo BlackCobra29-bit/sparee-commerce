@@ -618,8 +618,11 @@
             <button class="btn btn-outline-light mr-2 mb-2" onclick="clearCart()">
               <i class="fas fa-trash mr-2"></i>Clear
             </button>
-            <button class="btn btn-success ml-auto mb-2"
-              onclick="toast('Checkout', 'Checkout flow is UI-only in this template.')">
+            <button
+              type="button"
+              class="btn btn-success ml-auto mb-2"
+              id="submitOrderBtn"
+              data-order-url="{% url 'order_create' %}">
               <i class="fas fa-lock mr-2"></i>Submit Order
             </button>
           </div>
