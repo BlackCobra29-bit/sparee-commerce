@@ -29,7 +29,7 @@ class ProductAdmin(admin.ModelAdmin):
 
 @admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
-    list_display = ("id", "buyer", "product", "quantity", "total_price", "created_at")
+    list_display = ("id", "buyer", "product", "quantity", "total_price", "is_delivered", "created_at")
     list_filter = ("created_at",)
     search_fields = ("buyer__username", "buyer__email", "product__name", "product__vin")
     readonly_fields = ("created_at",)

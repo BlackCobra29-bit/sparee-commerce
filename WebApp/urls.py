@@ -24,7 +24,10 @@ from App.views import (
     LoginView,
     LogoutView,
     OrderCreateView,
+    BuyerOrderCancelView,
     BuyerDashboardView,
+    VendorOrderDeliveredUpdateView,
+    VendorOrderUnacceptView,
     VendorProductDeleteView,
     VendorProductCreateView,
     VendorProductRowsView,
@@ -45,6 +48,8 @@ urlpatterns = [
     path('vendor/', VendorDashboardView.as_view(), name='vendor_dashboard'),
     path('vendor/dashboard/', VendorDashboardView.as_view(), name='vendor_dashboard_home'),
     path('vendor/orders/', VendorOrdersView.as_view(), name='vendor_orders'),
+    path('vendor/orders/<int:pk>/delivered/', VendorOrderDeliveredUpdateView.as_view(), name='vendor_order_delivered_update'),
+    path('vendor/orders/<int:pk>/unaccept/', VendorOrderUnacceptView.as_view(), name='vendor_order_unaccept'),
     path('vendor/products/', VendorProductsView.as_view(), name='vendor_products'),
     path('vendor/products/rows/', VendorProductRowsView.as_view(), name='vendor_product_rows'),
     path('vendor/products/create/', VendorProductCreateView.as_view(), name='vendor_product_create'),
@@ -53,6 +58,7 @@ urlpatterns = [
     path('vendor/analytics/', VendorAnalyticsView.as_view(), name='vendor_analytics'),
     path('buyer/dashboard/', BuyerDashboardView.as_view(), name='buyer_dashboard'),
     path('orders/create/', OrderCreateView.as_view(), name='order_create'),
+    path('orders/<int:pk>/cancel/', BuyerOrderCancelView.as_view(), name='buyer_order_cancel'),
     path('admin/', admin.site.urls),
 ]
 

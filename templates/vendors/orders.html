@@ -1,290 +1,338 @@
 {% extends "vendors/base.html" %}
 {% load static %}
 {% block vendor_content %}
-
-      <!-- Orders Table -->
-      <div class="row">
-        <div class="col-12">
-          <div class="card">
-            <div class="card-header pb-0">
-              <div class="row">
-                <div class="col-lg-6 col-7">
-                  <h6>All Orders</h6>
-                  <p class="text-sm mb-0">
-                    <i class="fa fa-info-circle text-info" aria-hidden="true"></i>
-                    <span class="font-weight-bold ms-1">248 orders</span> found
-                  </p>
-                </div>
-              </div>
-            </div>
-            <div class="card-body px-0 pb-2">
-              <div class="table-responsive p-0">
-                <table class="table align-items-center mb-0">
-                  <thead>
-                    <tr>
-                      <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">
-                        <input type="checkbox" class="form-check-input" id="selectAll">
-                      </th>
-                      <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Order ID</th>
-                      <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Customer</th>
-                      <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Items</th>
-                      <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Amount</th>
-                      <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Status</th>
-                      <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Date</th>
-                      <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <td class="ps-2">
-                        <input type="checkbox" class="form-check-input" name="orderCheck">
-                      </td>
-                      <td>
-                        <div class="d-flex px-2 py-1">
-                          <div class="d-flex flex-column justify-content-center">
-                            <h6 class="mb-0 text-sm">#ORD-1832412</h6>
-                          </div>
-                        </div>
-                      </td>
-                      <td>
-                        <div class="d-flex px-2 py-1">
-                          <div class="d-flex flex-column justify-content-center">
-                            <h6 class="mb-0 text-sm">Ahmed Al-Mansoori</h6>
-                            <p class="text-xs text-secondary mb-0">ahmed@example.com</p>
-                          </div>
-                        </div>
-                      </td>
-                      <td class="align-middle text-center text-sm">
-                        <span class="text-xs font-weight-bold">3 items</span>
-                      </td>
-                      <td class="align-middle text-center text-sm">
-                        <span class="text-xs font-weight-bold">$245.00</span>
-                      </td>
-                      <td class="align-middle text-center">
-                        <span class="badge badge-sm bg-gradient-warning">Pending</span>
-                      </td>
-                      <td class="align-middle text-center">
-                        <span class="text-secondary text-xs font-weight-bold">Dec 15, 2024</span>
-                      </td>
-                      <td class="align-middle text-center">
-                        <a href="javascript:;" class="text-secondary font-weight-bold text-xs" data-bs-toggle="tooltip" data-bs-original-title="View Details">
-                          <i class="fas fa-eye me-2"></i>
-                        </a>
-                        <a href="javascript:;" class="text-success font-weight-bold text-xs" data-bs-toggle="tooltip" data-bs-original-title="Confirm Order">
-                          <i class="fas fa-check me-2"></i>
-                        </a>
-                        <a href="javascript:;" class="text-danger font-weight-bold text-xs" data-bs-toggle="tooltip" data-bs-original-title="Cancel">
-                          <i class="fas fa-times"></i>
-                        </a>
-                      </td>
-                    </tr>
-
-                    <tr>
-                      <td class="ps-2">
-                        <input type="checkbox" class="form-check-input" name="orderCheck">
-                      </td>
-                      <td>
-                        <div class="d-flex px-2 py-1">
-                          <div class="d-flex flex-column justify-content-center">
-                            <h6 class="mb-0 text-sm">#ORD-1832411</h6>
-                          </div>
-                        </div>
-                      </td>
-                      <td>
-                        <div class="d-flex px-2 py-1">
-                          <div class="d-flex flex-column justify-content-center">
-                            <h6 class="mb-0 text-sm">Fatima Al-Zahra</h6>
-                            <p class="text-xs text-secondary mb-0">fatima@example.com</p>
-                          </div>
-                        </div>
-                      </td>
-                      <td class="align-middle text-center text-sm">
-                        <span class="text-xs font-weight-bold">1 item</span>
-                      </td>
-                      <td class="align-middle text-center text-sm">
-                        <span class="text-xs font-weight-bold">$89.00</span>
-                      </td>
-                      <td class="align-middle text-center">
-                        <span class="badge badge-sm bg-gradient-info">Shipped</span>
-                      </td>
-                      <td class="align-middle text-center">
-                        <span class="text-secondary text-xs font-weight-bold">Dec 14, 2024</span>
-                      </td>
-                      <td class="align-middle text-center">
-                        <a href="javascript:;" class="text-secondary font-weight-bold text-xs" data-bs-toggle="tooltip" data-bs-original-title="View Details">
-                          <i class="fas fa-eye me-2"></i>
-                        </a>
-                        <a href="javascript:;" class="text-success font-weight-bold text-xs" data-bs-toggle="tooltip" data-bs-original-title="Confirm Order">
-                          <i class="fas fa-check me-2"></i>
-                        </a>
-                        <a href="javascript:;" class="text-danger font-weight-bold text-xs" data-bs-toggle="tooltip" data-bs-original-title="Cancel">
-                          <i class="fas fa-times"></i>
-                        </a>
-                      </td>
-                    </tr>
-
-                    <tr>
-                      <td class="ps-2">
-                        <input type="checkbox" class="form-check-input" name="orderCheck">
-                      </td>
-                      <td>
-                        <div class="d-flex px-2 py-1">
-                          <div class="d-flex flex-column justify-content-center">
-                            <h6 class="mb-0 text-sm">#ORD-1832410</h6>
-                          </div>
-                        </div>
-                      </td>
-                      <td>
-                        <div class="d-flex px-2 py-1">
-                          <div class="d-flex flex-column justify-content-center">
-                            <h6 class="mb-0 text-sm">Mohammed Al-Rashid</h6>
-                            <p class="text-xs text-secondary mb-0">mohammed@example.com</p>
-                          </div>
-                        </div>
-                      </td>
-                      <td class="align-middle text-center text-sm">
-                        <span class="text-xs font-weight-bold">5 items</span>
-                      </td>
-                      <td class="align-middle text-center text-sm">
-                        <span class="text-xs font-weight-bold">$456.50</span>
-                      </td>
-                      <td class="align-middle text-center">
-                        <span class="badge badge-sm bg-gradient-success">Delivered</span>
-                      </td>
-                      <td class="align-middle text-center">
-                        <span class="text-secondary text-xs font-weight-bold">Dec 13, 2024</span>
-                      </td>
-                      <td class="align-middle text-center">
-                        <a href="javascript:;" class="text-secondary font-weight-bold text-xs" data-bs-toggle="tooltip" data-bs-original-title="View Details">
-                          <i class="fas fa-eye me-2"></i>
-                        </a>
-                        <a href="javascript:;" class="text-success font-weight-bold text-xs" data-bs-toggle="tooltip" data-bs-original-title="Confirm Order">
-                          <i class="fas fa-check me-2"></i>
-                        </a>
-                        <a href="javascript:;" class="text-danger font-weight-bold text-xs" data-bs-toggle="tooltip" data-bs-original-title="Cancel">
-                          <i class="fas fa-times"></i>
-                        </a>
-                      </td>
-                    </tr>
-
-                    <tr>
-                      <td class="ps-2">
-                        <input type="checkbox" class="form-check-input" name="orderCheck">
-                      </td>
-                      <td>
-                        <div class="d-flex px-2 py-1">
-                          <div class="d-flex flex-column justify-content-center">
-                            <h6 class="mb-0 text-sm">#ORD-1832409</h6>
-                          </div>
-                        </div>
-                      </td>
-                      <td>
-                        <div class="d-flex px-2 py-1">
-                          <div class="d-flex flex-column justify-content-center">
-                            <h6 class="mb-0 text-sm">Sara Al-Hashimi</h6>
-                            <p class="text-xs text-secondary mb-0">sara@example.com</p>
-                          </div>
-                        </div>
-                      </td>
-                      <td class="align-middle text-center text-sm">
-                        <span class="text-xs font-weight-bold">2 items</span>
-                      </td>
-                      <td class="align-middle text-center text-sm">
-                        <span class="text-xs font-weight-bold">$125.00</span>
-                      </td>
-                      <td class="align-middle text-center">
-                        <span class="badge badge-sm bg-gradient-secondary">Confirmed</span>
-                      </td>
-                      <td class="align-middle text-center">
-                        <span class="text-secondary text-xs font-weight-bold">Dec 12, 2024</span>
-                      </td>
-                      <td class="align-middle text-center">
-                        <a href="javascript:;" class="text-secondary font-weight-bold text-xs" data-bs-toggle="tooltip" data-bs-original-title="View Details">
-                          <i class="fas fa-eye me-2"></i>
-                        </a>
-                        <a href="javascript:;" class="text-success font-weight-bold text-xs" data-bs-toggle="tooltip" data-bs-original-title="Confirm Order">
-                          <i class="fas fa-check me-2"></i>
-                        </a>
-                        <a href="javascript:;" class="text-danger font-weight-bold text-xs" data-bs-toggle="tooltip" data-bs-original-title="Cancel">
-                          <i class="fas fa-times"></i>
-                        </a>
-                      </td>
-                    </tr>
-
-                    <tr>
-                      <td class="ps-2">
-                        <input type="checkbox" class="form-check-input" name="orderCheck">
-                      </td>
-                      <td>
-                        <div class="d-flex px-2 py-1">
-                          <div class="d-flex flex-column justify-content-center">
-                            <h6 class="mb-0 text-sm">#ORD-1832408</h6>
-                          </div>
-                        </div>
-                      </td>
-                      <td>
-                        <div class="d-flex px-2 py-1">
-                          <div class="d-flex flex-column justify-content-center">
-                            <h6 class="mb-0 text-sm">Khalid Al-Mazrouei</h6>
-                            <p class="text-xs text-secondary mb-0">khalid@example.com</p>
-                          </div>
-                        </div>
-                      </td>
-                      <td class="align-middle text-center text-sm">
-                        <span class="text-xs font-weight-bold">4 items</span>
-                      </td>
-                      <td class="align-middle text-center text-sm">
-                        <span class="text-xs font-weight-bold">$312.75</span>
-                      </td>
-                      <td class="align-middle text-center">
-                        <span class="badge badge-sm bg-gradient-warning">Pending</span>
-                      </td>
-                      <td class="align-middle text-center">
-                        <span class="text-secondary text-xs font-weight-bold">Dec 11, 2024</span>
-                      </td>
-                      <td class="align-middle text-center">
-                        <a href="javascript:;" class="text-secondary font-weight-bold text-xs" data-bs-toggle="tooltip" data-bs-original-title="View Details">
-                          <i class="fas fa-eye me-2"></i>
-                        </a>
-                        <a href="javascript:;" class="text-success font-weight-bold text-xs" data-bs-toggle="tooltip" data-bs-original-title="Confirm Order">
-                          <i class="fas fa-check me-2"></i>
-                        </a>
-                        <a href="javascript:;" class="text-danger font-weight-bold text-xs" data-bs-toggle="tooltip" data-bs-original-title="Cancel">
-                          <i class="fas fa-times"></i>
-                        </a>
-                      </td>
-                    </tr>
-
-                  </tbody>
-                </table>
-              </div>
-            </div>
-            <div class="card-footer pt-3 pb-2">
-              <nav aria-label="Page navigation">
-                <ul class="pagination justify-content-center mb-0">
-                  <li class="page-item disabled">
-                    <a class="page-link" href="javascript:;" tabindex="-1">
-                      <i class="fa fa-angle-left"></i>
-                    </a>
-                  </li>
-                  <li class="page-item active"><a class="page-link" href="javascript:;">1</a></li>
-                  <li class="page-item"><a class="page-link" href="javascript:;">2</a></li>
-                  <li class="page-item"><a class="page-link" href="javascript:;">3</a></li>
-                  <li class="page-item">
-                    <a class="page-link" href="javascript:;">
-                      <i class="fa fa-angle-right"></i>
-                    </a>
-                  </li>
-                </ul>
-              </nav>
-            </div>
+<div class="row">
+  <div class="col-12">
+    <div class="card">
+      <div class="card-header pb-0">
+        <div class="row">
+          <div class="col-lg-6 col-7">
+            <h6>All Orders</h6>
+            <p class="text-sm mb-0">
+              <i class="fa fa-info-circle text-info" aria-hidden="true"></i>
+              <span id="ordersTotalText" class="font-weight-bold ms-1">{{ orders_total }} orders</span> found
+            </p>
           </div>
         </div>
       </div>
+      <div class="card-body px-0 pb-2">
+        <div class="table-responsive p-0">
+          <table class="table align-items-center mb-0">
+            <thead>
+              <tr>
+                <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Order ID</th>
+                <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Product</th>
+                <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Customer</th>
+                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Phone Number</th>
+                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Quantity</th>
+                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Amount</th>
+                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Delivered</th>
+                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Date</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for order in vendor_orders %}
+              <tr data-order-row-id="{{ order.id }}">
+                <td>
+                  <div class="d-flex px-2 py-1">
+                    <div class="d-flex flex-column justify-content-center">
+                      <h6 class="mb-0 text-sm">#ORD-{{ order.id }}</h6>
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  <div class="d-flex px-2 py-1">
+                    <div class="d-flex flex-column justify-content-center">
+                      <h6 class="mb-0 text-sm">{{ order.product.name }}</h6>
+                      <p class="text-xs text-secondary mb-0">VIN: {{ order.product.vin }}</p>
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  <div class="d-flex px-2 py-1">
+                    {% if order.buyer.account_registration.profile_picture %}
+                    <div>
+                      <img src="{{ order.buyer.account_registration.profile_picture.url }}" class="avatar avatar-sm me-3" style="object-fit: cover;" alt="Buyer photo">
+                    </div>
+                    {% else %}
+                    <div>
+                      <img src="{% static 'vendors/img/team-2.jpg' %}" class="avatar avatar-sm me-3" style="object-fit: cover;" alt="Buyer photo">
+                    </div>
+                    {% endif %}
+                    <div class="d-flex flex-column justify-content-center">
+                      <h6 class="mb-0 text-sm">
+                        {% if order.buyer.get_full_name %}
+                          {{ order.buyer.get_full_name }}
+                        {% else %}
+                          {{ order.buyer.username }}
+                        {% endif %}
+                      </h6>
+                      <p class="text-xs text-secondary mb-0">{{ order.buyer.email|default:"-" }}</p>
+                    </div>
+                  </div>
+                </td>
+                <td class="align-middle text-center text-sm">
+                  <span class="text-xs font-weight-bold">{{ order.buyer.account_registration.phone_number|default:"-" }}</span>
+                </td>
+                <td class="align-middle text-center text-sm">
+                  <span class="text-xs font-weight-bold">{{ order.quantity }}</span>
+                </td>
+                <td class="align-middle text-center text-sm">
+                  <span class="text-xs font-weight-bold">{{ order.total_price|number_separator }} birr</span>
+                </td>
+                <td class="align-middle text-center">
+                  <form id="deliveredForm{{ order.id }}" method="post" action="{% url 'vendor_order_delivered_update' order.id %}" class="d-inline-block m-0">
+                    {% csrf_token %}
+                    {% if order.is_delivered %}
+                    <span class="text-success text-xs font-weight-bold">
+                      <i class="fa fa-check me-1" aria-hidden="true"></i>Delivered
+                    </span>
+                    {% else %}
+                    <input type="hidden" name="is_delivered" value="1">
+                    <button
+                      type="button"
+                      class="btn btn-success btn-sm mb-0 py-1 px-2 text-xs"
+                      data-bs-toggle="modal"
+                      data-bs-target="#confirmDeliveredModal"
+                      data-form-id="deliveredForm{{ order.id }}">
+                      Mark Delivered
+                    </button>
+                    {% endif %}
+                  </form>
+                  {% if not order.is_delivered %}
+                  <form id="unacceptForm{{ order.id }}" method="post" action="{% url 'vendor_order_unaccept' order.id %}" class="d-inline-block m-0">
+                    {% csrf_token %}
+                    <button
+                      type="button"
+                      class="btn btn-danger btn-sm mb-0 py-1 px-2 text-xs"
+                      data-bs-toggle="modal"
+                      data-bs-target="#confirmUnacceptModal"
+                      data-form-id="unacceptForm{{ order.id }}">
+                      Unaccept Order
+                    </button>
+                  </form>
+                  {% endif %}
+                </td>
+                <td class="align-middle text-center">
+                  <span class="text-secondary text-xs font-weight-bold">{{ order.created_at|date:"M d, Y" }}</span>
+                </td>
+              </tr>
+              {% empty %}
+              <tr id="ordersEmptyRow">
+                <td colspan="8" class="text-center text-sm text-muted py-4">No orders for your products yet.</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+      {% if is_paginated %}
+      <div class="card-footer pt-3 pb-2">
+        <nav aria-label="Page navigation">
+          <ul class="pagination justify-content-center mb-0">
+            {% if page_obj.has_previous %}
+            <li class="page-item">
+              <a class="page-link" href="?page={{ page_obj.previous_page_number }}">
+                <i class="fa fa-angle-left"></i>
+              </a>
+            </li>
+            {% else %}
+            <li class="page-item disabled">
+              <span class="page-link"><i class="fa fa-angle-left"></i></span>
+            </li>
+            {% endif %}
+
+            <li class="page-item active">
+              <span class="page-link">{{ page_obj.number }}</span>
+            </li>
+
+            {% if page_obj.has_next %}
+            <li class="page-item">
+              <a class="page-link" href="?page={{ page_obj.next_page_number }}">
+                <i class="fa fa-angle-right"></i>
+              </a>
+            </li>
+            {% else %}
+            <li class="page-item disabled">
+              <span class="page-link"><i class="fa fa-angle-right"></i></span>
+            </li>
+            {% endif %}
+          </ul>
+        </nav>
+      </div>
+      {% endif %}
     </div>
-  </main>
+  </div>
+</div>
+
+<div class="modal fade" id="confirmDeliveredModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h6 class="modal-title mb-0">Confirm Delivery</h6>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        Mark this order as delivered?
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-light btn-sm mb-0" data-bs-dismiss="modal">No</button>
+        <button type="button" id="confirmDeliveredBtn" class="btn btn-success btn-sm mb-0">Yes, Mark Delivered</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="confirmUnacceptModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h6 class="modal-title mb-0">Confirm Unaccept</h6>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        Unaccept this order? This will remove it and restore stock.
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-light btn-sm mb-0" data-bs-dismiss="modal">No</button>
+        <button type="button" id="confirmUnacceptBtn" class="btn btn-danger btn-sm mb-0">Yes, Unaccept</button>
+      </div>
+    </div>
+  </div>
+</div>
 {% endblock %}
 
 {% block vendor_extra_js %}
-<script src="{% static 'vendors/Js/index.js' %}"></script>
+<script>
+  (function () {
+    var deliveredModal = document.getElementById('confirmDeliveredModal');
+    var unacceptModal = document.getElementById('confirmUnacceptModal');
+    var deliveredFormId = '';
+    var unacceptFormId = '';
+
+    if (deliveredModal) {
+      deliveredModal.addEventListener('show.bs.modal', function (event) {
+        var trigger = event.relatedTarget;
+        deliveredFormId = trigger ? trigger.getAttribute('data-form-id') : '';
+      });
+    }
+
+    if (unacceptModal) {
+      unacceptModal.addEventListener('show.bs.modal', function (event) {
+        var trigger = event.relatedTarget;
+        unacceptFormId = trigger ? trigger.getAttribute('data-form-id') : '';
+      });
+    }
+
+    function showToast(message, isError) {
+      if (typeof Toastify === 'undefined') return;
+      Toastify({
+        text: message,
+        duration: 2800,
+        close: true,
+        gravity: 'bottom',
+        position: 'center',
+        stopOnFocus: true,
+        style: {
+          background: isError
+            ? 'linear-gradient(to right, #ea0606, #c82333)'
+            : 'linear-gradient(to right, #17ad37, #1f9d55)'
+        }
+      }).showToast();
+    }
+
+    function hideModal(modalEl) {
+      if (!modalEl || typeof bootstrap === 'undefined') return;
+      var modalInstance = bootstrap.Modal.getInstance(modalEl);
+      if (modalInstance) modalInstance.hide();
+    }
+
+    function ensureEmptyStateRow() {
+      var tbody = document.querySelector('table tbody');
+      if (!tbody) return;
+      var rows = tbody.querySelectorAll('tr[data-order-row-id]');
+      var emptyRow = document.getElementById('ordersEmptyRow');
+      if (rows.length === 0 && !emptyRow) {
+        tbody.insertAdjacentHTML(
+          'beforeend',
+          '<tr id="ordersEmptyRow"><td colspan="8" class="text-center text-sm text-muted py-4">No orders for your products yet.</td></tr>'
+        );
+      } else if (rows.length > 0 && emptyRow) {
+        emptyRow.remove();
+      }
+    }
+
+    function updateOrdersCountDisplay() {
+      var totalText = document.getElementById('ordersTotalText');
+      if (!totalText) return;
+      var rows = document.querySelectorAll('tr[data-order-row-id]');
+      totalText.textContent = rows.length + ' orders';
+    }
+
+    async function submitAction(formId, modalEl, onSuccess) {
+      if (!formId) return;
+      var form = document.getElementById(formId);
+      if (!form) return;
+
+      try {
+        var response = await fetch(form.action, {
+          method: 'POST',
+          headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+          },
+          body: new FormData(form)
+        });
+
+        var data = {};
+        try {
+          data = await response.json();
+        } catch (e) {
+          data = {};
+        }
+
+        if (!response.ok || !data.ok) {
+          throw new Error(data.message || 'Request failed.');
+        }
+
+        hideModal(modalEl);
+        if (typeof onSuccess === 'function') onSuccess(data);
+        showToast(data.message || 'Done.', false);
+      } catch (error) {
+        showToast(error.message || 'Action failed.', true);
+      }
+    }
+
+    var confirmDeliveredBtn = document.getElementById('confirmDeliveredBtn');
+    if (confirmDeliveredBtn) {
+      confirmDeliveredBtn.addEventListener('click', function () {
+        var currentFormId = deliveredFormId;
+        submitAction(currentFormId, deliveredModal, function () {
+          var deliveredForm = document.getElementById(currentFormId);
+          if (!deliveredForm) return;
+
+          deliveredForm.innerHTML =
+            '<span class="text-success text-xs font-weight-bold"><i class="fa fa-check me-1" aria-hidden="true"></i>Delivered</span>';
+
+          var orderId = currentFormId.replace('deliveredForm', '');
+          var unacceptForm = document.getElementById('unacceptForm' + orderId);
+          if (unacceptForm) unacceptForm.remove();
+        });
+      });
+    }
+
+    var confirmUnacceptBtn = document.getElementById('confirmUnacceptBtn');
+    if (confirmUnacceptBtn) {
+      confirmUnacceptBtn.addEventListener('click', function () {
+        var currentFormId = unacceptFormId;
+        submitAction(currentFormId, unacceptModal, function () {
+          var orderId = currentFormId.replace('unacceptForm', '');
+          var row = document.querySelector('tr[data-order-row-id="' + orderId + '"]');
+          if (row) row.remove();
+          updateOrdersCountDisplay();
+          ensureEmptyStateRow();
+        });
+      });
+    }
+  })();
+</script>
 {% endblock %}

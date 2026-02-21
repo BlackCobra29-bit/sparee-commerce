@@ -3651,8 +3651,8 @@ fieldset:disabled .btn {
 
 .btn-success {
   color: #000;
-  background-color: #82d616;
-  border-color: #82d616;
+  background-color: #088c16;
+  border-color: #088c16;
 }
 
 .btn-success:hover {
@@ -4045,8 +4045,8 @@ fieldset:disabled .btn {
 }
 
 .btn-outline-success {
-  color: #82d616;
-  border-color: #82d616;
+    color: #141727;
+    border-color: #67748e;
 }
 
 .btn-outline-success:hover {
@@ -5279,7 +5279,7 @@ fieldset:disabled .btn {
 
 .navbar-light .navbar-nav .show>.nav-link,
 .navbar-light .navbar-nav .nav-link.active {
-  color: rgba(52, 71, 103, 0.9);
+  color: #141727;
 }
 
 .navbar-light .navbar-toggler {

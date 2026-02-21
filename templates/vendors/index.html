@@ -36,9 +36,9 @@
                   <div class="numbers">
                     <p class="text-sm mb-0 text-capitalize font-weight-bold">Pending Orders</p>
                     <h5 class="font-weight-bolder mb-0">
-                      18
+                      {{ pending_orders_count }}
                     </h5>
-                    <p class="text-xs text-secondary mb-0 mt-1">Confirm / pack</p>
+                    <p class="text-xs text-secondary mb-0 mt-1">Not delivered orders</p>
                   </div>
                 </div>
                 <div class="col-4 text-end">
@@ -83,7 +83,7 @@
                   <div class="numbers">
                     <p class="text-sm mb-0 text-capitalize font-weight-bold">Total Items Sold</p>
                     <h5 class="font-weight-bolder mb-0">
-                      5,120
+                      {{ delivered_orders_quantity }}
                       <span class="text-info text-sm font-weight-bolder">Items</span>
                     </h5>
                     <p class="text-xs text-secondary mb-0 mt-1">Period: <b>All time</b></p>
@@ -100,9 +100,92 @@
         </div>
   
       </div>
+
+      <div class="row mt-4">
+        <div class="col-lg-7 mb-4">
+          <div class="card h-100">
+            <div class="card-header pb-0">
+              <h6 class="mb-1">Products Quantity Added Monthly</h6>
+              <p class="text-sm mb-0 text-secondary">Last 6 months</p>
+            </div>
+            <div class="card-body">
+              <div id="products-added-monthly-chart" style="height: 320px; width: 100%;"></div>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-5 mb-4">
+          <div class="card h-100">
+            <div class="card-header pb-0">
+              <h6 class="mb-1">Products Delivered Monthly</h6>
+              <p class="text-sm mb-0 text-secondary">Delivered quantities (last 6 months)</p>
+            </div>
+            <div class="card-body">
+              <div id="products-delivered-monthly-chart" style="height: 320px; width: 100%;"></div>
+            </div>
+          </div>
+        </div>
+      </div>
       
 {% endblock %}
 
 {% block vendor_extra_js %}
-<script src="{% static 'vendors/Js/index.js' %}"></script>
+{{ monthly_added_chart_data|json_script:"monthly-added-chart-data" }}
+{{ monthly_delivered_chart_data|json_script:"monthly-delivered-chart-data" }}
+<script src="https://cdn.canvasjs.com/canvasjs.min.js"></script>
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    if (typeof CanvasJS === "undefined") return;
+
+    var addedData = JSON.parse(
+      document.getElementById("monthly-added-chart-data")?.textContent || "[]"
+    );
+    var deliveredData = JSON.parse(
+      document.getElementById("monthly-delivered-chart-data")?.textContent || "[]"
+    );
+
+    var addedChart = new CanvasJS.Chart("products-added-monthly-chart", {
+      animationEnabled: true,
+      backgroundColor: "transparent",
+      axisY: {
+        title: "Quantity Added",
+        includeZero: true,
+      },
+      toolTip: {
+        shared: true,
+      },
+      data: [
+        {
+          type: "column",
+          color: "#5e72e4",
+          yValueFormatString: "#,##0",
+          dataPoints: addedData,
+        },
+      ],
+    });
+
+    var deliveredChart = new CanvasJS.Chart("products-delivered-monthly-chart", {
+      animationEnabled: true,
+      backgroundColor: "transparent",
+      axisY: {
+        title: "Delivered Quantity",
+        includeZero: true,
+      },
+      toolTip: {
+        shared: true,
+      },
+      data: [
+        {
+          type: "splineArea",
+          color: "#2dce89",
+          markerSize: 6,
+          yValueFormatString: "#,##0",
+          dataPoints: deliveredData,
+        },
+      ],
+    });
+
+    addedChart.render();
+    deliveredChart.render();
+  });
+</script>
 {% endblock %}

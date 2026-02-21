@@ -158,6 +158,15 @@
 
 	          </ul>
           <ul class="navbar-nav ms-lg-auto mb-2 mb-lg-0 align-items-lg-center">
+            {% if request.user.account_registration.account_type == 'buyer' %}
+            <li class="nav-item me-lg-3">
+              <button class="btn btn-outline-success btn-sm mb-0 d-flex align-items-center" id="cartModalBtn" data-bs-toggle="modal" data-bs-target="#cartModal" type="button">
+                <i class="fa fa-shopping-cart me-1"></i>
+                <span>Cart</span>
+                <span class="badge bg-danger ms-2" id="cartCount">0</span>
+              </button>
+            </li>
+            {% endif %}
 	            <li class="nav-item me-lg-2">
 	              <a href="../vendor/profile.html" class="nav-link text-body font-weight-bold d-flex align-items-center px-0">
                   {% if request.user.account_registration.profile_picture %}
@@ -168,58 +177,18 @@
 	                <span>{% if request.user.get_full_name %}{{ request.user.get_full_name }}{% else %}{{ request.user.username }}{% endif %}</span>
 	              </a>
 	            </li>
+            {% if request.user.account_registration.account_type == 'seller' %}
             <li class="nav-item me-lg-3">
-              <a href="../vendor/settings.html" class="nav-link text-body p-0" title="Settings">
-                <i class="fa fa-cog cursor-pointer"></i>
-              </a>
-            </li>
-            <li class="nav-item dropdown me-lg-3">
-              <a href="javascript:;" class="nav-link text-body p-0 position-relative" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+              <a href="{% url 'vendor_orders' %}" class="nav-link text-body p-0 position-relative" title="View orders">
                 <i class="fa fa-bell cursor-pointer"></i>
-                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger px-1 py-0" style="font-size: 0.6rem; min-width: 1rem;">3</span>
+                {% if seller_notification_count > 0 %}
+                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger px-1 py-0" style="font-size: 0.6rem; min-width: 1rem;">
+                  {% if seller_notification_count > 99 %}99+{% else %}{{ seller_notification_count }}{% endif %}
+                </span>
+                {% endif %}
               </a>
-              <ul class="dropdown-menu dropdown-menu-end px-2 py-3 me-sm-n4" aria-labelledby="dropdownMenuButton">
-                <li class="mb-2">
-                  <a class="dropdown-item border-radius-md" href="{% url 'vendor_orders' %}">
-                    <div class="d-flex py-1">
-                      <div class="avatar avatar-sm bg-gradient-success me-3 my-auto d-flex align-items-center justify-content-center">
-                        <i class="ni ni-cart text-white"></i>
-                      </div>
-                      <div class="d-flex flex-column justify-content-center">
-                        <h6 class="text-sm font-weight-normal mb-1"><span class="font-weight-bold">New order</span> waiting for confirmation</h6>
-                        <p class="text-xs text-secondary mb-0"><i class="fa fa-clock me-1"></i> 5 minutes ago</p>
-                      </div>
-                    </div>
-                  </a>
-                </li>
-                <li class="mb-2">
-                  <a class="dropdown-item border-radius-md" href="payments.html">
-                    <div class="d-flex py-1">
-                      <div class="avatar avatar-sm bg-gradient-success me-3 my-auto d-flex align-items-center justify-content-center">
-                        <i class="fas fa-money-bill-wave text-white"></i>
-                      </div>
-                      <div class="d-flex flex-column justify-content-center">
-                        <h6 class="text-sm font-weight-normal mb-1"><span class="font-weight-bold">Payout processed</span></h6>
-                        <p class="text-xs text-secondary mb-0"><i class="fa fa-clock me-1"></i> 2 hours ago</p>
-                      </div>
-                    </div>
-                  </a>
-                </li>
-                <li>
-                  <a class="dropdown-item border-radius-md" href="../vendor/payouts.html">
-                    <div class="d-flex py-1">
-                      <div class="avatar avatar-sm bg-gradient-info me-3 my-auto d-flex align-items-center justify-content-center">
-                        <i class="ni ni-money-coins text-white"></i>
-                      </div>
-                      <div class="d-flex flex-column justify-content-center">
-                        <h6 class="text-sm font-weight-normal mb-1"><span class="font-weight-bold">Payout processed</span> successfully</h6>
-                        <p class="text-xs text-secondary mb-0"><i class="fa fa-clock me-1"></i> 2 days ago</p>
-                      </div>
-                    </div>
-                  </a>
-                </li>
-              </ul>
             </li>
+            {% endif %}
             <li class="nav-item">
               <button id="logoutBtn" class="btn btn-outline-danger btn-sm mb-0" type="button" title="Sign out">Sign out</button>
               <form id="logoutForm" method="post" action="{% url 'logout' %}" class="d-none">
@@ -228,8 +197,57 @@
             </li>
           </ul>
         </div>
-      </div>
+    </div>
     </nav>
+    {% if request.user.account_registration.account_type == 'buyer' %}
+    <div class="modal fade" id="cartModal" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title fw-bold"><i class="fa fa-shopping-cart me-2"></i>Your Cart</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <div class="table-responsive">
+              <table class="table table-hover align-middle mb-0">
+                <thead>
+                  <tr>
+                    <th>Seller</th>
+                    <th>Item</th>
+                    <th class="text-end">Price</th>
+                    <th class="text-center">Qty</th>
+                    <th class="text-end">Total</th>
+                    <th class="text-end" style="width:56px;">Remove</th>
+                  </tr>
+                </thead>
+                <tbody id="cartTable"></tbody>
+              </table>
+            </div>
+            <div class="d-flex align-items-center justify-content-between mt-3">
+              <div class="text-sm text-muted">Total amount of money you will cost.</div>
+              <div class="text-end">
+                <div class="text-sm text-muted">Subtotal</div>
+                <div class="h5 mb-0" id="cartSubtotal">0.00 ETB</div>
+              </div>
+            </div>
+            <hr class="my-3">
+            <div class="d-flex flex-wrap">
+              <button class="btn btn-outline-secondary me-2 mb-2" type="button" onclick="clearCart()">
+                <i class="fa fa-trash me-2"></i>Clear
+              </button>
+              <button
+                type="button"
+                class="btn btn-success ms-auto mb-2"
+                id="submitOrderBtn"
+                data-order-url="{% url 'order_create' %}">
+                <i class="fa fa-lock me-2"></i>Submit Order
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endif %}
     <div class="mx-4 mt-2 px-1">
       <nav aria-label="breadcrumb">
         <ol class="breadcrumb bg-transparent mb-0 pb-0 pt-1 px-0">
@@ -388,6 +406,14 @@
   <!-- Control Center for Soft Dashboard: parallax effects, scripts for the example pages etc -->
   <script src="{% static 'vendors/js/soft-ui-dashboard.min.js' %}"></script>
   <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+  {% if request.user.account_registration.account_type == 'buyer' %}
+  {% if shop_products %}
+  {{ shop_products|json_script:"shop-products-data" }}
+  {% else %}
+  <script id="shop-products-data" type="application/json">[]</script>
+  {% endif %}
+  <script src="{% static 'js/index.js' %}?v=20260219-2"></script>
+  {% endif %}
   <script>
   document.addEventListener('DOMContentLoaded', function () {
     {% for message in messages %}

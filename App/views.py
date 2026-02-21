@@ -1,4 +1,5 @@
 import json
+from datetime import date
 
 from django.contrib import messages
 from django.contrib.auth import login, logout
@@ -10,7 +11,8 @@ from django.shortcuts import get_object_or_404
 from django.shortcuts import redirect
 from django.db import transaction
 from django.db.models import F, Sum
-from django.db.models.functions import Coalesce
+from django.db.models.functions import Coalesce, TruncMonth
+from django.utils import timezone
 from django.template.loader import render_to_string
 from django.urls import reverse_lazy
 from django.views.generic import FormView, TemplateView, View
@@ -25,6 +27,66 @@ def _redirect_superuser_home(request):
         messages.error(request, "You are loggd in as a system admin")
         return redirect("home")
     return None
+
+
+def _build_shop_products():
+    products = (
+        Product.objects.filter(is_active=True, current_stock__gt=0)
+        .select_related("vendor", "vendor__account_registration")
+        .only(
+            "vin",
+            "name",
+            "category",
+            "price",
+            "current_stock",
+            "description",
+            "product_image",
+            "vendor__username",
+            "vendor__first_name",
+            "vendor__last_name",
+            "vendor__account_registration__profile_picture",
+        )
+        .order_by("-created_at")
+    )
+
+    shop_products = []
+    for product in products:
+        image_url = product.product_image.url if product.product_image else ""
+        stock = product.current_stock if product.current_stock is not None else 0
+        seller_name = product.vendor.get_full_name().strip() or product.vendor.username
+        seller_photo = ""
+        try:
+            account = product.vendor.account_registration
+            if account and account.profile_picture:
+                seller_photo = account.profile_picture.url
+        except AccountRegistration.DoesNotExist:
+            seller_photo = ""
+
+        stock_badges = []
+        if stock <= 5:
+            stock_badges.append("Low Stock")
+
+        shop_products.append(
+            {
+                "sku": product.vin,
+                "name": product.name,
+                "category": product.get_category_display(),
+                "brand": seller_name,
+                "seller_name": seller_name,
+                "seller_photo": seller_photo,
+                "condition": "New",
+                "rating": 4.5,
+                "reviews": 0,
+                "price": float(product.price),
+                "stock": stock,
+                "badges": stock_badges,
+                "oem": product.vin,
+                "img": image_url,
+                "desc": product.description,
+            }
+        )
+
+    return shop_products
 
 
 class HomeView(TemplateView):
@@ -47,64 +109,11 @@ class HomeView(TemplateView):
             if account and account.profile_picture:
                 nav_user_photo_url = account.profile_picture.url
 
-        products = (
-            Product.objects.filter(is_active=True, current_stock__gt=0)
-            .select_related("vendor", "vendor__account_registration")
-            .only(
-                "vin",
-                "name",
-                "category",
-                "price",
-                "current_stock",
-                "description",
-                "product_image",
-                "vendor__username",
-                "vendor__first_name",
-                "vendor__last_name",
-                "vendor__account_registration__profile_picture",
-            )
-            .order_by("-created_at")
-        )
+        shop_products = _build_shop_products()
 
         category_options = []
         for value, label in Product.CATEGORY_CHOICES:
             category_options.append({"value": label, "label": label})
-
-        shop_products = []
-        for product in products:
-            image_url = product.product_image.url if product.product_image else ""
-            stock = product.current_stock if product.current_stock is not None else 0
-            seller_name = product.vendor.get_full_name().strip() or product.vendor.username
-            seller_photo = ""
-            try:
-                account = product.vendor.account_registration
-                if account and account.profile_picture:
-                    seller_photo = account.profile_picture.url
-            except AccountRegistration.DoesNotExist:
-                seller_photo = ""
-            stock_badges = []
-            if stock <= 5:
-                stock_badges.append("Low Stock")
-
-            shop_products.append(
-                {
-                    "sku": product.vin,
-                    "name": product.name,
-                    "category": product.get_category_display(),
-                    "brand": seller_name,
-                    "seller_name": seller_name,
-                    "seller_photo": seller_photo,
-                    "condition": "New",
-                    "rating": 4.5,
-                    "reviews": 0,
-                    "price": float(product.price),
-                    "stock": stock,
-                    "badges": stock_badges,
-                    "oem": product.vin,
-                    "img": image_url,
-                    "desc": product.description,
-                }
-            )
 
         context["shop_products"] = shop_products
         context["shop_category_options"] = category_options
@@ -172,15 +181,168 @@ class VendorDashboardView(SellerAccountRequiredMixin, VendorAccessMixin, Templat
         )["total"]
         context["total_products_count"] = active_products.count()
         context["product_types_count"] = active_products.values("category").distinct().count()
+        context["pending_orders_count"] = Order.objects.filter(
+            product__vendor_id=self.request.user.id,
+            is_delivered=False,
+        ).count()
+        context["delivered_orders_quantity"] = Order.objects.filter(
+            product__vendor_id=self.request.user.id,
+            is_delivered=True,
+        ).aggregate(total=Coalesce(Sum("quantity"), 0))["total"]
         context["low_stock_count"] = active_products.filter(
             current_stock__isnull=False,
             current_stock__lte=F("reorder_level"),
         ).count()
+
+        # Build a continuous 6-month window (oldest -> newest).
+        today = timezone.localdate()
+        current_month_start = today.replace(day=1)
+        month_starts = []
+        for offset in range(-5, 1):
+            month_index = (current_month_start.year * 12 + current_month_start.month - 1) + offset
+            year = month_index // 12
+            month = (month_index % 12) + 1
+            month_starts.append(date(year, month, 1))
+
+        next_month_index = current_month_start.year * 12 + current_month_start.month
+        next_month_start = date((next_month_index // 12), (next_month_index % 12) + 1, 1)
+
+        added_by_month = {
+            row["month"].date(): int(row["total_quantity"] or 0)
+            for row in (
+                active_products.filter(
+                    created_at__date__gte=month_starts[0],
+                    created_at__date__lt=next_month_start,
+                )
+                .annotate(month=TruncMonth("created_at"))
+                .values("month")
+                .annotate(total_quantity=Sum("initial_stock"))
+            )
+        }
+        delivered_by_month = {
+            row["month"].date(): int(row["total_quantity"] or 0)
+            for row in (
+                Order.objects.filter(
+                    product__vendor_id=self.request.user.id,
+                    is_delivered=True,
+                    created_at__date__gte=month_starts[0],
+                    created_at__date__lt=next_month_start,
+                )
+                .annotate(month=TruncMonth("created_at"))
+                .values("month")
+                .annotate(total_quantity=Sum("quantity"))
+            )
+        }
+
+        monthly_added_chart_data = []
+        monthly_delivered_chart_data = []
+        for month_start in month_starts:
+            monthly_added_chart_data.append(
+                {"label": month_start.strftime("%b %Y"), "y": added_by_month.get(month_start, 0)}
+            )
+            monthly_delivered_chart_data.append(
+                {
+                    "label": month_start.strftime("%b %Y"),
+                    "y": delivered_by_month.get(month_start, 0),
+                }
+            )
+
+        context["monthly_added_chart_data"] = monthly_added_chart_data
+        context["monthly_delivered_chart_data"] = monthly_delivered_chart_data
         return context
 
 
 class VendorOrdersView(SellerAccountRequiredMixin, VendorAccessMixin, TemplateView):
     template_name = "vendors/orders.html"
+    paginate_by = 20
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        orders_qs = (
+            Order.objects.filter(product__vendor_id=self.request.user.id)
+            .select_related("buyer", "buyer__account_registration", "product")
+            .only(
+                "id",
+                "quantity",
+                "total_price",
+                "is_delivered",
+                "created_at",
+                "buyer__username",
+                "buyer__first_name",
+                "buyer__last_name",
+                "buyer__email",
+                "buyer__account_registration__phone_number",
+                "buyer__account_registration__profile_picture",
+                "product__name",
+                "product__vin",
+            )
+            .order_by("-created_at")
+        )
+        paginator = Paginator(orders_qs, self.paginate_by)
+        page_obj = paginator.get_page(self.request.GET.get("page"))
+
+        context["vendor_orders"] = page_obj.object_list
+        context["orders_total"] = paginator.count
+        context["page_obj"] = page_obj
+        context["is_paginated"] = page_obj.has_other_pages()
+        return context
+
+
+class VendorOrderDeliveredUpdateView(SellerAccountRequiredMixin, VendorAccessMixin, View):
+    http_method_names = ["post"]
+
+    def post(self, request, *args, **kwargs):
+        order = get_object_or_404(
+            Order.objects.only("id", "is_delivered"),
+            pk=kwargs.get("pk"),
+            product__vendor_id=request.user.id,
+        )
+        order.is_delivered = request.POST.get("is_delivered") == "1"
+        order.save(update_fields=["is_delivered"])
+        if request.headers.get("x-requested-with") == "XMLHttpRequest":
+            return JsonResponse(
+                {
+                    "ok": True,
+                    "message": "Order marked as delivered.",
+                    "order_id": order.id,
+                    "is_delivered": order.is_delivered,
+                }
+            )
+        return redirect("vendor_orders")
+
+
+class VendorOrderUnacceptView(SellerAccountRequiredMixin, VendorAccessMixin, View):
+    http_method_names = ["post"]
+
+    def post(self, request, *args, **kwargs):
+        order_id = kwargs.get("pk")
+        order = get_object_or_404(
+            Order.objects.select_related("product").only("id", "quantity", "product_id"),
+            pk=order_id,
+            product__vendor_id=request.user.id,
+        )
+
+        with transaction.atomic():
+            product = (
+                Product.objects.select_for_update()
+                .only("id", "current_stock", "initial_stock")
+                .get(pk=order.product_id)
+            )
+            current_stock = (
+                product.current_stock if product.current_stock is not None else product.initial_stock
+            )
+            Product.objects.filter(pk=product.pk).update(current_stock=current_stock + order.quantity)
+            order.delete()
+
+        if request.headers.get("x-requested-with") == "XMLHttpRequest":
+            return JsonResponse(
+                {
+                    "ok": True,
+                    "message": "Order unaccepted successfully.",
+                    "order_id": order_id,
+                }
+            )
+        return redirect("vendor_orders")
 
 
 class VendorProductsView(SellerAccountRequiredMixin, VendorAccessMixin, TemplateView):
@@ -268,6 +430,7 @@ class BuyerDashboardView(BuyerAccountRequiredMixin, VendorAccessMixin, TemplateV
                 "id",
                 "quantity",
                 "total_price",
+                "is_delivered",
                 "created_at",
                 "product__name",
                 "product__vin",
@@ -301,6 +464,7 @@ class BuyerDashboardView(BuyerAccountRequiredMixin, VendorAccessMixin, TemplateV
 
             buyer_orders.append(
                 {
+                    "id": order.id,
                     "seller_name": seller_name,
                     "seller_email": seller.email or "-",
                     "seller_phone": seller_phone,
@@ -309,6 +473,7 @@ class BuyerDashboardView(BuyerAccountRequiredMixin, VendorAccessMixin, TemplateV
                     "quantity": order.quantity,
                     "total_price": order.total_price,
                     "vin": order.product.vin,
+                    "is_delivered": order.is_delivered,
                 }
             )
 
@@ -316,7 +481,33 @@ class BuyerDashboardView(BuyerAccountRequiredMixin, VendorAccessMixin, TemplateV
         context["page_obj"] = page_obj
         context["is_paginated"] = page_obj.has_other_pages()
         context["orders_total"] = paginator.count
+        context["shop_products"] = _build_shop_products()
         return context
+
+
+class BuyerOrderCancelView(BuyerAccountRequiredMixin, VendorAccessMixin, View):
+    http_method_names = ["post"]
+
+    def post(self, request, *args, **kwargs):
+        order = get_object_or_404(
+            Order.objects.select_related("product").only("id", "quantity", "product_id"),
+            pk=kwargs.get("pk"),
+            buyer_id=request.user.id,
+        )
+
+        with transaction.atomic():
+            product = (
+                Product.objects.select_for_update()
+                .only("id", "current_stock", "initial_stock")
+                .get(pk=order.product_id)
+            )
+            current_stock = (
+                product.current_stock if product.current_stock is not None else product.initial_stock
+            )
+            Product.objects.filter(pk=product.pk).update(current_stock=current_stock + order.quantity)
+            order.delete()
+
+        return JsonResponse({"ok": True, "message": "Order canceled successfully."})
 
 
 class OrderCreateView(View):

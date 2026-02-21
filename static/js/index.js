@@ -538,18 +538,42 @@ function renderCartBadge() {
 
 function renderCartTable() {
   const tbody = $("#cartTable");
+  if (!tbody.length) return;
   tbody.empty();
 
-  const previousCount = cart.length;
-  cart = cart.filter((item) => !!bySku(item.sku));
-  if (cart.length !== previousCount) {
-    saveLS(LS.cart, cart);
+  if (PRODUCTS.length > 0) {
+    const previousCount = cart.length;
+    cart = cart.filter((item) => !!bySku(item.sku));
+    if (cart.length !== previousCount) {
+      saveLS(LS.cart, cart);
+    }
   }
 
   let subtotal = 0;
   cart.forEach((item) => {
     const p = bySku(item.sku);
-    if (!p) return;
+    if (!p) {
+      tbody.append(`
+          <tr class="cart-row">
+            <td class="ps-3">Unknown seller</td>
+            <td>
+              <div class="cart-item-name">Unknown product</div>
+              <div class="small"><span class="kbd">VIN: ${escapeHtml(item.sku || "-")}</span></div>
+            </td>
+            <td class="text-end fw-semibold">-</td>
+            <td class="text-center">${Math.max(1, Number(item.qty) || 1)}</td>
+            <td class="text-end fw-semibold">-</td>
+            <td class="text-end pe-3">
+              <button class="btn btn-outline-light btn-sm cart-remove-btn" onclick="removeFromCart('${escapeHtml(
+                item.sku || ""
+              )}')" aria-label="Remove item from cart">
+                <i class="fas fa-times"></i>
+              </button>
+            </td>
+          </tr>
+        `);
+      return;
+    }
     const line = p.price * item.qty;
     subtotal += line;
 
