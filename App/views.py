@@ -207,18 +207,34 @@ class VendorDashboardView(SellerAccountRequiredMixin, VendorAccessMixin, Templat
         next_month_index = current_month_start.year * 12 + current_month_start.month
         next_month_start = date((next_month_index // 12), (next_month_index % 12) + 1, 1)
 
-        added_by_month = {
-            row["month"].date(): int(row["total_quantity"] or 0)
-            for row in (
-                active_products.filter(
-                    created_at__date__gte=month_starts[0],
-                    created_at__date__lt=next_month_start,
-                )
-                .annotate(month=TruncMonth("created_at"))
-                .values("month")
-                .annotate(total_quantity=Sum("initial_stock"))
+        # "Added quantity" = not ordered (current stock) + ordered quantity.
+        added_by_month = {month_start: 0 for month_start in month_starts}
+        added_products = (
+            active_products.filter(
+                created_at__date__gte=month_starts[0],
+                created_at__date__lt=next_month_start,
             )
-        }
+            .annotate(month=TruncMonth("created_at"))
+            .annotate(total_ordered_quantity=Coalesce(Sum("orders__quantity"), 0))
+            .values(
+                "id",
+                "month",
+                "current_stock",
+                "initial_stock",
+                "total_ordered_quantity",
+            )
+        )
+        for row in added_products:
+            month_key = row["month"].date()
+            not_ordered_quantity = (
+                int(row["current_stock"])
+                if row["current_stock"] is not None
+                else int(row["initial_stock"] or 0)
+            )
+            ordered_quantity = int(row["total_ordered_quantity"] or 0)
+            added_by_month[month_key] = added_by_month.get(month_key, 0) + (
+                not_ordered_quantity + ordered_quantity
+            )
         delivered_by_month = {
             row["month"].date(): int(row["total_quantity"] or 0)
             for row in (
@@ -417,70 +433,101 @@ class VendorAnalyticsView(SellerAccountRequiredMixin, VendorAccessMixin, Templat
     template_name = "vendors/analytics.html"
 
 
+def _build_buyer_orders_page_data(user, page_number, page_size):
+    orders_qs = (
+        Order.objects.filter(buyer_id=user.id)
+        .select_related("product__vendor__account_registration")
+        .only(
+            "id",
+            "quantity",
+            "total_price",
+            "is_delivered",
+            "created_at",
+            "product__name",
+            "product__vin",
+            "product__vendor__username",
+            "product__vendor__first_name",
+            "product__vendor__last_name",
+            "product__vendor__email",
+            "product__vendor__account_registration__phone_number",
+            "product__vendor__account_registration__profile_picture",
+        )
+        .order_by("-created_at")
+    )
+    paginator = Paginator(orders_qs, page_size)
+    page_obj = paginator.get_page(page_number)
+
+    buyer_orders = []
+    for order in page_obj.object_list:
+        seller = order.product.vendor
+        seller_name = seller.get_full_name().strip() or seller.username
+        seller_account = getattr(seller, "account_registration", None)
+        seller_phone = seller_account.phone_number if seller_account and seller_account.phone_number else "-"
+        seller_photo_url = (
+            seller_account.profile_picture.url
+            if seller_account and seller_account.profile_picture
+            else ""
+        )
+
+        buyer_orders.append(
+            {
+                "id": order.id,
+                "seller_name": seller_name,
+                "seller_email": seller.email or "-",
+                "seller_phone": seller_phone,
+                "seller_photo_url": seller_photo_url,
+                "product_name": order.product.name,
+                "quantity": order.quantity,
+                "total_price": order.total_price,
+                "vin": order.product.vin,
+                "is_delivered": order.is_delivered,
+            }
+        )
+
+    return {
+        "orders_qs": orders_qs,
+        "paginator": paginator,
+        "page_obj": page_obj,
+        "buyer_orders": buyer_orders,
+    }
+
+
 class BuyerDashboardView(BuyerAccountRequiredMixin, VendorAccessMixin, TemplateView):
     template_name = "vendors/buyer/buyer_dashboard.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        orders_qs = Order.objects.filter(buyer_id=self.request.user.id)
+        delivered_orders_qs = orders_qs.filter(is_delivered=True)
+        pending_orders_count = orders_qs.filter(is_delivered=False).count()
+        delivered_orders_count = delivered_orders_qs.count()
+        total_items_ordered = delivered_orders_qs.aggregate(total=Coalesce(Sum("quantity"), 0))["total"]
+        total_spent_amount = delivered_orders_qs.aggregate(total=Sum("total_price"))["total"] or 0
+        context["orders_total"] = orders_qs.count()
+        context["pending_orders_count"] = pending_orders_count
+        context["delivered_orders_count"] = delivered_orders_count
+        context["total_items_ordered"] = total_items_ordered
+        context["total_spent_amount"] = total_spent_amount
+        context["shop_products"] = _build_shop_products()
+        return context
+
+
+class BuyerOrdersView(BuyerAccountRequiredMixin, VendorAccessMixin, TemplateView):
+    template_name = "vendors/buyer/buyer_order.html"
     paginate_by = 20
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        orders_qs = (
-            Order.objects.filter(buyer_id=self.request.user.id)
-            .select_related("product__vendor__account_registration")
-            .only(
-                "id",
-                "quantity",
-                "total_price",
-                "is_delivered",
-                "created_at",
-                "product__name",
-                "product__vin",
-                "product__vendor__username",
-                "product__vendor__first_name",
-                "product__vendor__last_name",
-                "product__vendor__email",
-                "product__vendor__account_registration__phone_number",
-                "product__vendor__account_registration__profile_picture",
-            )
-            .order_by("-created_at")
+        page_data = _build_buyer_orders_page_data(
+            user=self.request.user,
+            page_number=self.request.GET.get("page"),
+            page_size=self.paginate_by,
         )
-        paginator = Paginator(orders_qs, self.paginate_by)
-        page_obj = paginator.get_page(self.request.GET.get("page"))
 
-        buyer_orders = []
-        for order in page_obj.object_list:
-            seller = order.product.vendor
-            seller_name = seller.get_full_name().strip() or seller.username
-            seller_account = getattr(seller, "account_registration", None)
-            seller_phone = (
-                seller_account.phone_number
-                if seller_account and seller_account.phone_number
-                else "-"
-            )
-            seller_photo_url = (
-                seller_account.profile_picture.url
-                if seller_account and seller_account.profile_picture
-                else ""
-            )
-
-            buyer_orders.append(
-                {
-                    "id": order.id,
-                    "seller_name": seller_name,
-                    "seller_email": seller.email or "-",
-                    "seller_phone": seller_phone,
-                    "seller_photo_url": seller_photo_url,
-                    "product_name": order.product.name,
-                    "quantity": order.quantity,
-                    "total_price": order.total_price,
-                    "vin": order.product.vin,
-                    "is_delivered": order.is_delivered,
-                }
-            )
-
-        context["buyer_orders"] = buyer_orders
-        context["page_obj"] = page_obj
-        context["is_paginated"] = page_obj.has_other_pages()
-        context["orders_total"] = paginator.count
+        context["buyer_orders"] = page_data["buyer_orders"]
+        context["page_obj"] = page_data["page_obj"]
+        context["is_paginated"] = page_data["page_obj"].has_other_pages()
+        context["orders_total"] = page_data["paginator"].count
         context["shop_products"] = _build_shop_products()
         return context
 

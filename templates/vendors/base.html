@@ -63,6 +63,16 @@
       background-image: none !important;
       color: #fff;
     }
+
+    @media (max-width: 991.98px) {
+      .navbar-light .navbar-toggler {
+        border-color: #000;
+      }
+
+      .navbar-light .navbar-toggler-icon {
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%280, 0, 0, 1%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+      }
+    }
   </style>
   {% block vendor_extra_css %}{% endblock %}
 </head>
@@ -124,20 +134,6 @@
                 <span class="nav-link-text ms-1">Products</span>
               </a>
             </li>
-	            <li class="nav-item">
-	              <a class="nav-link d-flex align-items-center{% if current_url_name == 'vendor_analytics' %} active fw-bold{% endif %}" href="{% url 'vendor_analytics' %}" hx-boost="false">
-                <div class="icon icon-shape icon-sm border-radius-md {% if current_url_name == 'vendor_analytics' %}bg-gradient-primary text-white{% else %}bg-white text-dark{% endif %} text-center me-2 d-flex align-items-center justify-content-center">
-                  <svg width="12px" height="12px" viewBox="0 0 42 42" xmlns="http://www.w3.org/2000/svg">
-                    <title>analytics</title>
-                    <g fill="currentColor" fill-rule="nonzero">
-                      <path opacity="0.6" d="M6 36V8c0-2.2 1.8-4 4-4h22c2.2 0 4 1.8 4 4v28H6z"></path>
-                      <path d="M13 30h3V18h-3v12zm6 0h3V14h-3v16zm6 0h3V22h-3v8z"></path>
-                    </g>
-                  </svg>
-                </div>
-                <span class="nav-link-text ms-1">Analytics</span>
-	              </a>
-	            </li>
               {% endif %}
               {% if request.user.account_registration.account_type == 'buyer' %}
               <li class="nav-item">
@@ -154,6 +150,20 @@
                   <span class="nav-link-text ms-1">Dashboard</span>
                 </a>
               </li>
+              <li class="nav-item">
+                <a class="nav-link d-flex align-items-center{% if current_url_name == 'buyer_orders' %} active fw-bold{% endif %}" href="{% url 'buyer_orders' %}" hx-boost="false">
+                  <div class="icon icon-shape icon-sm border-radius-md {% if current_url_name == 'buyer_orders' %}bg-gradient-primary text-white{% else %}bg-white text-dark{% endif %} text-center me-2 d-flex align-items-center justify-content-center">
+                    <svg width="12px" height="12px" viewBox="0 0 42 42" xmlns="http://www.w3.org/2000/svg">
+                      <title>orders</title>
+                      <g fill="currentColor" fill-rule="nonzero">
+                        <path opacity="0.6" d="M12.25,17.5 L8.75,17.5 L8.75,1.75 C8.75,0.78225 9.53225,0 10.5,0 L31.5,0 C32.46775,0 33.25,0.78225 33.25,1.75 L33.25,12.25 L29.75,12.25 L29.75,3.5 L12.25,3.5 L12.25,17.5 Z"></path>
+                        <path d="M40.25,14 L24.5,14 C23.53225,14 22.75,14.78225 22.75,15.75 L22.75,38.5 L19.25,38.5 L19.25,22.75 C19.25,21.78225 18.46775,21 17.5,21 L1.75,21 C0.78225,21 0,21.78225 0,22.75 L0,40.25 C0,41.21775 0.78225,42 1.75,42 L40.25,42 C41.21775,42 42,41.21775 42,40.25 L42,15.75 C42,14.78225 41.21775,14 40.25,14 Z"></path>
+                      </g>
+                    </svg>
+                  </div>
+                  <span class="nav-link-text ms-1">Orders</span>
+                </a>
+              </li>
               {% endif %}
 
 	          </ul>
@@ -167,18 +177,8 @@
               </button>
             </li>
             {% endif %}
-	            <li class="nav-item me-lg-2">
-	              <a href="../vendor/profile.html" class="nav-link text-body font-weight-bold d-flex align-items-center px-0">
-                  {% if request.user.account_registration.profile_picture %}
-	                <img src="{{ request.user.account_registration.profile_picture.url }}" class="avatar avatar-sm me-2 rounded-circle" style="object-fit: cover;" alt="vendor profile photo">
-                  {% else %}
-	                <img src="{% static 'vendors/img/team-2.jpg' %}" class="avatar avatar-sm me-2 rounded-circle" style="object-fit: cover;" alt="vendor profile photo">
-                  {% endif %}
-	                <span>{% if request.user.get_full_name %}{{ request.user.get_full_name }}{% else %}{{ request.user.username }}{% endif %}</span>
-	              </a>
-	            </li>
             {% if request.user.account_registration.account_type == 'seller' %}
-            <li class="nav-item me-lg-3">
+            <li class="nav-item me-lg-3 pe-3">
               <a href="{% url 'vendor_orders' %}" class="nav-link text-body p-0 position-relative" title="View orders">
                 <i class="fa fa-bell cursor-pointer"></i>
                 {% if seller_notification_count > 0 %}
@@ -190,7 +190,7 @@
             </li>
             {% endif %}
             <li class="nav-item">
-              <button id="logoutBtn" class="btn btn-outline-danger btn-sm mb-0" type="button" title="Sign out">Sign out</button>
+              <button id="logoutBtn" class="btn btn-outline-dark btn-sm mb-0" type="button" title="Sign out">Sign out</button>
               <form id="logoutForm" method="post" action="{% url 'logout' %}" class="d-none">
                 {% csrf_token %}
               </form>
@@ -248,19 +248,10 @@
       </div>
     </div>
     {% endif %}
-    <div class="mx-4 mt-2 px-1">
-      <nav aria-label="breadcrumb">
-        <ol class="breadcrumb bg-transparent mb-0 pb-0 pt-1 px-0">
-          <li class="breadcrumb-item text-sm"><a class="opacity-5 text-dark" href="javascript:;">Vendor</a></li>
-          <li class="breadcrumb-item text-sm text-dark active" aria-current="page">{% block vendor_breadcrumb %}Dashboard{% endblock %}</li>
-        </ol>
-        <h6 class="font-weight-bolder mb-0">{% block vendor_heading %}Vendor Dashboard{% endblock %}</h6>
-      </nav>
-    </div>
     {% endwith %}
     <!-- End Navbar -->
   
-        <div class="container-fluid py-4 vendor-page-content">
+<div class="container-fluid pt-6 pb-4 vendor-page-content">
 
 {% block vendor_content %}
 

@@ -1,0 +1,271 @@
+{% extends "vendors/base.html" %}
+{% load static number_format %}
+{% block vendor_extra_css %}
+<style>
+  .seller-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+</style>
+{% endblock %}
+{% block vendor_content %}
+<div class="row">
+  <div class="col-12">
+      <div class="card mb-4">
+      <div class="card-header pb-0">
+        <h6>Buyer Ordered Items</h6>
+        <p id="ordersTotalText" class="text-sm mb-0">Submitted orders ({{ orders_total|number_separator }})</p>
+      </div>
+      <div class="card-body px-0 pt-0 pb-2">
+        <div class="table-responsive p-3">
+          <table class="table table-striped table-hover align-items-center mb-0 w-100">
+            <thead>
+              <tr>
+                <th>Seller</th>
+                <th>Email / Phone</th>
+                <th>Product Name</th>
+                <th>Quantity</th>
+                <th>Total Price</th>
+                <th>VIN</th>
+                <th>Cancel Order</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for order in buyer_orders %}
+              <tr data-order-row-id="{{ order.id }}">
+                <td>
+                  <div class="d-flex align-items-center">
+                    {% if order.seller_photo_url %}
+                    <img class="seller-avatar me-2" src="{{ order.seller_photo_url }}" alt="Seller">
+                    {% else %}
+                    <img class="seller-avatar me-2" src="{% static 'vendors/img/team-2.jpg' %}" alt="Seller">
+                    {% endif %}
+                    {{ order.seller_name }}
+                  </div>
+                </td>
+                <td>{{ order.seller_email }} / {{ order.seller_phone }}</td>
+                <td>{{ order.product_name }}</td>
+                <td>{{ order.quantity|number_separator }}</td>
+                <td>{{ order.total_price|number_separator }} birr</td>
+                <td>{{ order.vin }}</td>
+                <td>
+                  {% if order.is_delivered %}
+                  <span class="text-success text-xs font-weight-bold">
+                    <i class="fa fa-check me-1" aria-hidden="true"></i>Delivered
+                  </span>
+                  {% else %}
+                  <button
+                    type="button"
+                    class="btn btn-sm bg-gradient-danger mb-0 js-cancel-order"
+                    data-cancel-url="{% url 'buyer_order_cancel' order.id %}">
+                    Cancel
+                  </button>
+                  {% endif %}
+                </td>
+              </tr>
+              {% empty %}
+              <tr id="ordersEmptyRow">
+                <td colspan="7" class="text-center text-sm text-muted py-4">No submitted orders yet.</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% if is_paginated %}
+        <div class="px-3 pb-3 d-flex align-items-center justify-content-between flex-wrap">
+          <small class="text-muted mb-2 mb-md-0">
+            Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+          </small>
+          <nav aria-label="Orders pagination">
+            <ul class="pagination pagination-sm mb-0">
+              {% if page_obj.has_previous %}
+              <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a>
+              </li>
+              {% else %}
+              <li class="page-item disabled">
+                <span class="page-link">Previous</span>
+              </li>
+              {% endif %}
+              {% if page_obj.has_next %}
+              <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a>
+              </li>
+              {% else %}
+              <li class="page-item disabled">
+                <span class="page-link">Next</span>
+              </li>
+              {% endif %}
+            </ul>
+          </nav>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="confirmBuyerCancelModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h6 class="modal-title mb-0">Cancel this order?</h6>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        This will permanently remove the order.
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-light btn-sm mb-0" data-bs-dismiss="modal">Keep Order</button>
+        <button type="button" id="confirmBuyerCancelBtn" class="btn btn-danger btn-sm mb-0">Yes, Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block vendor_extra_js %}
+<script>
+  (function () {
+    var pendingCancelBtn = null;
+    var cancelModalEl = document.getElementById('confirmBuyerCancelModal');
+    var confirmCancelBtn = document.getElementById('confirmBuyerCancelBtn');
+
+    function getCookie(name) {
+      var cookies = document.cookie ? document.cookie.split(';') : [];
+      for (var i = 0; i < cookies.length; i++) {
+        var cookie = cookies[i].trim();
+        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+          return decodeURIComponent(cookie.substring(name.length + 1));
+        }
+      }
+      return null;
+    }
+
+    function showConfirmModal() {
+      if (!cancelModalEl) return false;
+      if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+        bootstrap.Modal.getOrCreateInstance(cancelModalEl).show();
+        return true;
+      }
+      if (typeof window.jQuery !== 'undefined' && window.jQuery.fn && window.jQuery.fn.modal) {
+        window.jQuery(cancelModalEl).modal('show');
+        return true;
+      }
+      return false;
+    }
+
+    function hideConfirmModal() {
+      if (!cancelModalEl) return;
+      if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+        var bsModal = bootstrap.Modal.getInstance(cancelModalEl);
+        if (bsModal) bsModal.hide();
+        return;
+      }
+      if (typeof window.jQuery !== 'undefined' && window.jQuery.fn && window.jQuery.fn.modal) {
+        window.jQuery(cancelModalEl).modal('hide');
+      }
+    }
+
+    function updateOrdersCountDisplay() {
+      var totalText = document.getElementById('ordersTotalText');
+      if (!totalText) return;
+
+      var rows = document.querySelectorAll('tr[data-order-row-id]');
+      totalText.textContent = 'Submitted orders (' + rows.length + ')';
+    }
+
+    function ensureEmptyStateRow() {
+      var tbody = document.querySelector('table tbody');
+      if (!tbody) return;
+
+      var rows = tbody.querySelectorAll('tr[data-order-row-id]');
+      var emptyRow = document.getElementById('ordersEmptyRow');
+      if (rows.length === 0 && !emptyRow) {
+        tbody.insertAdjacentHTML(
+          'beforeend',
+          '<tr id="ordersEmptyRow"><td colspan="7" class="text-center text-sm text-muted py-4">No submitted orders yet.</td></tr>'
+        );
+      }
+    }
+
+    async function cancelOrder(btn) {
+      var cancelUrl = btn.getAttribute('data-cancel-url');
+      if (!cancelUrl) return;
+
+      var row = btn.closest('tr[data-order-row-id]');
+      var csrfToken = getCookie('csrftoken');
+      if (!csrfToken) return;
+
+      btn.disabled = true;
+      btn.textContent = 'Canceling...';
+      if (confirmCancelBtn) confirmCancelBtn.disabled = true;
+
+      try {
+        var response = await fetch(cancelUrl, {
+          method: 'POST',
+          headers: {
+            'X-CSRFToken': csrfToken,
+            'X-Requested-With': 'XMLHttpRequest'
+          }
+        });
+
+        var data = {};
+        try {
+          data = await response.json();
+        } catch (e) {
+          data = {};
+        }
+
+        if (!response.ok || !data.ok) {
+          throw new Error(data.message || 'Failed to cancel order.');
+        }
+
+        if (row) row.remove();
+        updateOrdersCountDisplay();
+        ensureEmptyStateRow();
+        pendingCancelBtn = null;
+        hideConfirmModal();
+      } catch (error) {
+        btn.disabled = false;
+        btn.textContent = 'Cancel';
+        if (typeof Toastify !== 'undefined') {
+          Toastify({
+            text: error.message || 'Could not cancel order.',
+            duration: 3000,
+            gravity: 'bottom',
+            position: 'center',
+            close: true,
+            stopOnFocus: true,
+            style: { background: '#f5365c' }
+          }).showToast();
+        }
+      } finally {
+        if (confirmCancelBtn) confirmCancelBtn.disabled = false;
+      }
+    }
+
+    document.addEventListener('click', function (event) {
+      var btn = event.target.closest('.js-cancel-order');
+      if (!btn) return;
+
+      event.preventDefault();
+      pendingCancelBtn = btn;
+      if (!showConfirmModal()) {
+        var confirmed = window.confirm('Cancel this order? This will permanently remove the order.');
+        if (!confirmed) return;
+        cancelOrder(btn);
+        return;
+      }
+    });
+
+    if (confirmCancelBtn) {
+      confirmCancelBtn.addEventListener('click', function () {
+        if (!pendingCancelBtn) return;
+        cancelOrder(pendingCancelBtn);
+      });
+    }
+  })();
+</script>
+{% endblock %}

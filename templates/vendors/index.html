@@ -106,7 +106,7 @@
           <div class="card h-100">
             <div class="card-header pb-0">
               <h6 class="mb-1">Products Quantity Added Monthly</h6>
-              <p class="text-sm mb-0 text-secondary">Last 6 months</p>
+              <p class="text-sm mb-0 text-secondary">Last 6 months (not ordered + ordered)</p>
             </div>
             <div class="card-body">
               <div id="products-added-monthly-chart" style="height: 320px; width: 100%;"></div>
@@ -149,6 +149,7 @@
       axisY: {
         title: "Quantity Added",
         includeZero: true,
+        gridThickness: 0,
       },
       toolTip: {
         shared: true,
@@ -166,18 +167,30 @@
     var deliveredChart = new CanvasJS.Chart("products-delivered-monthly-chart", {
       animationEnabled: true,
       backgroundColor: "transparent",
+      axisX: {
+        lineColor: "#6c757d",
+        tickColor: "#6c757d",
+        labelFontColor: "#1f2937",
+      },
       axisY: {
         title: "Delivered Quantity",
         includeZero: true,
+        gridThickness: 0,
+        lineColor: "#6c757d",
+        tickColor: "#6c757d",
+        labelFontColor: "#1f2937",
       },
       toolTip: {
         shared: true,
       },
       data: [
         {
-          type: "splineArea",
-          color: "#2dce89",
-          markerSize: 6,
+          type: "line",
+          color: "#4f81bd",
+          lineThickness: 3,
+          markerType: "circle",
+          markerSize: 7,
+          markerColor: "#4f81bd",
           yValueFormatString: "#,##0",
           dataPoints: deliveredData,
         },
