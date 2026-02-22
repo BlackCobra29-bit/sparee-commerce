@@ -1,0 +1,100 @@
+{% extends "vendors/base.html" %}
+{% load number_format %}
+
+{% block vendor_title %}Seller Management - Wahid Spare Hub{% endblock %}
+
+{% block vendor_extra_css %}
+<link rel="stylesheet" href="https://cdn.datatables.net/2.0.8/css/dataTables.bootstrap5.css">
+{% endblock %}
+
+{% block vendor_content %}
+<div class="row">
+  <div class="col-12">
+    <div class="card mb-4">
+      <div class="card-header pb-0">
+        <h6>Seller Management Page</h6>
+      </div>
+      <div class="card-body">
+        <div class="table-responsive">
+          <table class="table align-items-center mb-0" id="sellerManagementTable">
+            <thead>
+              <tr>
+                <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Seller</th>
+                <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Verification Status</th>
+                <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Performance Indicators</th>
+                <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 text-center">Approve / Reject</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for seller in seller_rows %}
+              <tr>
+                <td>
+                  <div class="d-flex px-2 py-1">
+                    <div>
+                      {% if seller.profile_picture %}
+                      <img src="{{ seller.profile_picture.url }}" class="avatar avatar-sm me-3" alt="{{ seller.user.username }}">
+                      {% else %}
+                      <div class="avatar avatar-sm me-3 bg-gradient-secondary text-white d-flex align-items-center justify-content-center">
+                        <i class="ni ni-single-02 text-xs"></i>
+                      </div>
+                      {% endif %}
+                    </div>
+                    <div class="d-flex flex-column justify-content-center">
+                      <h6 class="mb-0 text-sm">{{ seller.user.get_full_name|default:seller.user.username }}</h6>
+                      <p class="text-xs text-secondary mb-0">{{ seller.user.email|default:"-" }}</p>
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  {% if seller.license_file %}
+                  <span class="badge badge-sm bg-gradient-success">Verified</span>
+                  {% else %}
+                  <span class="badge badge-sm bg-gradient-warning">Pending</span>
+                  {% endif %}
+                </td>
+                <td>
+                  <div class="text-xs text-secondary">
+                    Products: <b>{{ seller.product_count|number_separator }}</b>
+                  </div>
+                  <div class="text-xs text-secondary">
+                    Orders: <b>{{ seller.delivered_orders|number_separator }}</b> delivered / <b>{{ seller.total_orders|number_separator }}</b> total
+                  </div>
+                  <div class="text-xs text-secondary">
+                    Quantity sold: <b>{{ seller.sold_quantity|number_separator }}</b>
+                  </div>
+                </td>
+                <td class="align-middle text-center">
+                  <button type="button" class="btn btn-sm bg-gradient-success mb-0 me-1">Approve</button>
+                  <button type="button" class="btn btn-sm bg-gradient-danger mb-0">Reject</button>
+                </td>
+              </tr>
+              {% empty %}
+              <tr>
+                <td colspan="4" class="text-center text-sm text-secondary py-4">No seller records found.</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block vendor_extra_js %}
+<script src="https://cdn.datatables.net/2.0.8/js/dataTables.js"></script>
+<script src="https://cdn.datatables.net/2.0.8/js/dataTables.bootstrap5.js"></script>
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    if (typeof DataTable === "undefined") return;
+    new DataTable("#sellerManagementTable", {
+      pageLength: 10,
+      order: [[0, "asc"]],
+      language: {
+        search: "Search sellers:"
+      }
+    });
+  });
+</script>
+{% endblock %}

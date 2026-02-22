@@ -1,4 +1,5 @@
 import json
+from decimal import Decimal
 from datetime import date
 
 from django.contrib import messages
@@ -10,7 +11,7 @@ from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.shortcuts import get_object_or_404
 from django.shortcuts import redirect
 from django.db import transaction
-from django.db.models import F, Sum
+from django.db.models import Count, F, Q, Sum
 from django.db.models.functions import Coalesce, TruncMonth
 from django.utils import timezone
 from django.template.loader import render_to_string
@@ -170,6 +171,18 @@ class BuyerAccountRequiredMixin:
         return super().dispatch(request, *args, **kwargs)
 
 
+class SuperuserRequiredMixin(LoginRequiredMixin):
+    login_url = reverse_lazy("login")
+
+    def dispatch(self, request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return self.handle_no_permission()
+        if not request.user.is_superuser:
+            messages.error(request, "Only system admins can access this page.")
+            return redirect("home")
+        return super().dispatch(request, *args, **kwargs)
+
+
 class VendorDashboardView(SellerAccountRequiredMixin, VendorAccessMixin, TemplateView):
     template_name = "vendors/index.html"
 
@@ -266,6 +279,183 @@ class VendorDashboardView(SellerAccountRequiredMixin, VendorAccessMixin, Templat
         context["monthly_added_chart_data"] = monthly_added_chart_data
         context["monthly_delivered_chart_data"] = monthly_delivered_chart_data
         return context
+
+
+class AdminDashboardView(SuperuserRequiredMixin, TemplateView):
+    template_name = "admin/dashboard.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["total_sellers_count"] = AccountRegistration.objects.filter(
+            account_type=AccountRegistration.ACCOUNT_TYPE_SELLER
+        ).count()
+        context["pending_approvals_count"] = AccountRegistration.objects.filter(
+            account_type=AccountRegistration.ACCOUNT_TYPE_SELLER,
+        ).filter(
+            Q(license_file__isnull=True) | Q(license_file="")
+        ).count()
+        context["products_sold_count"] = Order.objects.filter(is_delivered=True).aggregate(
+            total=Coalesce(Sum("quantity"), 0)
+        )["total"]
+        context["active_products_count"] = Product.objects.filter(is_active=True).count()
+
+        # Last 6 months (oldest -> newest) for sold quantity and sales amount.
+        today = timezone.localdate()
+        current_month_start = today.replace(day=1)
+        month_starts = []
+        for offset in range(-5, 1):
+            month_index = (current_month_start.year * 12 + current_month_start.month - 1) + offset
+            year = month_index // 12
+            month = (month_index % 12) + 1
+            month_starts.append(date(year, month, 1))
+
+        next_month_index = current_month_start.year * 12 + current_month_start.month
+        next_month_start = date((next_month_index // 12), (next_month_index % 12) + 1, 1)
+
+        monthly_sales = (
+            Order.objects.filter(
+                is_delivered=True,
+                created_at__date__gte=month_starts[0],
+                created_at__date__lt=next_month_start,
+            )
+            .annotate(month=TruncMonth("created_at"))
+            .values("month")
+            .annotate(
+                total_quantity=Coalesce(Sum("quantity"), 0),
+                total_amount=Coalesce(Sum("total_price"), Decimal("0.00")),
+            )
+        )
+        sales_by_month = {
+            row["month"].date(): {
+                "quantity": int(row["total_quantity"] or 0),
+                "amount": float(row["total_amount"] or 0),
+            }
+            for row in monthly_sales
+        }
+
+        context["admin_monthly_quantity_chart_data"] = [
+            {
+                "label": month_start.strftime("%b %Y"),
+                "y": sales_by_month.get(month_start, {}).get("quantity", 0),
+            }
+            for month_start in month_starts
+        ]
+        context["admin_monthly_amount_chart_data"] = [
+            {
+                "label": month_start.strftime("%b %Y"),
+                "y": sales_by_month.get(month_start, {}).get("amount", 0),
+            }
+            for month_start in month_starts
+        ]
+        return context
+
+
+class AdminSellerManagementView(SuperuserRequiredMixin, TemplateView):
+    template_name = "admin/seller_management.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["seller_rows"] = (
+            AccountRegistration.objects.filter(
+                account_type=AccountRegistration.ACCOUNT_TYPE_SELLER
+            )
+            .select_related("user")
+            .annotate(
+                product_count=Count("user__products", distinct=True),
+                total_orders=Count("user__products__orders", distinct=True),
+                delivered_orders=Count(
+                    "user__products__orders",
+                    filter=Q(user__products__orders__is_delivered=True),
+                    distinct=True,
+                ),
+                sold_quantity=Coalesce(
+                    Sum(
+                        "user__products__orders__quantity",
+                        filter=Q(user__products__orders__is_delivered=True),
+                    ),
+                    0,
+                ),
+            )
+            .order_by("-created_at")
+        )
+        return context
+
+
+class AdminProductSkuControlView(SuperuserRequiredMixin, TemplateView):
+    template_name = "admin/product_sku_control.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        product_rows = list(
+            Product.objects.select_related("vendor", "vendor__account_registration")
+            .annotate(
+                pending_orders=Count(
+                    "orders",
+                    filter=Q(orders__is_delivered=False),
+                    distinct=True,
+                ),
+                delivered_orders=Count(
+                    "orders",
+                    filter=Q(orders__is_delivered=True),
+                    distinct=True,
+                ),
+                sold_quantity=Coalesce(
+                    Sum("orders__quantity", filter=Q(orders__is_delivered=True)),
+                    0,
+                ),
+            )
+            .order_by("-created_at")
+        )
+        product_ids = [product.id for product in product_rows]
+        delivered_orders = (
+            Order.objects.filter(product_id__in=product_ids, is_delivered=True)
+            .select_related("buyer", "buyer__account_registration", "product")
+            .only(
+                "id",
+                "product_id",
+                "quantity",
+                "total_price",
+                "created_at",
+                "buyer__username",
+                "buyer__first_name",
+                "buyer__last_name",
+                "buyer__account_registration__profile_picture",
+                "product__price",
+            )
+            .order_by("-created_at")
+        )
+
+        delivered_orders_map = {str(product_id): [] for product_id in product_ids}
+        for order in delivered_orders:
+            buyer_name = order.buyer.get_full_name().strip() or order.buyer.username
+            quantity = int(order.quantity or 0)
+            total_price = float(order.total_price or 0)
+            unit_price = float((order.total_price / order.quantity) if order.quantity else 0)
+            buyer_photo_url = ""
+            buyer_account = getattr(order.buyer, "account_registration", None)
+            if buyer_account and buyer_account.profile_picture:
+                buyer_photo_url = buyer_account.profile_picture.url
+            delivered_orders_map[str(order.product_id)].append(
+                {
+                    "buyer_name": buyer_name,
+                    "buyer_photo_url": buyer_photo_url,
+                    "order_date": f"{order.created_at.day} {order.created_at.strftime('%b %Y')}",
+                    "quantity": quantity,
+                    "unit_price": unit_price,
+                    "total_price": total_price,
+                }
+            )
+
+        context["product_rows"] = product_rows
+        context["product_delivered_orders_map"] = delivered_orders_map
+        return context
+
+
+class AdminPricingOversightView(SuperuserRequiredMixin, TemplateView):
+    template_name = "admin/pricing_oversight.html"
+
+class AdminSystemControlsView(SuperuserRequiredMixin, TemplateView):
+    template_name = "admin/system_controls.html"
 
 
 class VendorOrdersView(SellerAccountRequiredMixin, VendorAccessMixin, TemplateView):

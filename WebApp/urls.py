@@ -19,6 +19,11 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.urls import path
 from App.views import (
+    AdminDashboardView,
+    AdminPricingOversightView,
+    AdminProductSkuControlView,
+    AdminSellerManagementView,
+    AdminSystemControlsView,
     ForgotPasswordView,
     HomeView,
     LoginView,
@@ -61,6 +66,11 @@ urlpatterns = [
     path('buyer/orders/', BuyerOrdersView.as_view(), name='buyer_orders'),
     path('orders/create/', OrderCreateView.as_view(), name='order_create'),
     path('orders/<int:pk>/cancel/', BuyerOrderCancelView.as_view(), name='buyer_order_cancel'),
+    path('admin/dashboard/', AdminDashboardView.as_view(), name='admin_dashboard'),
+    path('admin/seller-management/', AdminSellerManagementView.as_view(), name='admin_seller_management'),
+    path('admin/product-sku-control/', AdminProductSkuControlView.as_view(), name='admin_product_sku_control'),
+    path('admin/pricing-oversight/', AdminPricingOversightView.as_view(), name='admin_pricing_oversight'),
+    path('admin/system-controls/', AdminSystemControlsView.as_view(), name='admin_system_controls'),
     path('admin/', admin.site.urls),
 ]
 

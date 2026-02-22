@@ -90,6 +90,40 @@
         </button>
 	        <div class="collapse navbar-collapse" id="vendorTopNav">
 	          <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+              {% if request.user.is_superuser %}
+            <li class="nav-item">
+              <a class="nav-link d-flex align-items-center{% if current_url_name == 'admin_dashboard' %} active fw-bold{% endif %}" href="{% url 'admin_dashboard' %}" hx-boost="false">
+                <div class="icon icon-shape icon-sm border-radius-md {% if current_url_name == 'admin_dashboard' %}bg-gradient-primary text-white{% else %}bg-white text-dark{% endif %} text-center me-2 d-flex align-items-center justify-content-center">
+                  <i class="fa fa-gauge"></i>
+                </div>
+                <span class="nav-link-text ms-1">Admin Dashboard</span>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link d-flex align-items-center{% if current_url_name == 'admin_seller_management' %} active fw-bold{% endif %}" href="{% url 'admin_seller_management' %}" hx-boost="false">
+                <div class="icon icon-shape icon-sm border-radius-md {% if current_url_name == 'admin_seller_management' %}bg-gradient-primary text-white{% else %}bg-white text-dark{% endif %} text-center me-2 d-flex align-items-center justify-content-center">
+                  <i class="fa fa-user-check"></i>
+                </div>
+                <span class="nav-link-text ms-1">Seller Management</span>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link d-flex align-items-center{% if current_url_name == 'admin_product_sku_control' %} active fw-bold{% endif %}" href="{% url 'admin_product_sku_control' %}" hx-boost="false">
+                <div class="icon icon-shape icon-sm border-radius-md {% if current_url_name == 'admin_product_sku_control' %}bg-gradient-primary text-white{% else %}bg-white text-dark{% endif %} text-center me-2 d-flex align-items-center justify-content-center">
+                  <i class="fa fa-boxes-stacked"></i>
+                </div>
+                <span class="nav-link-text ms-1">Product Management</span>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link d-flex align-items-center{% if current_url_name == 'admin_system_controls' %} active fw-bold{% endif %}" href="{% url 'admin_system_controls' %}" hx-boost="false">
+                <div class="icon icon-shape icon-sm border-radius-md {% if current_url_name == 'admin_system_controls' %}bg-gradient-primary text-white{% else %}bg-white text-dark{% endif %} text-center me-2 d-flex align-items-center justify-content-center">
+                  <i class="fa fa-sliders"></i>
+                </div>
+                <span class="nav-link-text ms-1">System Controls</span>
+              </a>
+            </li>
+              {% endif %}
               {% if request.user.account_registration.account_type == 'seller' %}
 	            <li class="nav-item">
               <a class="nav-link d-flex align-items-center{% if current_url_name == 'vendor_dashboard' or current_url_name == 'vendor_dashboard_home' %} active fw-bold{% endif %}" href="{% url 'vendor_dashboard_home' %}" hx-boost="false">

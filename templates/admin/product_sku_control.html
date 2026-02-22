@@ -1,0 +1,240 @@
+{% extends "vendors/base.html" %}
+{% load number_format %}
+
+{% block vendor_title %}Product and SKU Control - Wahid Spare Hub{% endblock %}
+
+{% block vendor_extra_css %}
+<link rel="stylesheet" href="https://cdn.datatables.net/2.0.8/css/dataTables.bootstrap5.css">
+{% endblock %}
+
+{% block vendor_content %}
+<div class="row">
+  <div class="col-12">
+    <div class="card mb-4">
+      <div class="card-header pb-0">
+        <h6>Product &amp; SKU Control Page</h6>
+      </div>
+      <div class="card-body">
+        <div class="table-responsive">
+          <table class="table align-items-center mb-0" id="productManagementTable">
+            <thead>
+              <tr>
+                <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Product</th>
+                <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">VIN</th>
+                <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Seller</th>
+                <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Category</th>
+                <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Price</th>
+                <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Stock</th>
+                <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Performance</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for product in product_rows %}
+              <tr>
+                <td>
+                  <div class="d-flex px-2 py-1 align-items-center">
+                    {% if product.product_image %}
+                    <img src="{{ product.product_image.url }}" class="avatar avatar-sm me-3" alt="{{ product.name }}">
+                    {% endif %}
+                    <div class="d-flex flex-column justify-content-center">
+                      <h6 class="mb-0 text-sm">{{ product.name }}</h6>
+                      <p class="text-xs text-secondary mb-0">
+                        {% with stock_value=product.current_stock|default_if_none:product.initial_stock %}
+                          {% if stock_value == 0 %}
+                          <span class="badge badge-sm bg-gradient-danger">No Item</span>
+                          {% elif stock_value <= product.reorder_level %}
+                          <span class="badge badge-sm bg-gradient-warning">Low Stock</span>
+                          {% else %}
+                          <span class="badge badge-sm bg-gradient-success">Active</span>
+                          {% endif %}
+                        {% endwith %}
+                      </p>
+                    </div>
+                  </div>
+                </td>
+                <td><span class="badge badge-sm bg-gradient-light text-xs text-dark font-weight-bold">{{ product.vin }}</span></td>
+                <td>
+                  <div class="d-flex align-items-center">
+                    {% if product.vendor.account_registration.profile_picture %}
+                    <img src="{{ product.vendor.account_registration.profile_picture.url }}" class="avatar avatar-xs rounded-circle me-2" alt="{{ product.vendor.username }}">
+                    {% else %}
+                    <div class="avatar avatar-xs rounded-circle bg-gradient-secondary text-white d-flex align-items-center justify-content-center me-2">
+                      <i class="ni ni-single-02 text-xxs"></i>
+                    </div>
+                    {% endif %}
+                    <span class="text-xs font-weight-bold">
+                      {{ product.vendor.get_full_name|default:product.vendor.username }}
+                    </span>
+                  </div>
+                </td>
+                <td><span class="text-xs">{{ product.get_category_display }}</span></td>
+                <td><span class="text-xs font-weight-bold">{{ product.price|number_separator }} ETB</span></td>
+                <td>
+                  <span class="text-xs font-weight-bold">
+                    {% if product.current_stock is not None %}
+                    {{ product.current_stock|number_separator }}
+                    {% else %}
+                    {{ product.initial_stock|number_separator }}
+                    {% endif %}
+                  </span>
+                </td>
+                <td>
+                  <div class="text-xs text-secondary">
+                    Pending orders: <b>{{ product.pending_orders|number_separator }}</b>
+                  </div>
+                  <div class="text-xs text-secondary">
+                    {% if product.delivered_orders %}
+                    <a href="#" class="open-product-orders-modal text-primary font-weight-bold" data-product-id="{{ product.id }}" data-product-name="{{ product.name|escape }}">
+                      Delivered orders: <b>{{ product.delivered_orders|number_separator }}</b>
+                    </a>
+                    {% else %}
+                    Delivered orders: <b>{{ product.delivered_orders|number_separator }}</b>
+                    {% endif %}
+                  </div>
+                  <div class="text-xs text-secondary">
+                    Quantity sold: <b>{{ product.sold_quantity|number_separator }}</b>
+                  </div>
+                </td>
+              </tr>
+              {% empty %}
+              <tr>
+                <td colspan="7" class="text-center text-sm text-secondary py-4">No products found.</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="productOrdersModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title fw-bold" id="productOrdersModalTitle">Delivered Order Details</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0" id="productOrdersModalTable">
+            <thead>
+              <tr>
+                <th>Buyer</th>
+                <th class="text-center">Date</th>
+                <th class="text-center">Quantity</th>
+                <th class="text-end">Price/Item</th>
+                <th class="text-end">Total Price</th>
+              </tr>
+            </thead>
+            <tbody id="productOrdersModalTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block vendor_extra_js %}
+{{ product_delivered_orders_map|json_script:"product-delivered-orders-map" }}
+<script src="https://cdn.datatables.net/2.0.8/js/dataTables.js"></script>
+<script src="https://cdn.datatables.net/2.0.8/js/dataTables.bootstrap5.js"></script>
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    if (typeof DataTable !== "undefined") {
+      new DataTable("#productManagementTable", {
+        pageLength: 10,
+        order: [[0, "asc"]],
+        language: {
+          search: "Search products:"
+        }
+      });
+    }
+
+    var ordersMap = JSON.parse(
+      document.getElementById("product-delivered-orders-map")?.textContent || "{}"
+    );
+    var modalElement = document.getElementById("productOrdersModal");
+    var modalTitleElement = document.getElementById("productOrdersModalTitle");
+    var tableBody = document.getElementById("productOrdersModalTableBody");
+    var modalTableElement = document.getElementById("productOrdersModalTable");
+    var modalDataTable = null;
+    var modal = (typeof bootstrap !== "undefined" && modalElement)
+      ? new bootstrap.Modal(modalElement)
+      : null;
+
+    function formatETB(value) {
+      return "ETB " + Number(value || 0).toLocaleString(undefined, {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      });
+    }
+
+    document.querySelectorAll(".open-product-orders-modal").forEach(function (link) {
+      link.addEventListener("click", function (event) {
+        event.preventDefault();
+        if (!modal || !tableBody || !modalTitleElement) return;
+
+        var productId = String(this.getAttribute("data-product-id") || "");
+        var productName = this.getAttribute("data-product-name") || "Product";
+        var rows = ordersMap[productId] || [];
+
+        modalTitleElement.textContent = productName + " - Delivered Order Details";
+        tableBody.innerHTML = "";
+
+        if (!rows.length) {
+          tableBody.innerHTML = "<tr><td colspan=\"5\" class=\"text-center text-sm text-secondary py-3\">No delivered order details found.</td></tr>";
+        } else {
+          rows.forEach(function (row) {
+            var buyerCell = "";
+            if (row.buyer_photo_url) {
+              buyerCell =
+                "<div class=\"d-flex align-items-center\">" +
+                  "<img src=\"" + row.buyer_photo_url + "\" class=\"avatar avatar-xs rounded-circle me-2\" alt=\"" + row.buyer_name + "\">" +
+                  "<span>" + row.buyer_name + "</span>" +
+                "</div>";
+            } else {
+              buyerCell =
+                "<div class=\"d-flex align-items-center\">" +
+                  "<div class=\"avatar avatar-xs rounded-circle bg-gradient-secondary text-white d-flex align-items-center justify-content-center me-2\">" +
+                    "<i class=\"ni ni-single-02 text-xxs\"></i>" +
+                  "</div>" +
+                  "<span>" + row.buyer_name + "</span>" +
+                "</div>";
+            }
+            tableBody.insertAdjacentHTML(
+              "beforeend",
+              "<tr>" +
+                "<td>" + buyerCell + "</td>" +
+                "<td class=\"text-center\">" + (row.order_date || "-") + "</td>" +
+                "<td class=\"text-center\">" + Number(row.quantity || 0).toLocaleString() + "</td>" +
+                "<td class=\"text-end\">" + formatETB(row.unit_price) + "</td>" +
+                "<td class=\"text-end\">" + formatETB(row.total_price) + "</td>" +
+              "</tr>"
+            );
+          });
+        }
+
+        if (modalDataTable) {
+          modalDataTable.destroy();
+          modalDataTable = null;
+        }
+        if (typeof DataTable !== "undefined" && modalTableElement) {
+          modalDataTable = new DataTable("#productOrdersModalTable", {
+            pageLength: 5,
+            lengthChange: false,
+            order: [],
+            language: {
+              search: "Search orders:"
+            }
+          });
+        }
+
+        modal.show();
+      });
+    });
+  });
+</script>
+{% endblock %}
