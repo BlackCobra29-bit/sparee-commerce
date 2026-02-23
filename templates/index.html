@@ -185,76 +185,83 @@
   <!-- SUPPORT -->
   <section class="py-4" id="support">
     <div class="container" data-aos="fade-up">
-      <div class="row">
-        <div class="col-lg-7 mb-3">
-          <div class="panel">
-            <div class="panel-h font-weight-bold"><i class="fas fa-headset mr-2"></i>Support</div>
-            <div class="panel-b">
-              <div class="row">
-                <div class="col-md-6 mb-3">
-                  <div class="panel" style="background:var(--glass2)">
-                    <div class="panel-b">
-                      <div class="font-weight-bold mb-1">Need the exact part?</div>
-                      <div class="muted small mb-2">Send OEM/VIN (placeholder) & weâ€™ll match it.</div>
-                      <button class="btn btn-outline-light btn-sm" onclick="toast('Support', 'Ticket started (demo).')">
-                        <i class="fas fa-paper-plane mr-1"></i>Start Ticket
-                      </button>
-                    </div>
+      <div class="panel support-shell">
+        <div class="panel-b p-0">
+          <div class="row no-gutters">
+            <div class="col-lg-5 support-left">
+              <div class="support-left-inner">
+                <div class="support-kicker">Premium Assistance</div>
+                <h4 class="font-weight-bold mb-2">Need help with a part or order?</h4>
+                <p class="muted mb-4">Our support team helps with fitment, order issues, and seller communication.</p>
+
+                <div class="support-contact-card mb-3">
+                  <div class="support-icon"><i class="fas fa-envelope"></i></div>
+                  <div>
+                    <div class="font-weight-bold">Email</div>
+                    <div class="muted small">support@wahid.example</div>
                   </div>
                 </div>
-                <div class="col-md-6 mb-3">
-                  <div class="panel" style="background:var(--glass2)">
-                    <div class="panel-b">
-                      <div class="font-weight-bold mb-1">Bulk orders</div>
-                      <div class="muted small mb-2">Fleet pricing & invoice checkout.</div>
-                      <button class="btn btn-outline-light btn-sm" onclick="toast('Sales', 'Quote requested (demo).')">
-                        <i class="fas fa-file-invoice-dollar mr-1"></i>Request Quote
-                      </button>
-                    </div>
+
+                <div class="support-contact-card mb-3">
+                  <div class="support-icon"><i class="fas fa-phone-alt"></i></div>
+                  <div>
+                    <div class="font-weight-bold">Phone</div>
+                    <div class="muted small">+251 000 000 000</div>
                   </div>
                 </div>
+
+                <div class="support-contact-card mb-4">
+                  <div class="support-icon"><i class="fas fa-clock"></i></div>
+                  <div>
+                    <div class="font-weight-bold">Hours</div>
+                    <div class="muted small">Mon-Sat, 9:00-18:00</div>
+                  </div>
+                </div>
+
+                <div class="d-flex flex-wrap">
+                  <button class="btn btn-outline-light btn-sm mr-2 mb-2" onclick="toast('Chat', 'Live chat starts soon (demo).')">
+                    <i class="fas fa-comments mr-1"></i>Live Chat
+                  </button>
+                  <button class="btn btn-outline-light btn-sm mb-2" onclick="toast('Help', 'Support ticket opened (demo).')">
+                    <i class="fas fa-life-ring mr-1"></i>Open Ticket
+                  </button>
+                </div>
               </div>
+            </div>
 
-              <hr class="divider">
-
-              <div class="d-flex flex-wrap align-items-center justify-content-between">
-                <div class="mb-2 mb-md-0">
-                  <div class="font-weight-bold">Email</div>
-                  <div class="muted small">support@wahid.example</div>
+            <div class="col-lg-7 support-right">
+              <div class="support-form-wrap">
+                <div class="d-flex align-items-center justify-content-between mb-3">
+                  <h5 class="font-weight-bold mb-0"><i class="fas fa-paper-plane mr-2"></i>Contact Us</h5>
+                  <span class="badge badge-soft">Response in 24h</span>
                 </div>
-                <div class="mb-2 mb-md-0">
-                  <div class="font-weight-bold">Phone</div>
-                  <div class="muted small">+251 000 000 000 (sample)</div>
-                </div>
-                <div>
-                  <div class="font-weight-bold">Hours</div>
-                  <div class="muted small">Monâ€“Sat, 9:00â€“18:00</div>
-                </div>
+                <form id="contactUsFormModal" data-submit-url="{% url 'contact_message_create' %}" data-parsley-validate novalidate>
+                  <div class="form-row">
+                    <div class="col-md-6 mb-3">
+                      <label class="small text-uppercase mb-1">Name</label>
+                      <input type="text" class="form-control support-input" name="name" placeholder="Your full name" required data-parsley-required-message="Name is required." data-parsley-trigger="change blur">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                      <label class="small text-uppercase mb-1">Email</label>
+                      <input type="email" class="form-control support-input" name="email" placeholder="you@example.com" required data-parsley-type="email" data-parsley-required-message="Email is required." data-parsley-type-message="Enter a valid email address." data-parsley-trigger="change blur">
+                    </div>
+                  </div>
+                  <div class="form-group mb-3">
+                    <label class="small text-uppercase mb-1">Subject</label>
+                    <input type="text" class="form-control support-input" name="subject" placeholder="What do you need help with?" required data-parsley-required-message="Subject is required." data-parsley-maxlength="180" data-parsley-maxlength-message="Subject must be 180 characters or less." data-parsley-trigger="change blur">
+                  </div>
+                  <div class="form-group mb-3">
+                    <label class="small text-uppercase mb-1">Message</label>
+                    <textarea class="form-control support-input" name="message_body" rows="6" placeholder="Write your message here..." required data-parsley-required-message="Message is required." data-parsley-minlength="10" data-parsley-minlength-message="Message should be at least 10 characters." data-parsley-trigger="change blur"></textarea>
+                  </div>
+                  <button type="submit" class="btn btn-primary btn-block support-send-btn" id="contactUsSubmitBtn">
+                    <i class="fas fa-paper-plane mr-2"></i>Submit Message
+                  </button>
+                </form>
               </div>
-
             </div>
           </div>
         </div>
-
-        <div class="col-lg-5 mb-3">
-          <div class="panel">
-            <div class="panel-h font-weight-bold"><i class="fas fa-info-circle mr-2"></i>Sample Image Credits</div>
-            <div class="panel-b muted small">
-              Images are loaded from Wikimedia Commons (free media repository), via <b>Special:FilePath</b>.
-              Replace with your own product photos anytime.
-              <ul class="mb-0 mt-2">
-                <li>Car workshop tools (hero)</li>
-                <li>Brake pads / brake shoes</li>
-                <li>Spark plugs</li>
-                <li>Bosch oil filter</li>
-                <li>Air filter</li>
-                <li>Diesel particulate filter</li>
-                <li>Shock absorber (suspension)</li>
-              </ul>
-            </div>
-          </div>
-        </div>
-
       </div>
     </div>
   </section>
@@ -475,6 +482,10 @@
                 <div class="price h3 mb-0" id="qvPrice">0.00 ETB</div>
                 <div class="rating" id="qvRating"></div>
               </div>
+              <div class="mt-2" id="qvRateBox">
+                <span class="muted small mr-2">Rate this product:</span>
+                <span id="qvRateStars" class="d-inline-flex align-items-center"></span>
+              </div>
 
               <p class="muted mt-2" id="qvDesc"></p>
 
@@ -503,6 +514,29 @@
 
             </div>
           </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RATE CONFIRM MODAL -->
+  <div class="modal fade" id="rateConfirmModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title font-weight-bold"><i class="fas fa-star mr-2"></i>Rate Product</h5>
+          <button type="button" class="close" style="color:var(--text)" data-dismiss="modal"><span>&times;</span></button>
+        </div>
+        <div class="modal-body">
+          <div class="muted mb-2">Choose your rating:</div>
+          <div id="rateConfirmStars" class="rating mb-2"></div>
+          <div id="rateConfirmValue" class="small mb-2">Selected: 0 / 5</div>
+          <div class="small muted" id="rateConfirmProduct"></div>
+          <div class="small text-warning mt-2">You can rate only once per product.</div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-light" data-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-primary" id="rateConfirmSubmit" disabled>Submit</button>
         </div>
       </div>
     </div>
@@ -644,4 +678,6 @@
     </div>
   </div>
   {{ shop_products|json_script:"shop-products-data" }}
+  {{ shop_rating_context|json_script:"shop-rating-context" }}
   {% endblock %}
+

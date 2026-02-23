@@ -3,7 +3,7 @@ import os
 from django import forms
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
-from .models import AccountRegistration, Product
+from .models import AccountRegistration, Product, ProductCategory
 
 
 class LoginForm(forms.Form):
@@ -125,6 +125,11 @@ class ProductForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         if self.vendor is not None:
             self.instance.vendor = self.vendor
+        available_categories = ProductCategory.objects.filter(is_visible=True).order_by("name")
+        self.fields["category"] = forms.ChoiceField(
+            choices=[(category.name, category.name) for category in available_categories],
+            required=True,
+        )
 
     class Meta:
         model = Product
@@ -145,6 +150,12 @@ class ProductForm(forms.ModelForm):
 
     def clean_description(self):
         return (self.cleaned_data.get("description") or "").strip()
+
+    def clean_category(self):
+        category_name = (self.cleaned_data.get("category") or "").strip()
+        if not ProductCategory.objects.filter(name=category_name).exists():
+            raise forms.ValidationError("Please select a valid product category.")
+        return category_name
 
     def clean_product_image(self):
         image = self.cleaned_data.get("product_image")
@@ -175,3 +186,15 @@ class ProductForm(forms.ModelForm):
         if commit:
             product.save()
         return product
+
+
+class ProductCategoryForm(forms.ModelForm):
+    class Meta:
+        model = ProductCategory
+        fields = ("name", "description")
+
+    def clean_name(self):
+        return (self.cleaned_data.get("name") or "").strip()
+
+    def clean_description(self):
+        return (self.cleaned_data.get("description") or "").strip()

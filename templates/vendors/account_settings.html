@@ -1,0 +1,85 @@
+{% extends "vendors/base.html" %}
+
+{% block vendor_title %}Account Settings - Wahid Spare Hub{% endblock %}
+
+{% block vendor_content %}
+<div class="row mb-4">
+  <div class="col-12">
+    <div class="card">
+      <div class="card-body p-3">
+        <h5 class="mb-1">Account Settings</h5>
+        <p class="text-sm text-secondary mb-0">
+          Manage your account details and password.
+          <span class="ms-2 badge bg-gradient-dark">{{ account_type_label }}</span>
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-lg-7 mb-4">
+    <div class="card h-100">
+      <div class="card-header pb-0">
+        <h6 class="mb-0"><i class="fa fa-user me-2"></i>Profile Details</h6>
+      </div>
+      <div class="card-body pt-3">
+        <form method="post" action="{% url 'account_settings' %}">
+          {% csrf_token %}
+          <input type="hidden" name="form_type" value="profile">
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label class="form-label">First Name</label>
+              <input type="text" class="form-control" name="first_name" value="{{ request.user.first_name }}" required>
+            </div>
+            <div class="col-md-6 mb-3">
+              <label class="form-label">Last Name</label>
+              <input type="text" class="form-control" name="last_name" value="{{ request.user.last_name }}" required>
+            </div>
+            <div class="col-md-6 mb-3">
+              <label class="form-label">Username</label>
+              <input type="text" class="form-control" name="username" value="{{ request.user.username }}" required>
+            </div>
+            <div class="col-md-6 mb-3">
+              <label class="form-label">Email</label>
+              <input type="email" class="form-control" name="email" value="{{ request.user.email }}" required>
+            </div>
+          </div>
+          <button type="submit" class="btn bg-gradient-primary mb-0">
+            <i class="fa fa-save me-2"></i>Save Profile
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-5 mb-4">
+    <div class="card h-100">
+      <div class="card-header pb-0">
+        <h6 class="mb-0"><i class="fa fa-lock me-2"></i>Change Password</h6>
+      </div>
+      <div class="card-body pt-3">
+        <form method="post" action="{% url 'account_settings' %}">
+          {% csrf_token %}
+          <input type="hidden" name="form_type" value="password">
+          <div class="mb-3">
+            <label class="form-label">Current Password</label>
+            <input type="password" class="form-control" name="current_password" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">New Password</label>
+            <input type="password" class="form-control" name="new_password" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Confirm New Password</label>
+            <input type="password" class="form-control" name="confirm_password" required>
+          </div>
+          <button type="submit" class="btn bg-gradient-dark mb-0">
+            <i class="fa fa-key me-2"></i>Update Password
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

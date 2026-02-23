@@ -2,7 +2,7 @@ from decimal import Decimal
 
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
-from django.core.validators import MinValueValidator, RegexValidator
+from django.core.validators import MaxValueValidator, MinValueValidator, RegexValidator
 from django.db import models
 
 
@@ -28,6 +28,7 @@ class AccountRegistration(models.Model):
     )
     profile_picture = models.ImageField(upload_to="profile_pictures/", blank=True, null=True)
     license_file = models.FileField(upload_to="license_uploads/", blank=True, null=True)
+    is_verified = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -36,19 +37,6 @@ class AccountRegistration(models.Model):
 
 
 class Product(models.Model):
-    CATEGORY_BRAKE_PARTS = "brake-parts"
-    CATEGORY_FILTERS = "filters"
-    CATEGORY_SUSPENSION = "suspension"
-    CATEGORY_ENGINE = "engine"
-    CATEGORY_ELECTRICAL = "electrical"
-    CATEGORY_CHOICES = (
-        (CATEGORY_BRAKE_PARTS, "Brake Parts"),
-        (CATEGORY_FILTERS, "Filters"),
-        (CATEGORY_SUSPENSION, "Suspension"),
-        (CATEGORY_ENGINE, "Engine Parts"),
-        (CATEGORY_ELECTRICAL, "Electrical"),
-    )
-
     vin_validator = RegexValidator(
         regex=r"^[A-HJ-NPR-Z0-9]{17}$",
         message="VIN must be exactly 17 characters (letters and numbers, excluding I, O, and Q).",
@@ -57,7 +45,7 @@ class Product(models.Model):
     vendor = models.ForeignKey(User, on_delete=models.CASCADE, related_name="products")
     name = models.CharField(max_length=160)
     vin = models.CharField(max_length=17, unique=True, validators=[vin_validator], db_index=True)
-    category = models.CharField(max_length=24, choices=CATEGORY_CHOICES, db_index=True)
+    category = models.CharField(max_length=80, db_index=True)
     price = models.DecimalField(
         max_digits=10,
         decimal_places=2,
@@ -117,6 +105,31 @@ class Product(models.Model):
     def __str__(self):
         return f"{self.name} ({self.vin})"
 
+
+class ProductRating(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="product_ratings")
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name="ratings")
+    rating = models.PositiveSmallIntegerField(
+        validators=[MinValueValidator(1), MaxValueValidator(5)]
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ("-created_at",)
+        constraints = [
+            models.UniqueConstraint(
+                fields=["user", "product"], name="unique_user_product_rating"
+            )
+        ]
+        indexes = [
+            models.Index(fields=["product", "created_at"], name="App_product_product_925d9a_idx"),
+        ]
+
+    def __str__(self):
+        return f"{self.user.username} rated {self.product.name} ({self.rating})"
+
+
 class Order(models.Model):
     buyer = models.ForeignKey(User, on_delete=models.CASCADE, related_name="orders")
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name="orders")
@@ -128,3 +141,39 @@ class Order(models.Model):
     def __str__(self):
         return f"Order #{self.id} - {self.product.name} x {self.quantity} for {self.buyer.username}"
         return f"Order #{self.id} - {self.product.name} x {self.quantity} for {self.buyer.username}"
+
+
+class ProductCategory(models.Model):
+    name = models.CharField(max_length=80, unique=True)
+    description = models.TextField(blank=True)
+    is_visible = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ("name",)
+
+    def __str__(self):
+        return self.name
+
+
+class ContactMessage(models.Model):
+    user = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="contact_messages",
+    )
+    name = models.CharField(max_length=120)
+    email = models.EmailField(max_length=254)
+    subject = models.CharField(max_length=180)
+    message_body = models.TextField()
+    message_seen = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ("-created_at",)
+
+    def __str__(self):
+        return f"{self.name} - {self.subject}"

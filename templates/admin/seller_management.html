@@ -27,47 +27,7 @@
             </thead>
             <tbody>
               {% for seller in seller_rows %}
-              <tr>
-                <td>
-                  <div class="d-flex px-2 py-1">
-                    <div>
-                      {% if seller.profile_picture %}
-                      <img src="{{ seller.profile_picture.url }}" class="avatar avatar-sm me-3" alt="{{ seller.user.username }}">
-                      {% else %}
-                      <div class="avatar avatar-sm me-3 bg-gradient-secondary text-white d-flex align-items-center justify-content-center">
-                        <i class="ni ni-single-02 text-xs"></i>
-                      </div>
-                      {% endif %}
-                    </div>
-                    <div class="d-flex flex-column justify-content-center">
-                      <h6 class="mb-0 text-sm">{{ seller.user.get_full_name|default:seller.user.username }}</h6>
-                      <p class="text-xs text-secondary mb-0">{{ seller.user.email|default:"-" }}</p>
-                    </div>
-                  </div>
-                </td>
-                <td>
-                  {% if seller.license_file %}
-                  <span class="badge badge-sm bg-gradient-success">Verified</span>
-                  {% else %}
-                  <span class="badge badge-sm bg-gradient-warning">Pending</span>
-                  {% endif %}
-                </td>
-                <td>
-                  <div class="text-xs text-secondary">
-                    Products: <b>{{ seller.product_count|number_separator }}</b>
-                  </div>
-                  <div class="text-xs text-secondary">
-                    Orders: <b>{{ seller.delivered_orders|number_separator }}</b> delivered / <b>{{ seller.total_orders|number_separator }}</b> total
-                  </div>
-                  <div class="text-xs text-secondary">
-                    Quantity sold: <b>{{ seller.sold_quantity|number_separator }}</b>
-                  </div>
-                </td>
-                <td class="align-middle text-center">
-                  <button type="button" class="btn btn-sm bg-gradient-success mb-0 me-1">Approve</button>
-                  <button type="button" class="btn btn-sm bg-gradient-danger mb-0">Reject</button>
-                </td>
-              </tr>
+              {% include "admin/partials/seller_row.html" with seller=seller %}
               {% empty %}
               <tr>
                 <td colspan="4" class="text-center text-sm text-secondary py-4">No seller records found.</td>
@@ -87,12 +47,128 @@
 <script src="https://cdn.datatables.net/2.0.8/js/dataTables.bootstrap5.js"></script>
 <script>
   document.addEventListener("DOMContentLoaded", function () {
-    if (typeof DataTable === "undefined") return;
-    new DataTable("#sellerManagementTable", {
-      pageLength: 10,
-      order: [[0, "asc"]],
-      language: {
-        search: "Search sellers:"
+    if (typeof DataTable !== "undefined") {
+      new DataTable("#sellerManagementTable", {
+        pageLength: 10,
+        order: [[0, "asc"]],
+        language: {
+          search: "Search sellers:"
+        }
+      });
+    }
+
+    function getCookie(name) {
+      var cookieValue = null;
+      if (document.cookie && document.cookie !== "") {
+        var cookies = document.cookie.split(";");
+        for (var i = 0; i < cookies.length; i++) {
+          var cookie = cookies[i].trim();
+          if (cookie.substring(0, name.length + 1) === (name + "=")) {
+            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+            break;
+          }
+        }
+      }
+      return cookieValue;
+    }
+
+    function showToast(message, isSuccess) {
+      if (typeof Toastify === "undefined") return;
+      Toastify({
+        text: message,
+        duration: 3000,
+        gravity: "bottom",
+        position: "center",
+        close: true,
+        stopOnFocus: true,
+        style: {
+          background: isSuccess ? "#2dce89" : "#f5365c"
+        }
+      }).showToast();
+    }
+
+    function handleSellerAction(button, action) {
+      var row = button.closest("tr");
+      var url = button.getAttribute("data-url");
+      if (!row || !url || typeof Swal === "undefined") return;
+
+      var titleMap = {
+        approve: "Approve seller?",
+        reject: "Reject seller?",
+        disable: "Disable seller account?",
+        enable: "Enable seller account?",
+        delete: "Delete seller account permanently?"
+      };
+      var textMap = {
+        approve: "Do you want to verify this seller account?",
+        reject: "Do you want to reject this seller and disable the account?",
+        disable: "Do you want to disable this verified seller account?",
+        enable: "Do you want to enable this seller account?",
+        delete: "This will permanently remove the seller account and delete available unsold products. Continue?"
+      };
+      var buttonMap = {
+        approve: "Yes, approve",
+        reject: "Yes, reject",
+        disable: "Yes, disable",
+        enable: "Yes, enable",
+        delete: "Yes, delete"
+      };
+      var colorMap = {
+        approve: "#2dce89",
+        reject: "#f5365c",
+        disable: "#f5365c",
+        enable: "#2dce89",
+        delete: "#f5365c"
+      };
+
+      Swal.fire({
+        title: titleMap[action] || "Confirm action?",
+        text: textMap[action] || "Proceed with this action?",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: buttonMap[action] || "Yes, continue",
+        cancelButtonText: "Cancel",
+        confirmButtonColor: colorMap[action] || "#5e72e4",
+        reverseButtons: true
+      }).then(function (result) {
+        if (!result.isConfirmed) return;
+
+        fetch(url, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+            "X-CSRFToken": getCookie("csrftoken"),
+            "X-Requested-With": "XMLHttpRequest"
+          },
+          body: "action=" + encodeURIComponent(action)
+        })
+          .then(function (response) { return response.json(); })
+            .then(function (data) {
+              if (!data.ok) {
+                showToast(data.message || "Unable to update seller account.", false);
+                return;
+              }
+              if (data.deleted) {
+                row.remove();
+                showToast(data.message || "Seller account deleted.", true);
+                return;
+              }
+              if (data.row_html) {
+                row.outerHTML = data.row_html;
+              }
+            showToast(data.message || "Seller verification updated.", true);
+          })
+          .catch(function () {
+            showToast("Request failed. Please try again.", false);
+          });
+      });
+    }
+
+    document.addEventListener("click", function (event) {
+      var actionBtn = event.target.closest(".js-seller-action");
+      if (actionBtn) {
+        event.preventDefault();
+        handleSellerAction(actionBtn, actionBtn.getAttribute("data-action"));
       }
     });
   });

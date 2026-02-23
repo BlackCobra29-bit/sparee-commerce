@@ -1,0 +1,141 @@
+{% extends "vendors/base.html" %}
+
+{% block vendor_title %}Messages Inbox - Wahid Spare Hub{% endblock %}
+
+{% block vendor_content %}
+<div class="row mb-4">
+  <div class="col-12">
+    <div class="card">
+      <div class="card-body p-3">
+        <div class="row align-items-center">
+          <div class="col-md-7">
+            <h5 class="mb-1">Contact Messages Inbox</h5>
+            <p class="text-sm text-secondary mb-0">Messages submitted from the homepage Contact Us form.</p>
+          </div>
+          <div class="col-md-5">
+            <div class="d-flex justify-content-md-end gap-2 mt-3 mt-md-0">
+              <span class="badge bg-gradient-dark">Total: {{ contact_messages_total }}</span>
+              <span class="badge bg-gradient-danger">Unseen: {{ contact_messages_unseen }}</span>
+              <span class="badge bg-gradient-success">Seen: {{ contact_messages_seen }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-12">
+    <div class="card">
+      <div class="card-header pb-0">
+        <h6 class="mb-0"><i class="fa fa-envelope me-2"></i>Messages</h6>
+      </div>
+      <div class="card-body pt-3">
+        <div class="table-responsive">
+          <table class="table align-items-center mb-0">
+            <thead>
+              <tr>
+                <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Sender</th>
+                <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Subject</th>
+                <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Message</th>
+                <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 text-end">Date</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for msg in contact_messages %}
+              <tr>
+                <td>
+                  <div class="d-flex flex-column">
+                    <span class="text-sm font-weight-bold">{{ msg.name }}</span>
+                    <span class="text-xs text-secondary">{{ msg.email }}</span>
+                  </div>
+                </td>
+                <td>
+                  <span class="text-sm">{{ msg.subject }}</span>
+                </td>
+                <td>
+                  <span class="text-sm text-wrap d-inline" style="max-width: 420px;">{{ msg.message_body|truncatechars:120 }}</span>{% if msg.message_body|length > 120 %}<button
+                    type="button"
+                    class="btn btn-link text-primary text-xs px-0 py-0 align-baseline js-message-read-more"
+                    data-name="{{ msg.name|escape }}"
+                    data-email="{{ msg.email|escape }}"
+                    data-subject="{{ msg.subject|escape }}"
+                    data-date="{{ msg.created_at|date:'j M Y, g:i A'|escape }}"
+                    data-message="{{ msg.message_body|escapejs }}"
+                  >Read more</button>{% endif %}
+                </td>
+                <td class="align-middle text-end">
+                  <span class="text-xs text-secondary">{{ msg.created_at|date:"j M Y, g:i A" }}</span>
+                </td>
+              </tr>
+              {% empty %}
+              <tr>
+                <td colspan="4" class="text-center text-sm text-secondary py-4">No messages yet.</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="contactMessageReadModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+      <div class="modal-header pb-2">
+        <h5 class="modal-title">
+          <i class="fa fa-envelope-open-text me-2 text-primary"></i>Message Details
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body pt-2">
+        <div class="row g-3 mb-3">
+          <div class="col-md-6">
+            <div class="text-xs text-secondary text-uppercase">From</div>
+            <div class="text-sm fw-bold" id="msgModalSenderName">-</div>
+            <div class="text-xs text-secondary" id="msgModalSenderEmail">-</div>
+          </div>
+          <div class="col-md-6 text-md-end">
+            <div class="text-xs text-secondary text-uppercase">Date</div>
+            <div class="text-sm" id="msgModalDate">-</div>
+          </div>
+        </div>
+        <div class="mb-2">
+          <div class="text-xs text-secondary text-uppercase">Subject</div>
+          <div class="text-sm fw-bold" id="msgModalSubject">-</div>
+        </div>
+        <div class="border rounded-3 p-3 bg-gray-100">
+          <div class="text-xs text-secondary text-uppercase mb-1">Message</div>
+          <div class="text-sm text-dark" id="msgModalBody" style="white-space: pre-wrap;"></div>
+        </div>
+      </div>
+      <div class="modal-footer pt-2">
+        <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block vendor_extra_js %}
+<script>
+  document.addEventListener("click", function (event) {
+    var trigger = event.target.closest(".js-message-read-more");
+    if (!trigger) return;
+    event.preventDefault();
+
+    document.getElementById("msgModalSenderName").textContent = trigger.getAttribute("data-name") || "-";
+    document.getElementById("msgModalSenderEmail").textContent = trigger.getAttribute("data-email") || "-";
+    document.getElementById("msgModalSubject").textContent = trigger.getAttribute("data-subject") || "-";
+    document.getElementById("msgModalDate").textContent = trigger.getAttribute("data-date") || "-";
+    document.getElementById("msgModalBody").textContent = trigger.getAttribute("data-message") || "-";
+
+    var modalEl = document.getElementById("contactMessageReadModal");
+    if (!modalEl || typeof bootstrap === "undefined") return;
+    bootstrap.Modal.getOrCreateInstance(modalEl).show();
+  });
+</script>
+{% endblock %}

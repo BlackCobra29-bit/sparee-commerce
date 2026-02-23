@@ -3,24 +3,31 @@ from decimal import Decimal
 from datetime import date
 
 from django.contrib import messages
-from django.contrib.auth import login, logout
+from django.contrib.auth import login, logout, update_session_auth_hash
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import User
 from django.core.paginator import Paginator
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.shortcuts import get_object_or_404
 from django.shortcuts import redirect
-from django.db import transaction
-from django.db.models import Count, F, Q, Sum
+from django.db import IntegrityError, transaction
+from django.db.models import Avg, Count, F, FloatField, Q, Sum, Value
 from django.db.models.functions import Coalesce, TruncMonth
 from django.utils import timezone
 from django.template.loader import render_to_string
-from django.urls import reverse_lazy
+from django.urls import reverse, reverse_lazy
 from django.views.generic import FormView, TemplateView, View
 from django_htmx.http import HttpResponseClientRedirect
 
-from .forms import ForgotPasswordForm, LoginForm, ProductForm, SignupForm
-from .models import AccountRegistration, Order, Product
+from .forms import ForgotPasswordForm, LoginForm, ProductCategoryForm, ProductForm, SignupForm
+from .models import (
+    AccountRegistration,
+    ContactMessage,
+    Order,
+    Product,
+    ProductCategory,
+    ProductRating,
+)
 
 
 def _redirect_superuser_home(request):
@@ -32,8 +39,21 @@ def _redirect_superuser_home(request):
 
 def _build_shop_products():
     products = (
-        Product.objects.filter(is_active=True, current_stock__gt=0)
+        Product.objects.filter(
+            is_active=True,
+            current_stock__gt=0,
+            vendor__is_active=True,
+            vendor__account_registration__is_verified=True,
+        )
         .select_related("vendor", "vendor__account_registration")
+        .annotate(
+            rating_avg=Coalesce(
+                Avg("ratings__rating"),
+                Value(0.0),
+                output_field=FloatField(),
+            ),
+            rating_count=Coalesce(Count("ratings", distinct=True), 0),
+        )
         .only(
             "vin",
             "name",
@@ -71,13 +91,14 @@ def _build_shop_products():
             {
                 "sku": product.vin,
                 "name": product.name,
-                "category": product.get_category_display(),
+                "category": product.category,
                 "brand": seller_name,
                 "seller_name": seller_name,
                 "seller_photo": seller_photo,
+                "owner_id": product.vendor_id,
                 "condition": "New",
-                "rating": 4.5,
-                "reviews": 0,
+                "rating": float(product.rating_avg or 0),
+                "reviews": int(product.rating_count or 0),
                 "price": float(product.price),
                 "stock": stock,
                 "badges": stock_badges,
@@ -112,9 +133,16 @@ class HomeView(TemplateView):
 
         shop_products = _build_shop_products()
 
-        category_options = []
-        for value, label in Product.CATEGORY_CHOICES:
-            category_options.append({"value": label, "label": label})
+        category_options = [
+            {"value": category.name, "label": category.name}
+            for category in ProductCategory.objects.filter(is_visible=True).order_by("name")
+        ]
+        if not category_options:
+            category_options = [
+                {"value": name, "label": name}
+                for name in Product.objects.values_list("category", flat=True).distinct()
+                if name
+            ]
 
         context["shop_products"] = shop_products
         context["shop_category_options"] = category_options
@@ -122,6 +150,20 @@ class HomeView(TemplateView):
         context["show_nav_user"] = show_nav_user
         context["nav_user_name"] = nav_user_name
         context["nav_user_photo_url"] = nav_user_photo_url
+        has_registered_account = False
+        if self.request.user.is_authenticated:
+            has_registered_account = AccountRegistration.objects.filter(
+                user_id=self.request.user.id
+            ).exists()
+        context["shop_rating_context"] = {
+            "is_authenticated": self.request.user.is_authenticated,
+            "can_rate": self.request.user.is_authenticated
+            and (not self.request.user.is_superuser)
+            and has_registered_account,
+            "current_user_id": self.request.user.id if self.request.user.is_authenticated else None,
+            "login_url": reverse("login"),
+            "rate_url_template": reverse("product_rate", kwargs={"sku": "__SKU__"}),
+        }
         return context
 
 
@@ -137,15 +179,22 @@ class SellerAccountRequiredMixin:
 
         if not request.user.is_authenticated:
             return self.handle_no_permission()
+        if not request.user.is_active:
+            logout(request)
+            messages.error(request, "Your account is disabled. Please contact admin.")
+            return redirect("login")
 
         account = (
             AccountRegistration.objects.filter(user_id=request.user.id)
-            .only("account_type")
+            .only("account_type", "is_verified")
             .first()
         )
         if not account or account.account_type != AccountRegistration.ACCOUNT_TYPE_SELLER:
             messages.error(request, "Only seller accounts can access this page.")
             return redirect("login")
+        if not account.is_verified:
+            messages.error(request, "Your seller account is pending superadmin verification.")
+            return redirect("home")
 
         return super().dispatch(request, *args, **kwargs)
 
@@ -291,8 +340,7 @@ class AdminDashboardView(SuperuserRequiredMixin, TemplateView):
         ).count()
         context["pending_approvals_count"] = AccountRegistration.objects.filter(
             account_type=AccountRegistration.ACCOUNT_TYPE_SELLER,
-        ).filter(
-            Q(license_file__isnull=True) | Q(license_file="")
+            is_verified=False,
         ).count()
         context["products_sold_count"] = Order.objects.filter(is_delivered=True).aggregate(
             total=Coalesce(Sum("quantity"), 0)
@@ -381,6 +429,107 @@ class AdminSellerManagementView(SuperuserRequiredMixin, TemplateView):
         return context
 
 
+class AdminSellerVerificationUpdateView(SuperuserRequiredMixin, View):
+    http_method_names = ["post"]
+
+    def post(self, request, *args, **kwargs):
+        account = get_object_or_404(
+            AccountRegistration.objects.select_related("user"),
+            pk=kwargs.get("pk"),
+            account_type=AccountRegistration.ACCOUNT_TYPE_SELLER,
+        )
+        action = (request.POST.get("action") or "").strip().lower()
+        if action not in {"approve", "reject", "disable", "enable", "delete"}:
+            return JsonResponse({"ok": False, "message": "Invalid action."}, status=400)
+
+        if action == "approve":
+            account.is_verified = True
+            account.user.is_active = True
+            Product.objects.filter(vendor_id=account.user_id).update(is_active=True)
+            message = "Seller approved and verified successfully."
+        elif action == "reject":
+            account.is_verified = False
+            account.user.is_active = False
+            Product.objects.filter(vendor_id=account.user_id).update(is_active=False)
+            message = "Seller rejected and account disabled."
+        elif action == "disable":
+            account.user.is_active = False
+            Product.objects.filter(vendor_id=account.user_id).update(is_active=False)
+            message = "Seller account disabled."
+        elif action == "enable":
+            account.user.is_active = True
+            Product.objects.filter(vendor_id=account.user_id).update(is_active=True)
+            message = "Seller account enabled."
+        else:
+            if account.user.is_active:
+                return JsonResponse(
+                    {"ok": False, "message": "Disable seller account before deleting."},
+                    status=400,
+                )
+
+            unsold_products_qs = (
+                Product.objects.filter(
+                    vendor_id=account.user_id,
+                    is_active=True,
+                    current_stock__gt=0,
+                )
+                .annotate(
+                    delivered_qty=Coalesce(
+                        Sum("orders__quantity", filter=Q(orders__is_delivered=True)),
+                        0,
+                    )
+                )
+                .filter(delivered_qty=0)
+            )
+            deleted_products_count = unsold_products_qs.count()
+            user = account.user
+            with transaction.atomic():
+                unsold_products_qs.delete()
+                account.delete()
+                user.is_active = False
+                user.set_unusable_password()
+                user.email = ""
+                user.first_name = ""
+                user.last_name = ""
+                user.save(
+                    update_fields=[
+                        "is_active",
+                        "password",
+                        "email",
+                        "first_name",
+                        "last_name",
+                    ]
+                )
+            return JsonResponse(
+                {
+                    "ok": True,
+                    "deleted": True,
+                    "account_id": kwargs.get("pk"),
+                    "message": f"Seller account removed. Deleted {deleted_products_count} available unsold product(s).",
+                }
+            )
+
+        with transaction.atomic():
+            account.save(update_fields=["is_verified", "updated_at"])
+            account.user.save(update_fields=["is_active"])
+
+        row_html = render_to_string(
+            "admin/partials/seller_row.html",
+            {"seller": account},
+            request=request,
+        )
+        return JsonResponse(
+            {
+                "ok": True,
+                "account_id": account.id,
+                "is_verified": account.is_verified,
+                "is_active": account.user.is_active,
+                "message": message,
+                "row_html": row_html,
+            }
+        )
+
+
 class AdminProductSkuControlView(SuperuserRequiredMixin, TemplateView):
     template_name = "admin/product_sku_control.html"
 
@@ -456,6 +605,134 @@ class AdminPricingOversightView(SuperuserRequiredMixin, TemplateView):
 
 class AdminSystemControlsView(SuperuserRequiredMixin, TemplateView):
     template_name = "admin/system_controls.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        categories = ProductCategory.objects.order_by("-created_at")
+        context["category_rows"] = categories
+        context["category_total_count"] = categories.count()
+        context["category_visible_count"] = categories.filter(is_visible=True).count()
+        context["category_hidden_count"] = categories.filter(is_visible=False).count()
+        context["category_form"] = kwargs.get("category_form") or ProductCategoryForm()
+        return context
+
+
+class AdminProductCategoryCreateView(SuperuserRequiredMixin, View):
+    http_method_names = ["post"]
+
+    def post(self, request, *args, **kwargs):
+        form = ProductCategoryForm(request.POST)
+        is_ajax = request.headers.get("x-requested-with") == "XMLHttpRequest"
+        if form.is_valid():
+            category = form.save()
+            if is_ajax:
+                card_html = render_to_string(
+                    "admin/partials/category_card.html",
+                    {"category": category},
+                    request=request,
+                )
+                total_count = ProductCategory.objects.count()
+                visible_count = ProductCategory.objects.filter(is_visible=True).count()
+                hidden_count = ProductCategory.objects.filter(is_visible=False).count()
+                return JsonResponse(
+                    {
+                        "ok": True,
+                        "message": "Product category added successfully.",
+                        "card_html": card_html,
+                        "counts": {
+                            "total": total_count,
+                            "visible": visible_count,
+                            "hidden": hidden_count,
+                        },
+                    }
+                )
+            messages.success(request, "Product category added successfully.")
+            return redirect("admin_system_controls")
+
+        if is_ajax:
+            errors = []
+            for field_errors in form.errors.values():
+                errors.extend(field_errors)
+            return JsonResponse(
+                {
+                    "ok": False,
+                    "message": errors[0] if errors else "Unable to add category.",
+                    "errors": form.errors,
+                },
+                status=422,
+            )
+
+        for field_name, errors in form.errors.items():
+            if field_name == "__all__":
+                for error in errors:
+                    messages.error(request, error)
+                continue
+            label = form.fields[field_name].label or field_name.replace("_", " ").title()
+            for error in errors:
+                messages.error(request, f"{label}: {error}")
+
+        view = AdminSystemControlsView()
+        view.setup(request)
+        context = view.get_context_data(category_form=form)
+        return view.render_to_response(context, status=422)
+
+
+class AdminProductCategoryVisibilityUpdateView(SuperuserRequiredMixin, View):
+    http_method_names = ["post"]
+
+    def post(self, request, *args, **kwargs):
+        category = get_object_or_404(ProductCategory, pk=kwargs.get("pk"))
+        make_visible = request.POST.get("is_visible") == "1"
+        category.is_visible = make_visible
+        category.save(update_fields=["is_visible", "updated_at"])
+        total_count = ProductCategory.objects.count()
+        visible_count = ProductCategory.objects.filter(is_visible=True).count()
+        hidden_count = ProductCategory.objects.filter(is_visible=False).count()
+        return JsonResponse(
+            {
+                "ok": True,
+                "category_id": category.id,
+                "is_visible": category.is_visible,
+                "message": "Category is now visible." if category.is_visible else "Category hidden successfully.",
+                "counts": {
+                    "total": total_count,
+                    "visible": visible_count,
+                    "hidden": hidden_count,
+                },
+            }
+        )
+
+
+class AdminMessagesInboxView(SuperuserRequiredMixin, TemplateView):
+    template_name = "admin/messages_inbox.html"
+
+    def dispatch(self, request, *args, **kwargs):
+        ContactMessage.objects.filter(message_seen=False).update(message_seen=True)
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        messages_qs = (
+            ContactMessage.objects.select_related("user")
+            .only(
+                "id",
+                "name",
+                "email",
+                "subject",
+                "message_body",
+                "message_seen",
+                "created_at",
+                "user__username",
+                "user__first_name",
+                "user__last_name",
+            )
+            .order_by("-created_at")
+        )
+        context["contact_messages"] = messages_qs
+        context["contact_messages_total"] = messages_qs.count()
+        context["contact_messages_unseen"] = messages_qs.filter(message_seen=False).count()
+        context["contact_messages_seen"] = messages_qs.filter(message_seen=True).count()
+        return context
 
 
 class VendorOrdersView(SellerAccountRequiredMixin, VendorAccessMixin, TemplateView):
@@ -571,6 +848,7 @@ class VendorProductsView(SellerAccountRequiredMixin, VendorAccessMixin, Template
             )
             .order_by("-created_at")
         )
+        context["product_category_rows"] = ProductCategory.objects.filter(is_visible=True).order_by("name")
         return context
 
 
@@ -745,6 +1023,130 @@ class BuyerOrderCancelView(BuyerAccountRequiredMixin, VendorAccessMixin, View):
             order.delete()
 
         return JsonResponse({"ok": True, "message": "Order canceled successfully."})
+
+
+class ProductRatingCreateView(View):
+    http_method_names = ["post"]
+
+    def post(self, request, *args, **kwargs):
+        if request.user.is_authenticated and request.user.is_superuser:
+            return JsonResponse({"error": "System admins cannot rate products."}, status=403)
+
+        if not request.user.is_authenticated:
+            return JsonResponse(
+                {"error": "Please log in with a registered account to rate."},
+                status=401,
+            )
+
+        account = (
+            AccountRegistration.objects.filter(user_id=request.user.id)
+            .only("id")
+            .first()
+        )
+        if not account:
+            return JsonResponse(
+                {"error": "Only registered accounts can rate products."},
+                status=403,
+            )
+
+        sku = str(kwargs.get("sku", "")).strip().upper()
+        if not sku:
+            return JsonResponse({"error": "Invalid product identifier."}, status=400)
+
+        product = Product.objects.filter(
+            vin=sku,
+            is_active=True,
+            vendor__is_active=True,
+            vendor__account_registration__is_verified=True,
+        ).first()
+        if not product:
+            return JsonResponse({"error": "Product is not available for rating."}, status=404)
+        if product.vendor_id == request.user.id:
+            return JsonResponse(
+                {"error": "You cannot rate your own product."},
+                status=403,
+            )
+
+        try:
+            payload = json.loads(request.body or "{}")
+        except json.JSONDecodeError:
+            return JsonResponse({"error": "Invalid request payload."}, status=400)
+
+        try:
+            rating_value = int(payload.get("rating"))
+        except (TypeError, ValueError):
+            return JsonResponse({"error": "Rating is required."}, status=400)
+
+        if rating_value < 1 or rating_value > 5:
+            return JsonResponse({"error": "Rating must be between 1 and 5."}, status=400)
+
+        if ProductRating.objects.filter(user_id=request.user.id, product_id=product.id).exists():
+            return JsonResponse(
+                {"error": "You already rated this product. You can only rate once."},
+                status=409,
+            )
+
+        try:
+            ProductRating.objects.create(
+                user=request.user,
+                product=product,
+                rating=rating_value,
+            )
+        except IntegrityError:
+            return JsonResponse(
+                {"error": "You already rated this product. You can only rate once."},
+                status=409,
+            )
+
+        aggregates = ProductRating.objects.filter(product_id=product.id).aggregate(
+            avg=Coalesce(Avg("rating"), Value(0.0), output_field=FloatField()),
+            count=Coalesce(Count("id"), 0),
+        )
+        return JsonResponse(
+            {
+                "ok": True,
+                "message": "Thanks for your rating.",
+                "rating": round(float(aggregates["avg"] or 0), 1),
+                "reviews": int(aggregates["count"] or 0),
+                "sku": sku,
+            }
+        )
+
+
+class ContactMessageCreateView(View):
+    http_method_names = ["post"]
+
+    def post(self, request, *args, **kwargs):
+        try:
+            payload = json.loads(request.body or "{}")
+        except json.JSONDecodeError:
+            payload = request.POST
+
+        name = str(payload.get("name", "")).strip()
+        email = str(payload.get("email", "")).strip()
+        subject = str(payload.get("subject", "")).strip()
+        message_body = str(payload.get("message_body", "")).strip()
+
+        if not all([name, email, subject, message_body]):
+            return JsonResponse(
+                {"ok": False, "message": "All contact fields are required."},
+                status=400,
+            )
+
+        if len(name) > 120 or len(subject) > 180:
+            return JsonResponse(
+                {"ok": False, "message": "Name or subject is too long."},
+                status=400,
+            )
+
+        ContactMessage.objects.create(
+            user=request.user if request.user.is_authenticated else None,
+            name=name,
+            email=email,
+            subject=subject,
+            message_body=message_body,
+        )
+        return JsonResponse({"ok": True, "message": "Message submitted successfully."})
 
 
 class OrderCreateView(View):
@@ -1066,6 +1468,83 @@ class HtmxTemplateMixin:
         return HttpResponseRedirect(url)
 
 
+class AccountSettingsView(LoginRequiredMixin, TemplateView):
+    login_url = reverse_lazy("login")
+    template_name = "vendors/account_settings.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        account = (
+            AccountRegistration.objects.filter(user_id=self.request.user.id)
+            .only("account_type")
+            .first()
+        )
+        context["account_type_label"] = account.get_account_type_display() if account else "-"
+        return context
+
+    def post(self, request, *args, **kwargs):
+        form_type = (request.POST.get("form_type") or "").strip()
+        user = request.user
+
+        if form_type == "profile":
+            first_name = (request.POST.get("first_name") or "").strip()
+            last_name = (request.POST.get("last_name") or "").strip()
+            username = (request.POST.get("username") or "").strip()
+            email = (request.POST.get("email") or "").strip().lower()
+
+            if not first_name or not last_name or not username or not email:
+                messages.error(request, "All profile fields are required.")
+                return redirect("account_settings")
+
+            username_exists = User.objects.filter(username__iexact=username).exclude(pk=user.id).exists()
+            if username_exists:
+                messages.error(request, "Username is already taken.")
+                return redirect("account_settings")
+
+            email_exists = User.objects.filter(email__iexact=email).exclude(pk=user.id).exists()
+            if email_exists:
+                messages.error(request, "Email is already registered.")
+                return redirect("account_settings")
+
+            user.first_name = first_name
+            user.last_name = last_name
+            user.username = username
+            user.email = email
+            user.save(update_fields=["first_name", "last_name", "username", "email"])
+            messages.success(request, "Account profile updated successfully.")
+            return redirect("account_settings")
+
+        if form_type == "password":
+            current_password = request.POST.get("current_password") or ""
+            new_password = request.POST.get("new_password") or ""
+            confirm_password = request.POST.get("confirm_password") or ""
+
+            if not current_password or not new_password or not confirm_password:
+                messages.error(request, "All password fields are required.")
+                return redirect("account_settings")
+
+            if not user.check_password(current_password):
+                messages.error(request, "Current password is incorrect.")
+                return redirect("account_settings")
+
+            if len(new_password) < 8:
+                messages.error(request, "New password must be at least 8 characters.")
+                return redirect("account_settings")
+
+            if new_password != confirm_password:
+                messages.error(request, "New password and confirm password do not match.")
+                return redirect("account_settings")
+
+            user.set_password(new_password)
+            user.save(update_fields=["password"])
+            update_session_auth_hash(request, user)
+            messages.success(request, "Password changed successfully.")
+            return redirect("account_settings")
+
+        messages.error(request, "Invalid settings request.")
+        return redirect("account_settings")
+
+
 class LoginView(HtmxTemplateMixin, FormView):
     full_template_name = "auth/login.html"
     partial_template_name = "auth/partials/login_content.html"
@@ -1157,16 +1636,30 @@ class SignupView(HtmxTemplateMixin, FormView):
             phone_number=form.cleaned_data["phone"],
             profile_picture=profile_picture,
             license_file=license_file if account_type == "seller" else None,
+            is_verified=(account_type != "seller"),
         )
 
-        login(self.request, user)
         if account_type == "seller":
             messages.success(
                 self.request,
-                "Your seller account was created successfully. License uploaded.",
+                "Account registered successfully. Waiting approval by admin.",
             )
-        else:
-            messages.success(self.request, "Your buyer account was created successfully.")
+            return self.render_to_response(
+                self.get_context_data(
+                    form=self.form_class(),
+                    prefill={
+                        "account_type": "seller",
+                        "first_name": "",
+                        "last_name": "",
+                        "username": "",
+                        "email": "",
+                        "phone": "",
+                    },
+                )
+            )
+
+        login(self.request, user)
+        messages.success(self.request, "Your buyer account was created successfully.")
         return self.client_redirect(self.get_success_url())
 
     def form_invalid(self, form):

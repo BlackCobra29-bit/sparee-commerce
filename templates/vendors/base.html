@@ -64,6 +64,23 @@
       color: #fff;
     }
 
+    details > summary::-webkit-details-marker {
+      display: none;
+    }
+
+    details > summary {
+      list-style: none;
+    }
+
+    details:not([open]) > .dropdown-menu {
+      display: none;
+    }
+
+    details[open] > .dropdown-menu {
+      display: block;
+      z-index: 1040;
+    }
+
     @media (max-width: 991.98px) {
       .navbar-light .navbar-toggler {
         border-color: #000;
@@ -120,7 +137,7 @@
                 <div class="icon icon-shape icon-sm border-radius-md {% if current_url_name == 'admin_system_controls' %}bg-gradient-primary text-white{% else %}bg-white text-dark{% endif %} text-center me-2 d-flex align-items-center justify-content-center">
                   <i class="fa fa-sliders"></i>
                 </div>
-                <span class="nav-link-text ms-1">System Controls</span>
+                <span class="nav-link-text ms-1">Category Controls</span>
               </a>
             </li>
               {% endif %}
@@ -223,8 +240,73 @@
               </a>
             </li>
             {% endif %}
-            <li class="nav-item">
-              <button id="logoutBtn" class="btn btn-outline-dark btn-sm mb-0" type="button" title="Sign out">Sign out</button>
+            {% if request.user.is_superuser %}
+            <li class="nav-item me-lg-3 pe-3">
+              <a
+                href="{% url 'admin_messages_inbox' %}"
+                class="nav-link text-body p-0 position-relative d-inline-flex align-items-center justify-content-center"
+                style="width: 18px; height: 18px;"
+                title="Contact messages inbox"
+              >
+                <i class="fa fa-envelope cursor-pointer{% if current_url_name == 'admin_messages_inbox' %} text-primary{% endif %}" style="font-size: 0.95rem; line-height: 1;"></i>
+                {% if superadmin_unseen_message_count > 0 %}
+                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger px-1 py-0" style="font-size: 0.6rem; min-width: 1rem;">
+                  {% if superadmin_unseen_message_count > 99 %}99+{% else %}{{ superadmin_unseen_message_count }}{% endif %}
+                </span>
+                {% endif %}
+              </a>
+            </li>
+            <li class="nav-item me-lg-3 pe-3">
+              <a
+                href="#"
+                class="nav-link text-body p-0 position-relative d-inline-flex align-items-center justify-content-center"
+                style="width: 18px; height: 18px;"
+                title="New seller approvals"
+                data-bs-toggle="modal"
+                data-bs-target="#superadminSellerNotificationModal"
+                onclick="return false;"
+              >
+                <i class="fa fa-bell cursor-pointer" style="font-size: 0.95rem; line-height: 1;"></i>
+                {% if superadmin_notification_count > 0 %}
+                <span id="superadminSellerNotificationBadge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger px-1 py-0" style="font-size: 0.6rem; min-width: 1rem;">
+                  {% if superadmin_notification_count > 99 %}99+{% else %}{{ superadmin_notification_count }}{% endif %}
+                </span>
+                {% endif %}
+              </a>
+            </li>
+            {% endif %}
+            <li class="nav-item position-relative">
+              <details class="position-relative">
+                <summary
+                  class="list-unstyled d-flex align-items-center px-2 py-1"
+                  style="cursor:pointer; user-select:none;"
+                >
+                  {% if request.user.account_registration.profile_picture %}
+                  <img
+                    src="{{ request.user.account_registration.profile_picture.url }}"
+                    alt="Profile photo"
+                    class="rounded-circle me-2"
+                    style="width: 30px; height: 30px; object-fit: cover;"
+                  >
+                  {% else %}
+                  <span class="d-inline-flex align-items-center justify-content-center rounded-circle bg-gradient-secondary text-white me-2" style="width: 30px; height: 30px; font-size: 0.8rem;">
+                    {{ request.user.first_name|default:request.user.username|slice:":1"|upper }}
+                  </span>
+                  {% endif %}
+                  <span class="text-sm fw-bold text-dark">
+                    {% if request.user.get_full_name %}{{ request.user.get_full_name }}{% else %}{{ request.user.username }}{% endif %}
+                  </span>
+                </summary>
+                <div class="dropdown-menu dropdown-menu-end shadow-sm" style="min-width: 180px; right: 0; left: auto; top: calc(100% + 6px);">
+                  <a class="dropdown-item{% if current_url_name == 'account_settings' %} active{% endif %}" href="{% url 'account_settings' %}">
+                    <i class="fa fa-cog me-2"></i>Settings
+                  </a>
+                  <div class="dropdown-divider"></div>
+                  <button id="logoutBtn" class="dropdown-item text-danger" type="button" title="Sign out">
+                    <i class="fa fa-sign-out-alt me-2"></i>Sign out
+                  </button>
+                </div>
+              </details>
               <form id="logoutForm" method="post" action="{% url 'logout' %}" class="d-none">
                 {% csrf_token %}
               </form>
@@ -276,6 +358,65 @@
                 data-order-url="{% url 'order_create' %}">
                 <i class="fa fa-lock me-2"></i>Submit Order
               </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+    {% if request.user.is_superuser %}
+    <div class="modal fade" id="superadminSellerNotificationModal" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title fw-bold">
+              <i class="fa fa-user-check me-2"></i>New Seller Registration Requests
+            </h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <div class="table-responsive">
+              <table class="table table-hover align-middle mb-0">
+                <thead>
+                  <tr>
+                    <th>Seller</th>
+                    <th>Email</th>
+                    <th>Date</th>
+                    <th class="text-end">Action</th>
+                  </tr>
+                </thead>
+                <tbody id="superadminSellerNotificationTableBody">
+                  {% for item in superadmin_notifications %}
+                  <tr id="superadmin-seller-notification-row-{{ item.id }}">
+                    <td class="text-sm fw-bold">{{ item.full_name }}</td>
+                    <td class="text-sm">{{ item.email }}</td>
+                    <td class="text-sm">{{ item.created_at|date:"j M Y" }}</td>
+                    <td class="text-end">
+                      <button
+                        type="button"
+                        class="btn btn-sm bg-gradient-success mb-0 me-1 js-superadmin-seller-action"
+                        data-url="{% url 'admin_seller_verification_update' item.id %}"
+                        data-action="approve"
+                      >
+                        Approve
+                      </button>
+                      <button
+                        type="button"
+                        class="btn btn-sm bg-gradient-danger mb-0 js-superadmin-seller-action"
+                        data-url="{% url 'admin_seller_verification_update' item.id %}"
+                        data-action="reject"
+                      >
+                        Reject
+                      </button>
+                    </td>
+                  </tr>
+                  {% empty %}
+                  <tr id="superadminSellerNotificationEmptyRow">
+                    <td colspan="4" class="text-center text-sm text-secondary py-4">No pending seller accounts.</td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
             </div>
           </div>
         </div>
@@ -403,6 +544,27 @@
     }
 
     (function () {
+      var profileBtn = document.getElementById('profileMenuBtn');
+      var profileMenu = document.getElementById('profileMenu');
+      if (profileBtn && profileMenu) {
+        profileBtn.addEventListener('click', function (event) {
+          event.preventDefault();
+          event.stopPropagation();
+          profileMenu.classList.toggle('show');
+          var expanded = profileMenu.classList.contains('show');
+          profileBtn.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+        });
+
+        document.addEventListener('click', function (event) {
+          if (!profileMenu.classList.contains('show')) return;
+          if (profileMenu.contains(event.target) || profileBtn.contains(event.target)) return;
+          profileMenu.classList.remove('show');
+          profileBtn.setAttribute('aria-expanded', 'false');
+        });
+      }
+    })();
+
+    (function () {
       var logoutBtn = document.getElementById('logoutBtn');
       var logoutForm = document.getElementById('logoutForm');
       if (!logoutBtn || !logoutForm || typeof Swal === 'undefined') return;
@@ -422,6 +584,109 @@
           if (result.isConfirmed) {
             logoutForm.submit();
           }
+        });
+      });
+    })();
+
+    (function () {
+      if (!{{ request.user.is_superuser|yesno:"true,false" }}) return;
+
+      function getCookie(name) {
+        var cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+          var cookies = document.cookie.split(';');
+          for (var i = 0; i < cookies.length; i++) {
+            var cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+              cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+              break;
+            }
+          }
+        }
+        return cookieValue;
+      }
+
+      function showToast(message, isSuccess) {
+        if (typeof Toastify === 'undefined') return;
+        Toastify({
+          text: message,
+          duration: 3000,
+          gravity: 'bottom',
+          position: 'center',
+          close: true,
+          stopOnFocus: true,
+          style: { background: isSuccess ? '#2dce89' : '#f5365c' }
+        }).showToast();
+      }
+
+      function updateSuperadminBellCount() {
+        var rows = document.querySelectorAll('[id^="superadmin-seller-notification-row-"]');
+        var count = rows.length;
+        var badge = document.getElementById('superadminSellerNotificationBadge');
+        if (count <= 0) {
+          if (badge) badge.remove();
+          var tbody = document.getElementById('superadminSellerNotificationTableBody');
+          if (tbody && !document.getElementById('superadminSellerNotificationEmptyRow')) {
+            tbody.insertAdjacentHTML('beforeend', '<tr id="superadminSellerNotificationEmptyRow"><td colspan="4" class="text-center text-sm text-secondary py-4">No pending seller accounts.</td></tr>');
+          }
+          return;
+        }
+        if (!badge) return;
+        badge.textContent = count > 99 ? '99+' : String(count);
+      }
+
+      document.addEventListener('click', function (event) {
+        var actionBtn = event.target.closest('.js-superadmin-seller-action');
+        if (!actionBtn) return;
+        event.preventDefault();
+
+        var url = actionBtn.getAttribute('data-url');
+        var action = actionBtn.getAttribute('data-action');
+        if (!url || !action || typeof Swal === 'undefined') return;
+
+        var confirmTitle = action === 'approve' ? 'Approve seller?' : 'Reject seller?';
+        var confirmText = action === 'approve'
+          ? 'Do you want to verify this seller account?'
+          : 'Do you want to reject this seller account?';
+        var confirmColor = action === 'approve' ? '#2dce89' : '#f5365c';
+
+        Swal.fire({
+          title: confirmTitle,
+          text: confirmText,
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonText: action === 'approve' ? 'Yes, approve' : 'Yes, reject',
+          cancelButtonText: 'Cancel',
+          confirmButtonColor: confirmColor,
+          reverseButtons: true
+        }).then(function (result) {
+          if (!result.isConfirmed) return;
+
+          fetch(url, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/x-www-form-urlencoded',
+              'X-CSRFToken': getCookie('csrftoken'),
+              'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: 'action=' + encodeURIComponent(action)
+          })
+            .then(function (response) { return response.json(); })
+            .then(function (data) {
+              if (!data.ok) {
+                showToast(data.message || 'Unable to update seller account.', false);
+                return;
+              }
+              var row = actionBtn.closest('tr');
+              if (row) row.remove();
+              var emptyRow = document.getElementById('superadminSellerNotificationEmptyRow');
+              if (emptyRow) emptyRow.remove();
+              updateSuperadminBellCount();
+              showToast(data.message || 'Seller request updated.', true);
+            })
+            .catch(function () {
+              showToast('Request failed. Please try again.', false);
+            });
         });
       });
     })();

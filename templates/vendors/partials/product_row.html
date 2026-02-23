@@ -8,7 +8,7 @@
     </div>
   </td>
   <td class="align-middle text-center">
-    <span>{{ product.get_category_display }}</span>
+    <span>{{ product.category }}</span>
   </td>
   <td class="align-middle text-center">
     <span class="{% if stock <= product.reorder_level and stock > 0 %}text-danger{% endif %}">{{ stock }}</span>
@@ -31,7 +31,7 @@
       class="text-secondary js-view-product"
       data-name="{{ product.name|escape }}"
       data-vin="{{ product.vin|escape }}"
-      data-category-label="{{ product.get_category_display|escape }}"
+      data-category-label="{{ product.category|escape }}"
       data-price="{{ product.price }}"
       data-current-stock="{{ product.current_stock|default_if_none:product.initial_stock }}"
       data-reorder-level="{{ product.reorder_level }}"

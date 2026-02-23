@@ -1,0 +1,93 @@
+<tr id="seller-row-{{ seller.id }}">
+  <td>
+    <div class="d-flex px-2 py-1">
+      <div>
+        {% if seller.profile_picture %}
+        <img src="{{ seller.profile_picture.url }}" class="avatar avatar-sm me-3" alt="{{ seller.user.username }}">
+        {% else %}
+        <div class="avatar avatar-sm me-3 bg-gradient-secondary text-white d-flex align-items-center justify-content-center">
+          <i class="ni ni-single-02 text-xs"></i>
+        </div>
+        {% endif %}
+      </div>
+      <div class="d-flex flex-column justify-content-center">
+        <h6 class="mb-0 text-sm">{{ seller.user.get_full_name|default:seller.user.username }}</h6>
+        <p class="text-xs text-secondary mb-0">{{ seller.user.email|default:"-" }}</p>
+      </div>
+    </div>
+  </td>
+  <td>
+    {% if not seller.user.is_active %}
+    <span class="badge badge-sm bg-gradient-danger js-verification-status">Disabled</span>
+    {% elif seller.is_verified %}
+    <span class="badge badge-sm bg-gradient-success js-verification-status">Verified</span>
+    {% else %}
+    <span class="badge badge-sm bg-gradient-warning js-verification-status">Pending</span>
+    {% endif %}
+
+    {% if seller.license_file %}
+    <a href="{{ seller.license_file.url }}" target="_blank" class="d-block text-xs mt-1">View license</a>
+    {% else %}
+    <span class="d-block text-xs mt-1 text-secondary">No license file</span>
+    {% endif %}
+  </td>
+  <td>
+    <div class="text-xs text-secondary">
+      Products: <b>{{ seller.product_count|default:0 }}</b>
+    </div>
+    <div class="text-xs text-secondary">
+      Orders: <b>{{ seller.delivered_orders|default:0 }}</b> delivered / <b>{{ seller.total_orders|default:0 }}</b> total
+    </div>
+    <div class="text-xs text-secondary">
+      Quantity sold: <b>{{ seller.sold_quantity|default:0 }}</b>
+    </div>
+  </td>
+  <td class="align-middle text-center">
+    {% if seller.user.is_active %}
+      {% if seller.is_verified %}
+      <button
+        type="button"
+        class="btn btn-sm bg-gradient-danger mb-0 py-1 px-2 text-xs js-seller-action"
+        data-url="{% url 'admin_seller_verification_update' seller.id %}"
+        data-action="disable"
+      >
+        Disable Account
+      </button>
+      {% else %}
+      <button
+        type="button"
+        class="btn btn-sm bg-gradient-success mb-0 me-1 py-1 px-2 text-xs js-seller-action"
+        data-url="{% url 'admin_seller_verification_update' seller.id %}"
+        data-action="approve"
+      >
+        Approve
+      </button>
+      <button
+        type="button"
+        class="btn btn-sm bg-gradient-danger mb-0 py-1 px-2 text-xs js-seller-action"
+        data-url="{% url 'admin_seller_verification_update' seller.id %}"
+        data-action="reject"
+      >
+        Reject
+      </button>
+      {% endif %}
+    {% else %}
+    <button
+      type="button"
+      class="btn btn-sm bg-gradient-success mb-0 py-1 px-2 text-xs js-seller-action"
+      data-url="{% url 'admin_seller_verification_update' seller.id %}"
+      data-action="enable"
+    >
+      Enable Account
+    </button>
+    <button
+      type="button"
+      class="btn btn-sm bg-gradient-danger mb-0 ms-1 py-1 px-2 text-xs js-seller-action"
+      data-url="{% url 'admin_seller_verification_update' seller.id %}"
+      data-action="delete"
+    >
+      Delete
+    </button>
+    {% endif %}
+  </td>
+</tr>

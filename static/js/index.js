@@ -15,6 +15,7 @@ function normalizeProduct(raw = {}) {
     brand: String(raw.brand || raw.seller_name || "Unknown"),
     seller_name: String(raw.seller_name || raw.brand || "Unknown"),
     seller_photo: String(raw.seller_photo || ""),
+    owner_id: toNumber(raw.owner_id, 0),
     condition: String(raw.condition || "New"),
     rating: toNumber(raw.rating, 0),
     reviews: Math.max(0, Math.trunc(toNumber(raw.reviews, 0))),
@@ -41,6 +42,38 @@ function readProductsFromView() {
 }
 
 const PRODUCTS = readProductsFromView();
+function readRatingContext() {
+  const node = document.getElementById("shop-rating-context");
+  if (!node) {
+    return {
+      is_authenticated: false,
+      can_rate: false,
+      login_url: "/login/",
+      rate_url_template: "/products/__SKU__/rate/",
+    };
+  }
+  try {
+    const parsed = JSON.parse(node.textContent || "{}");
+    return {
+      is_authenticated: !!parsed.is_authenticated,
+      can_rate: !!parsed.can_rate,
+      current_user_id: toNumber(parsed.current_user_id, 0),
+      login_url: String(parsed.login_url || "/login/"),
+      rate_url_template: String(
+        parsed.rate_url_template || "/products/__SKU__/rate/"
+      ),
+    };
+  } catch (e) {
+    return {
+      is_authenticated: false,
+      can_rate: false,
+      current_user_id: 0,
+      login_url: "/login/",
+      rate_url_template: "/products/__SKU__/rate/",
+    };
+  }
+}
+const RATING_CONTEXT = readRatingContext();
 
 // ==========================
 // STATE (persisted)
@@ -50,6 +83,8 @@ const LS = {
   wish: "wahid_wish_v2",
   compare: "wahid_compare_v2",
   vehicle: "wahid_vehicle_v2",
+  rated: "wahid_rated_products_v1",
+  rated_values: "wahid_rated_values_v1",
 };
 
 let view = [...PRODUCTS];
@@ -57,6 +92,9 @@ let cart = loadLS(LS.cart, []); // [{sku, qty}]
 let wish = loadLS(LS.wish, []); // [sku]
 let compare = loadLS(LS.compare, []); // [sku]
 let savedVehicle = loadLS(LS.vehicle, null); // {make, year} or null
+let ratedSkus = new Set(loadLS(LS.rated, [])); // [sku]
+let ratedSkuValues = loadLS(LS.rated_values, {}); // { [sku]: rating }
+let pendingRatingConfirm = null; // { sku, rating }
 
 // ==========================
 // HELPERS
@@ -130,6 +168,273 @@ function stars(rating) {
     else html += '<i class="far fa-star"></i>';
   }
   return html;
+}
+function modalRatingStarsHtml(selected = 0) {
+  let html = "";
+  for (let i = 1; i <= 5; i += 1) {
+    html += `<button type="button" class="btn btn-link p-0 mr-1 rate-modal-star" data-rating="${i}" title="${i} star${
+      i > 1 ? "s" : ""
+    }"><i class="${i <= selected ? "fas" : "far"} fa-star"></i></button>`;
+  }
+  return html;
+}
+function openRateNowLinkHtml(sku) {
+  const safeSku = String(sku || "").replace(/'/g, "\\'");
+  return `<a href="#" class="small font-weight-bold text-primary" onclick="openRateModal('${safeSku}'); return false;">Rate now</a>`;
+}
+function buildRateUrl(sku) {
+  return RATING_CONTEXT.rate_url_template.replace(
+    "__SKU__",
+    encodeURIComponent(String(sku || "").trim())
+  );
+}
+function saveRatedSkus() {
+  saveLS(LS.rated, Array.from(ratedSkus));
+}
+function saveRatedSkuValues() {
+  saveLS(LS.rated_values, ratedSkuValues);
+}
+function ratedStateHtml(sku) {
+  const ratedValue = Math.trunc(toNumber(ratedSkuValues[sku], 0));
+  if (ratedValue >= 1 && ratedValue <= 5) {
+    return `<span class="badge badge-success" title="Your rating: ${ratedValue}/5">Rated</span>`;
+  }
+  return '<span class="badge badge-success">Rated</span>';
+}
+function updateProductRatingValue(sku, rating, reviews) {
+  const product = bySku(sku);
+  if (!product) return;
+  product.rating = Math.max(0, toNumber(rating, product.rating));
+  product.reviews = Math.max(0, Math.trunc(toNumber(reviews, product.reviews)));
+}
+function renderQuickViewRateControls(sku) {
+  const box = $("#qvRateBox");
+  const starsBox = $("#qvRateStars");
+  if (!box.length || !starsBox.length) return;
+  const product = bySku(sku);
+  const isOwnProduct =
+    !!product &&
+    Number(product.owner_id || 0) > 0 &&
+    Number(product.owner_id || 0) === Number(RATING_CONTEXT.current_user_id || 0);
+
+  if (isOwnProduct) {
+    starsBox.html(
+      '<span class="muted small">You cannot rate your own product.</span>'
+    );
+    return;
+  }
+
+  if (ratedSkus.has(String(sku || "").trim())) {
+    starsBox.html(ratedStateHtml(String(sku || "").trim()));
+    return;
+  }
+
+  if (!RATING_CONTEXT.can_rate) {
+    const msg = RATING_CONTEXT.is_authenticated
+      ? "Only registered accounts can rate."
+      : "Log in to rate this product.";
+    starsBox.html(`<span class="muted small">${escapeHtml(msg)}</span>`);
+    return;
+  }
+  starsBox.html(openRateNowLinkHtml(sku));
+}
+function setModalSelectedRating(rating) {
+  const selected = Math.trunc(toNumber(rating, 0));
+  pendingRatingConfirm = pendingRatingConfirm || { sku: "", rating: 0 };
+  pendingRatingConfirm.rating = selected;
+  $("#rateConfirmStars .rate-modal-star").each(function () {
+    const starValue = Math.trunc(toNumber($(this).data("rating"), 0));
+    const icon = $(this).find("i");
+    if (starValue <= selected) {
+      icon.removeClass("far").addClass("fas");
+    } else {
+      icon.removeClass("fas").addClass("far");
+    }
+  });
+  $("#rateConfirmValue").text(`Selected: ${selected} / 5`);
+  $("#rateConfirmSubmit").prop("disabled", selected < 1 || selected > 5);
+}
+function openRateModal(sku) {
+  const normalizedSku = String(sku || "").trim();
+  if (!normalizedSku) return;
+
+  if (ratedSkus.has(normalizedSku)) {
+    toast(
+      "Rating",
+      "You already rated this product. You can only rate once.",
+      "error"
+    );
+    return;
+  }
+
+  const product = bySku(normalizedSku);
+  $("#rateConfirmProduct").text(product ? product.name : `SKU: ${normalizedSku}`);
+  $("#rateConfirmStars").html(modalRatingStarsHtml(0));
+  pendingRatingConfirm = { sku: normalizedSku, rating: 0 };
+  setModalSelectedRating(0);
+  $("#rateConfirmModal").modal("show");
+}
+async function submitRating(sku, rating) {
+  const normalizedSku = String(sku || "").trim();
+  if (!normalizedSku) return;
+
+  if (ratedSkus.has(normalizedSku)) {
+    toast(
+      "Rating",
+      "You already rated this product. You can only rate once.",
+      "error"
+    );
+    return;
+  }
+
+  if (!RATING_CONTEXT.is_authenticated) {
+    toast("Rating", "Please log in to rate products.", "error");
+    if (RATING_CONTEXT.login_url) {
+      setTimeout(() => {
+        window.location.href = RATING_CONTEXT.login_url;
+      }, 300);
+    }
+    return;
+  }
+
+  if (!RATING_CONTEXT.can_rate) {
+    toast("Rating", "Only registered accounts can rate products.", "error");
+    return;
+  }
+
+  const value = Math.trunc(toNumber(rating, 0));
+  if (value < 1 || value > 5) {
+    toast("Rating", "Please select a rating from 1 to 5.", "error");
+    return;
+  }
+
+  const url = buildRateUrl(normalizedSku);
+  if (!url) {
+    toast("Rating", "Rating endpoint is not configured.", "error");
+    return;
+  }
+
+  const product = bySku(normalizedSku);
+  const isOwnProduct =
+    !!product &&
+    Number(product.owner_id || 0) > 0 &&
+    Number(product.owner_id || 0) === Number(RATING_CONTEXT.current_user_id || 0);
+  if (isOwnProduct) {
+    toast("Rating", "You cannot rate your own product.", "error");
+    return;
+  }
+
+  try {
+    const response = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-CSRFToken": getCsrfToken(),
+        "X-Requested-With": "XMLHttpRequest",
+      },
+      body: JSON.stringify({ rating: value }),
+    });
+
+    let data = {};
+    try {
+      data = await response.json();
+    } catch (e) {
+      data = {};
+    }
+
+    if (!response.ok) {
+      if (response.status === 409) {
+        ratedSkus.add(normalizedSku);
+        saveRatedSkus();
+      }
+      throw new Error(data.error || "Could not submit rating.");
+    }
+
+    ratedSkus.add(normalizedSku);
+    ratedSkuValues[normalizedSku] = value;
+    saveRatedSkus();
+    saveRatedSkuValues();
+    updateProductRatingValue(normalizedSku, data.rating, data.reviews);
+
+    renderProducts(view);
+    const product = bySku(normalizedSku);
+    if (product) {
+      $("#qvRating").html(
+        stars(product.rating) +
+          ' <span class="muted small ml-1">' +
+          product.rating.toFixed(1) +
+          " (" +
+          product.reviews +
+          ")</span>"
+      );
+    }
+
+    toast("Rating", data.message || "Thanks for your rating.");
+  } catch (error) {
+    toast("Rating", error.message || "Could not submit rating.", "error");
+  }
+}
+async function submitContactMessageForm(form) {
+  if (typeof $ !== "undefined" && typeof $.fn.parsley !== "undefined") {
+    const parsleyInstance = $(form).parsley();
+    if (!parsleyInstance.validate()) {
+      return;
+    }
+  }
+
+  const submitUrl = String($(form).data("submit-url") || "").trim();
+  if (!submitUrl) {
+    toast("Contact", "Contact endpoint is not configured.", "error");
+    return;
+  }
+
+  const submitBtn = $("#contactUsSubmitBtn");
+  const payload = {
+    name: String($(form).find('[name="name"]').val() || "").trim(),
+    email: String($(form).find('[name="email"]').val() || "").trim(),
+    subject: String($(form).find('[name="subject"]').val() || "").trim(),
+    message_body: String($(form).find('[name="message_body"]').val() || "").trim(),
+  };
+
+  if (!payload.name || !payload.email || !payload.subject || !payload.message_body) {
+    toast("Contact", "All fields are required.", "error");
+    return;
+  }
+
+  submitBtn.prop("disabled", true);
+  try {
+    const response = await fetch(submitUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-CSRFToken": getCsrfToken(),
+        "X-Requested-With": "XMLHttpRequest",
+      },
+      body: JSON.stringify(payload),
+    });
+
+    let data = {};
+    try {
+      data = await response.json();
+    } catch (e) {
+      data = {};
+    }
+
+    if (!response.ok || !data.ok) {
+      throw new Error(data.message || "Unable to submit your message.");
+    }
+
+    const contactModal = $("#contactUsModal");
+    if (contactModal.length) {
+      contactModal.modal("hide");
+    }
+    form.reset();
+    toast("Contact", data.message || "Message submitted successfully.");
+  } catch (error) {
+    toast("Contact", error.message || "Unable to submit your message.", "error");
+  } finally {
+    submitBtn.prop("disabled", false);
+  }
 }
 
 function toast(title, body, variant = "info") {
@@ -311,6 +616,18 @@ function renderProducts(items) {
                   )} <span class="muted small ml-1">${p.rating.toFixed(1)} (${
       p.reviews
     })</span></div>
+                  <div class="ml-2">
+                    ${
+                      Number(p.owner_id || 0) > 0 &&
+                      Number(p.owner_id || 0) === Number(RATING_CONTEXT.current_user_id || 0)
+                        ? '<span class="muted small">Own product</span>'
+                        : ratedSkus.has(String(p.sku || "").trim())
+                        ? ratedStateHtml(String(p.sku || "").trim())
+                        : RATING_CONTEXT.can_rate
+                        ? openRateNowLinkHtml(p.sku)
+                        : ""
+                    }
+                  </div>
                 </div>
 
                 <div class="muted small mt-2" style="min-height:42px">
@@ -384,6 +701,7 @@ function openQuickView(sku) {
       p.reviews +
       ")</span>"
   );
+  renderQuickViewRateControls(p.sku);
 
   $("#qvFitBadge").text(savedVehicle ? "Vehicle saved" : "Not checked");
 
@@ -1125,6 +1443,34 @@ $(function () {
     e.preventDefault();
     submitOrder();
   });
+
+  $("#rateConfirmSubmit").on("click", function () {
+    if (!pendingRatingConfirm) return;
+    if (Math.trunc(toNumber(pendingRatingConfirm.rating, 0)) < 1) {
+      toast("Rating", "Please choose a rating first.", "error");
+      return;
+    }
+    const payload = { ...pendingRatingConfirm };
+    pendingRatingConfirm = null;
+    $("#rateConfirmModal").modal("hide");
+    submitRating(payload.sku, payload.rating);
+  });
+
+  $(document).on("click", "#rateConfirmStars .rate-modal-star", function (e) {
+    e.preventDefault();
+    const selected = Math.trunc(toNumber($(this).data("rating"), 0));
+    setModalSelectedRating(selected);
+  });
+
+  $("#rateConfirmModal").on("hidden.bs.modal", function () {
+    pendingRatingConfirm = null;
+  });
+
+  $(document).on("submit", "#contactUsFormModal", function (e) {
+    e.preventDefault();
+    submitContactMessageForm(this);
+  });
+
 });
 
 // Expose some functions for inline onclick
@@ -1138,3 +1484,5 @@ window.toast = toast;
 window.setQty = setQty;
 window.removeFromCart = removeFromCart;
 window.submitOrder = submitOrder;
+window.submitRating = submitRating;
+window.openRateModal = openRateModal;

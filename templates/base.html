@@ -15,7 +15,7 @@
   <!-- Toastify -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
 
-  <link rel='stylesheet' href='{% static "css/index.css" %}'>
+  <link rel='stylesheet' href='{% static "css/index.css" %}?v=20260223-3'>
   
 
 </head>
@@ -54,6 +54,12 @@
   <!-- NAVBAR -->
   <nav class="navbar navbar-expand-lg navbar-dark sticky-top">
     <div class="container">
+      <a class="navbar-brand d-flex align-items-center" href="{% url 'home' %}">
+        <img
+          src="{% static 'image/logo.png' %}"
+          alt="Wahid Pro logo"
+          style="height:38px; width:auto; object-fit:contain;">
+      </a>
     
       <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navMain">
         <span class="navbar-toggler-icon"></span>
@@ -61,11 +67,9 @@
 
       <div class="collapse navbar-collapse" id="navMain">
         <ul class="navbar-nav mr-auto mt-2 mt-lg-0">
-          <li class="nav-item mr-2"><a class="nav-link nav-pill" href="#shop"><i class="fas fa-store mr-1"></i>Shop</a>
+          <li class="nav-item mr-2"><a class="nav-link nav-pill" href="{% url 'home' %}"><i class="fas fa-home mr-1"></i>Home</a>
           </li>
-          <li class="nav-item mr-2"><a class="nav-link nav-pill" href="#fitment"><i
-                class="fas fa-car mr-1"></i>Fitment</a></li>
-          <li class="nav-item mr-2"><a class="nav-link nav-pill" href="#deals"><i class="fas fa-bolt mr-1"></i>Deals</a>
+          <li class="nav-item mr-2"><a class="nav-link nav-pill" href="#shop"><i class="fas fa-store mr-1"></i>Shop</a>
           </li>
           <li class="nav-item mr-2"><a class="nav-link nav-pill" href="#guides"><i
                 class="fas fa-book mr-1"></i>Guides</a></li>
@@ -117,8 +121,9 @@
   <script src="https://unpkg.com/aos@2.3.4/dist/aos.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/parsleyjs@2.9.2/dist/parsley.min.js"></script>
 
-    <script src='{% static "js/index.js" %}?v=20260219-1'></script>
+    <script src='{% static "js/index.js" %}?v=20260223-5'></script>
     {% if messages %}
     <script>
       (function () {

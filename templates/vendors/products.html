@@ -83,11 +83,9 @@
                 </label>
                 <select id="category" name="category" class="form-control" data-help="Choose one category." required data-parsley-required-message="Please select a category.">
                   <option value="">Select category</option>
-                  <option value="brake-parts">Brake Parts</option>
-                  <option value="filters">Filters</option>
-                  <option value="suspension">Suspension</option>
-                  <option value="engine">Engine Parts</option>
-                  <option value="electrical">Electrical</option>
+                  {% for category in product_category_rows %}
+                  <option value="{{ category.name }}">{{ category.name }}</option>
+                  {% endfor %}
                 </select>
                 <div class="invalid-feedback">Please select a category.</div>
               </div>
@@ -241,11 +239,9 @@
                 <label class="form-label" for="editCategory">Category *</label>
                 <select id="editCategory" name="category" class="form-control" required>
                   <option value="">Select category</option>
-                  <option value="brake-parts">Brake Parts</option>
-                  <option value="filters">Filters</option>
-                  <option value="suspension">Suspension</option>
-                  <option value="engine">Engine Parts</option>
-                  <option value="electrical">Electrical</option>
+                  {% for category in product_category_rows %}
+                  <option value="{{ category.name }}">{{ category.name }}</option>
+                  {% endfor %}
                 </select>
               </div>
               <div class="col-md-6 mb-3">
@@ -281,6 +277,7 @@
       </div>
     </div>
   </div>
+
 
   <!-- Delete Product Modal -->
   <div class="modal fade" id="deleteProductModal" tabindex="-1" aria-labelledby="deleteProductModalLabel" aria-hidden="true">
