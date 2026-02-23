@@ -372,6 +372,7 @@
             </button>
             <div class="ml-auto muted mt-2">Tip: Filters and search work together for instant narrowing.</div>
         </div>
+        </div>
       </div>
     </div>
   </div>
@@ -531,6 +532,58 @@
     </div>
   </div>
 
+  <!-- CART MODAL -->
+  <div class="modal fade" id="cartModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title font-weight-bold"><i class="fas fa-shopping-cart mr-2"></i>Your Cart</h5>
+          <button type="button" class="close" style="color:var(--text)" data-dismiss="modal"><span>&times;</span></button>
+        </div>
+        <div class="modal-body">
+          <div class="cart-table-wrap">
+            <table class="table cart-table">
+              <thead>
+                <tr>
+                  <th>Seller</th>
+                  <th>Item</th>
+                  <th class="text-right">Price</th>
+                  <th class="text-center">Qty</th>
+                  <th class="text-right">Total</th>
+                  <th class="text-right" style="width:56px;">Remove</th>
+                </tr>
+              </thead>
+              <tbody id="cartTable"></tbody>
+            </table>
+          </div>
+
+          <div class="d-flex align-items-center justify-content-between mt-3 flex-wrap">
+            <div class="muted small mb-2 mb-md-0">Total amount for items currently in your cart.</div>
+            <div class="text-right">
+              <div class="muted small">Subtotal</div>
+              <div class="h5 mb-0" id="cartSubtotal">0.00 ETB</div>
+            </div>
+          </div>
+
+          <hr class="divider mt-3 mb-3">
+
+          <div class="d-flex flex-wrap">
+            <button class="btn btn-outline-light mr-2 mb-2" type="button" onclick="clearCart()">
+              <i class="fas fa-trash mr-2"></i>Clear
+            </button>
+            <button
+              type="button"
+              class="btn btn-success ml-auto mb-2"
+              id="submitOrderBtn"
+              data-order-url="{% url 'order_create' %}">
+              <i class="fas fa-lock mr-2"></i>Submit Order
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- COMPARE MODAL -->
   <div class="modal fade" id="compareModal" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-xl" role="document">
@@ -559,61 +612,6 @@
         <div class="modal-footer">
           <button class="btn btn-outline-light" onclick="clearCompare()"><i class="fas fa-trash mr-2"></i>Clear</button>
           <button class="btn btn-primary" data-dismiss="modal">Done</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- CART MODAL -->
-  <div class="modal fade" id="cartModal" tabindex="-1" role="dialog" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title font-weight-bold"><i class="fas fa-shopping-cart mr-2"></i>Your Cart</h5>
-          <button type="button" class="close" style="color:var(--text)"
-            data-dismiss="modal"><span>&times;</span></button>
-        </div>
-        <div class="modal-body">
-          <div class="table-responsive cart-table-wrap rounded-4">
-            <table class="table table-hover align-middle mb-0 cart-table">
-              <thead class="table-dark">
-                <tr>
-                  <th scope="col" class="ps-3">Seller</th>
-                  <th scope="col">Item</th>
-                  <th scope="col" class="text-end">Price</th>
-                  <th scope="col" class="text-center">Qty</th>
-                  <th scope="col" class="text-end">Total</th>
-                  <th scope="col" class="text-end pe-3" style="width:56px;">Remove</th>
-                </tr>
-              </thead>
-              <tbody id="cartTable" class="table-group-divider"></tbody>
-            </table>
-          </div>
-
-          <div class="d-flex align-items-center justify-content-between mt-3">
-            <div class="muted">
-              Total amount of money you will cost.
-            </div>
-            <div class="text-right">
-              <div class="muted">Subtotal</div>
-              <div class="h3 price mb-0" id="cartSubtotal">0.00 ETB</div>
-            </div>
-          </div>
-
-          <hr class="divider">
-
-          <div class="d-flex flex-wrap">
-            <button class="btn btn-outline-light mr-2 mb-2" onclick="clearCart()">
-              <i class="fas fa-trash mr-2"></i>Clear
-            </button>
-            <button
-              type="button"
-              class="btn btn-success ml-auto mb-2"
-              id="submitOrderBtn"
-              data-order-url="{% url 'order_create' %}">
-              <i class="fas fa-lock mr-2"></i>Submit Order
-            </button>
-          </div>
         </div>
       </div>
     </div>
