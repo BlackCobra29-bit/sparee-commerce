@@ -169,6 +169,45 @@
       flex: 0 0 28px;
       border: 1px solid rgba(15, 23, 42, 0.12);
     }
+
+    /* Cart remove column style */
+    #cartModal thead th:last-child {
+      color: #1f2937;
+      font-weight: 800;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+    }
+
+    #cartModal tbody td:last-child {
+      text-align: center;
+    }
+
+    #cartModal .cart-remove-btn {
+      width: 32px;
+      height: 32px;
+      padding: 0;
+      border-radius: 10px;
+      border: 1px solid #8fcb99 !important;
+      background: #d9e2d8 !important;
+      color: #0a8f2b !important;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: none !important;
+    }
+
+    #cartModal .cart-remove-btn:hover,
+    #cartModal .cart-remove-btn:focus {
+      background: #cfddce !important;
+      border-color: #7dbe88 !important;
+      color: #087d26 !important;
+    }
+
+    #cartModal .cart-remove-btn i {
+      font-size: 1.35rem;
+      font-weight: 700;
+      line-height: 1;
+    }
   </style>
   {% block vendor_extra_css %}{% endblock %}
 </head>
