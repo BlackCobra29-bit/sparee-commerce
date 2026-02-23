@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+
+{% block 'main-content' %}
+<section class="py-4">
+  <div class="container">
+    <div class="d-flex flex-wrap align-items-center justify-content-between mb-3">
+      <div>
+        <h2 class="h4 font-weight-bold mb-1">Category: {{ selected_category }}</h2>
+        <p class="muted mb-0">Showing {{ category_products|length }} product(s)</p>
+      </div>
+      <a href="{% url 'home' %}#shop" class="btn btn-outline-light">
+        <i class="fas fa-arrow-left mr-2"></i>Back to Shop
+      </a>
+    </div>
+
+    <div class="row">
+      {% for p in category_products %}
+      <div class="col-sm-6 col-lg-3 mb-4">
+        <div class="product-card h-100">
+          <div class="p-img">
+            <img src="{{ p.img }}" alt="{{ p.name }}">
+          </div>
+          <div class="p-3">
+            <div class="muted small mb-1"><b class="text-success">Category:</b> {{ p.category }}</div>
+            <div class="font-weight-bold mb-1">{{ p.name }}</div>
+            <div class="muted small mb-2">Seller: {{ p.seller_name }}</div>
+            <div class="d-flex justify-content-between align-items-center">
+              <div class="price">{{ p.price }} ETB</div>
+              <div class="muted small">Stock: <b>{{ p.stock }}</b></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      {% empty %}
+      <div class="col-12">
+        <div class="panel">
+          <div class="panel-b text-center muted py-5">
+            No active products found for this category.
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endblock %}

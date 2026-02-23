@@ -679,10 +679,10 @@ function openQuickView(sku) {
       p.seller_photo || sellerAvatarDataUri(p.seller_name || p.brand)
     )
     .attr("alt", (p.seller_name || p.brand || "Seller") + " profile");
-  $("#qvCategory").text(p.category || "�");
-  $("#qvCondition").text(p.condition || "�");
-  $("#qvSeller").text(p.seller_name || p.brand || "�");
-  $("#qvOem").text(p.oem || "�");
+  $("#qvCategory").text(p.category || "—");
+  $("#qvCondition").text(p.condition || "—");
+  $("#qvSeller").text(p.seller_name || p.brand || "—");
+  $("#qvOem").text(p.oem || "—");
   $("#qvStock").text(p.stock);
   $("#qvMeta").text(
     p.brand +
@@ -764,23 +764,23 @@ function renderCompareUI() {
 
   // headers
   const cols = [compare[0], compare[1], compare[2]].map((sku) => bySku(sku));
-  $("#c1").text(cols[0]?.name || "—");
-  $("#c2").text(cols[1]?.name || "—");
-  $("#c3").text(cols[2]?.name || "—");
+  $("#c1").text(cols[0]?.name || "-");
+  $("#c2").text(cols[1]?.name || "-");
+  $("#c3").text(cols[2]?.name || "-");
 
   // table
   const rows = [
-    { k: "SKU", v: (p) => p?.sku || "—" },
-    { k: "Brand", v: (p) => p?.brand || "—" },
-    { k: "Category", v: (p) => p?.category || "—" },
-    { k: "OEM", v: (p) => p?.oem || "—" },
-    { k: "Condition", v: (p) => p?.condition || "—" },
+    { k: "SKU", v: (p) => p?.sku || "-" },
+    { k: "Brand", v: (p) => p?.brand || "-" },
+    { k: "Category", v: (p) => p?.category || "-" },
+    { k: "OEM", v: (p) => p?.oem || "-" },
+    { k: "Condition", v: (p) => p?.condition || "-" },
     {
       k: "Rating",
-      v: (p) => (p ? `${p.rating.toFixed(1)} (${p.reviews})` : "—"),
+      v: (p) => (p ? `${p.rating.toFixed(1)} (${p.reviews})` : "-"),
     },
-    { k: "Price", v: (p) => (p ? money(p.price) : "—") },
-    { k: "Stock", v: (p) => (p ? String(p.stock) : "—") },
+    { k: "Price", v: (p) => (p ? money(p.price) : "-") },
+    { k: "Stock", v: (p) => (p ? String(p.stock) : "-") },
   ];
 
   const tbody = $("#compareTable");
@@ -1094,7 +1094,7 @@ function applyAll(showToast = true) {
 
   renderProducts(view);
 
-  if (showToast) toast("Filters", `Applied • ${active} active`);
+  if (showToast) toast("Filters", `Applied - ${active} active`);
 }
 
 function resetAll() {
@@ -1124,7 +1124,7 @@ function renderFitmentRecs() {
   const box = $("#fitmentRecs");
   box.empty();
 
-  // lightweight “recommendations”
+  // lightweight "recommendations"
   const recs = PRODUCTS.slice(0, 4);
   recs.forEach((p) => {
     box.append(`
@@ -1207,7 +1207,7 @@ function renderWizard() {
               <div class="d-flex align-items-center justify-content-between">
                 <div>
                   <div class="font-weight-bold">Vehicle Profile</div>
-                  <div class="muted small">This will improve search relevance (demo).</div>
+                  <div class="muted small">This will improve search relevance.</div>
                 </div>
                 <span class="badge badge-soft">Ready</span>
               </div>
@@ -1271,7 +1271,7 @@ $(function () {
     });
   }
 
-  // skeleton then render (gives “premium” feel)
+  // skeleton then render (gives "premium" feel)
   renderSkeletons(6);
   setTimeout(() => {
     resetAll();
@@ -1306,7 +1306,7 @@ $(function () {
     toast("Search", "Results updated.");
   });
   $("#btnVoice").on("click", () =>
-    toast("Voice", "Voice search is UI-only in this template.")
+    toast("Voice", "Voice search will be available soon.")
   );
 
   // Filters
@@ -1346,7 +1346,7 @@ $(function () {
     const vin = ($("#vin").val() || "").trim();
 
     if (!vin && (!make || !year)) {
-      toast("Fitment", "Enter VIN or select Make + Year (demo).");
+      toast("Fitment", "Enter VIN or select Make + Year.");
       return;
     }
     const chosenMake = make || "VIN vehicle";
@@ -1430,13 +1430,13 @@ $(function () {
   $("#btnHotkey").on("click", () =>
     toast(
       "Hotkeys",
-      'Press "/" for search • "C" for cart • Esc to clear search'
+      'Press "/" for search - "C" for cart - Esc to clear search'
     )
   );
 
-  // Load more demo
+  // Load more
   $("#btnLoadMore").on("click", () =>
-    toast("Demo", "Pagination is UI-only in this template.")
+    toast("Notice", "More products will load as they become available.")
   );
 
   $(document).on("click", "#submitOrderBtn", function (e) {

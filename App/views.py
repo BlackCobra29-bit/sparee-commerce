@@ -37,13 +37,30 @@ def _redirect_superuser_home(request):
     return None
 
 
-def _build_shop_products():
+def _build_shop_products(category_name=None, search_term=None):
+    filters = {
+        "is_active": True,
+        "current_stock__gt": 0,
+        "vendor__is_active": True,
+        "vendor__account_registration__is_verified": True,
+    }
+    if category_name:
+        filters["category"] = category_name
+    if search_term:
+        term = search_term.strip()
+        if term:
+            filters["name__isnull"] = False
+
     products = (
         Product.objects.filter(
-            is_active=True,
-            current_stock__gt=0,
-            vendor__is_active=True,
-            vendor__account_registration__is_verified=True,
+            **filters
+        )
+        .filter(
+            Q(vin__icontains=search_term) |
+            Q(name__icontains=search_term) |
+            Q(category__icontains=search_term)
+            if search_term
+            else Q()
         )
         .select_related("vendor", "vendor__account_registration")
         .annotate(
@@ -164,6 +181,92 @@ class HomeView(TemplateView):
             "login_url": reverse("login"),
             "rate_url_template": reverse("product_rate", kwargs={"sku": "__SKU__"}),
         }
+        return context
+
+
+class CategoryProductsView(TemplateView):
+    template_name = "category_products.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        selected_category = (self.request.GET.get("category") or "").strip()
+
+        nav_user_name = ""
+        nav_user_photo_url = ""
+        show_nav_user = self.request.user.is_authenticated
+        if show_nav_user:
+            nav_user_name = (
+                self.request.user.get_full_name().strip() or self.request.user.username
+            )
+            account = (
+                AccountRegistration.objects.filter(user_id=self.request.user.id)
+                .only("profile_picture")
+                .first()
+            )
+            if account and account.profile_picture:
+                nav_user_photo_url = account.profile_picture.url
+
+        category_options = [
+            {"value": category.name, "label": category.name}
+            for category in ProductCategory.objects.filter(is_visible=True).order_by("name")
+        ]
+        if not category_options:
+            category_options = [
+                {"value": name, "label": name}
+                for name in Product.objects.values_list("category", flat=True).distinct()
+                if name
+            ]
+
+        products = _build_shop_products(selected_category or None)
+        context["category_products"] = products
+        context["selected_category"] = selected_category or "All Categories"
+        context["shop_category_options"] = category_options
+        context["show_nav_user"] = show_nav_user
+        context["nav_user_name"] = nav_user_name
+        context["nav_user_photo_url"] = nav_user_photo_url
+        return context
+
+
+class SearchProductsView(TemplateView):
+    template_name = "search_results.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        query = (self.request.GET.get("q") or "").strip()
+
+        nav_user_name = ""
+        nav_user_photo_url = ""
+        show_nav_user = self.request.user.is_authenticated
+        if show_nav_user:
+            nav_user_name = (
+                self.request.user.get_full_name().strip() or self.request.user.username
+            )
+            account = (
+                AccountRegistration.objects.filter(user_id=self.request.user.id)
+                .only("profile_picture")
+                .first()
+            )
+            if account and account.profile_picture:
+                nav_user_photo_url = account.profile_picture.url
+
+        category_options = [
+            {"value": category.name, "label": category.name}
+            for category in ProductCategory.objects.filter(is_visible=True).order_by("name")
+        ]
+        if not category_options:
+            category_options = [
+                {"value": name, "label": name}
+                for name in Product.objects.values_list("category", flat=True).distinct()
+                if name
+            ]
+
+        products = _build_shop_products(search_term=query or None)
+        context["search_query"] = query
+        context["search_products"] = products
+        context["shop_category_options"] = category_options
+        context["show_nav_user"] = show_nav_user
+        context["nav_user_name"] = nav_user_name
+        context["nav_user_photo_url"] = nav_user_photo_url
         return context
 
 
@@ -1553,6 +1656,8 @@ class LoginView(HtmxTemplateMixin, FormView):
 
     @staticmethod
     def get_dashboard_url_for_user(user):
+        if user.is_superuser:
+            return reverse_lazy("admin_dashboard")
         account = (
             AccountRegistration.objects.filter(user_id=user.id)
             .only("account_type")
@@ -1563,10 +1668,6 @@ class LoginView(HtmxTemplateMixin, FormView):
         return reverse_lazy("vendor_dashboard")
 
     def dispatch(self, request, *args, **kwargs):
-        superuser_redirect = _redirect_superuser_home(request)
-        if superuser_redirect:
-            return superuser_redirect
-
         if request.user.is_authenticated:
             return redirect(self.get_dashboard_url_for_user(request.user))
         return super().dispatch(request, *args, **kwargs)
@@ -1716,12 +1817,6 @@ class ForgotPasswordView(HtmxTemplateMixin, FormView):
 class LogoutView(LoginRequiredMixin, View):
     login_url = reverse_lazy("login")
     http_method_names = ["post"]
-
-    def dispatch(self, request, *args, **kwargs):
-        superuser_redirect = _redirect_superuser_home(request)
-        if superuser_redirect:
-            return superuser_redirect
-        return super().dispatch(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
         logout(request)

@@ -39,6 +39,8 @@ from App.views import (
     BuyerOrderCancelView,
     BuyerDashboardView,
     BuyerOrdersView,
+    CategoryProductsView,
+    SearchProductsView,
     VendorOrderDeliveredUpdateView,
     VendorOrderUnacceptView,
     VendorProductDeleteView,
@@ -54,6 +56,8 @@ from App.views import (
 
 urlpatterns = [
     path('', HomeView.as_view(), name='home'),
+    path('categories/', CategoryProductsView.as_view(), name='category_products'),
+    path('search/', SearchProductsView.as_view(), name='search_products'),
     path('login/', LoginView.as_view(), name='login'),
     path('logout/', LogoutView.as_view(), name='logout'),
     path('forgot-password/', ForgotPasswordView.as_view(), name='forgot_password'),

@@ -4,7 +4,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
-  <title>Wahid Pro â€” Mind-Blowing Spare Parts Store (Bootstrap 4)</title>
+  <title>Wahid Pro - Spare Parts Platform</title>
 
   <!-- Bootstrap 4.6 -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
@@ -15,7 +15,21 @@
   <!-- Toastify -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
 
-  <link rel='stylesheet' href='{% static "css/index.css" %}?v=20260223-3'>
+  <link rel='stylesheet' href='{% static "css/index.css" %}?v=20260223-7'>
+  <style>
+    #navMain .navbar-nav > .nav-item {
+      margin-right: .8rem;
+    }
+    .navbar-toggler {
+      border-color: rgba(31, 41, 55, .45);
+    }
+    .navbar-dark .navbar-toggler-icon {
+      background-image: url("data:image/svg+xml,%3csvg viewBox='0 0 30 30' xmlns='http://www.w3.org/2000/svg'%3e%3cpath stroke='rgba%2820, 28, 45, 0.95%29' stroke-width='2.2' stroke-linecap='round' stroke-miterlimit='10' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+    }
+    .navbar-toggler:focus {
+      box-shadow: 0 0 0 .12rem rgba(17, 24, 39, .35);
+    }
+  </style>
   
 
 </head>
@@ -28,22 +42,27 @@
     <div class="container d-flex align-items-center justify-content-between">
       <small>
         <i class="fas fa-bolt mr-2"></i>
-        New Year Promo: <b>15% OFF</b> brake kits â€¢ Free delivery over <b>75 ETB</b> â€¢ <span class="kbd">WHD15</span>
+        New Year Promo: <b>15% OFF</b> brake kits • Free delivery over <b>75 ETB</b> • <span class="kbd">WHD15</span>
       </small>
       <div class="topbar-search">
         <div class="search-wrap">
-          <div class="input-group">
+          <form class="input-group" method="get" action="{% url 'search_products' %}">
             <div class="input-group-prepend">
               <span class="input-group-text bg-transparent border-0 search-ico">
                 <i class="fas fa-search"></i>
               </span>
             </div>
-            <input id="q" class="form-control" placeholder='Search part / OEM / SKUâ€¦ (try: "filter" or "NGK")'
-              autocomplete="off" />
+            <input
+              id="q"
+              name="q"
+              class="form-control"
+              placeholder="Search by VIN, product name, or category"
+              autocomplete="off"
+              value="{{ request.GET.q|default:'' }}" />
             <div class="input-group-append">
-              <button class="btn btn-primary" id="btnSearch"><i class="fas fa-arrow-right"></i></button>
+              <button class="btn btn-primary" id="btnSearch" type="submit"><i class="fas fa-arrow-right"></i></button>
             </div>
-          </div>
+          </form>
           <div class="suggest" id="suggestBox"></div>
         </div>
       </div>
@@ -71,6 +90,18 @@
           </li>
           <li class="nav-item mr-2"><a class="nav-link nav-pill" href="#shop"><i class="fas fa-store mr-1"></i>Shop</a>
           </li>
+          <li class="nav-item mr-2 dropdown">
+            <a class="nav-link nav-pill dropdown-toggle" href="#" id="navCategoryDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+              <i class="fas fa-list mr-1"></i>Category
+            </a>
+            <div class="dropdown-menu" aria-labelledby="navCategoryDropdown">
+              {% for category in shop_category_options %}
+              <a class="dropdown-item" href="{% url 'category_products' %}?category={{ category.value|urlencode }}">{{ category.label }}</a>
+              {% empty %}
+              <span class="dropdown-item-text text-muted">No categories</span>
+              {% endfor %}
+            </div>
+          </li>
           <li class="nav-item mr-2"><a class="nav-link nav-pill" href="#guides"><i
                 class="fas fa-book mr-1"></i>Guides</a></li>
           <li class="nav-item mr-2"><a class="nav-link nav-pill" href="#support"><i
@@ -97,7 +128,7 @@
               {{ nav_user_name }}
             </span>
           </a>
-          {% else %}
+          {% else %}  
           <a class="nav-btn" href="{% url 'login' %}">
             <i class="fas fa-sign-in-alt"></i>
             <span class="d-none d-md-inline ml-1">Login</span>

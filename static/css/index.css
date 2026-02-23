@@ -1162,3 +1162,166 @@
         font-size: 1.6rem;
       }
     }
+
+    /* Workflow section */
+    #guides .roadmap-shell {
+      border: 1px solid rgba(20, 30, 60, .16);
+      border-radius: 24px;
+      background:
+        radial-gradient(420px 200px at 8% 0%, rgba(8, 140, 22, .12), transparent 72%),
+        radial-gradient(420px 210px at 92% 100%, rgba(0, 144, 2, .10), transparent 74%),
+        linear-gradient(180deg, #ffffff 0%, #f8fcff 100%);
+      box-shadow: 0 24px 58px rgba(10, 20, 40, .12);
+      overflow: hidden;
+    }
+
+    #guides .workflow-flow {
+      position: relative;
+      padding: 14px 4px 4px;
+    }
+
+    #guides .workflow-track {
+      position: absolute;
+      left: 8%;
+      right: 8%;
+      top: 112px;
+      height: 6px;
+      border-radius: 999px;
+      background: linear-gradient(90deg, #059212 0%, #0f8f2a 38%, #1f6f3a 100%);
+      box-shadow: 0 8px 18px rgba(8, 140, 22, .22);
+    }
+
+    #guides .workflow-track::before {
+      content: "";
+      position: absolute;
+      inset: -7px 0 auto 0;
+      height: 20px;
+      background:
+        radial-gradient(circle at 0 50%, rgba(255, 255, 255, .88) 0 3px, transparent 4px) left center / 32px 100% repeat-x;
+      opacity: .85;
+      animation: wfTrackMove 4s linear infinite;
+    }
+
+    #guides .workflow-grid {
+      position: relative;
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 16px;
+      z-index: 1;
+    }
+
+    #guides .workflow-step {
+      border: 1px solid rgba(20, 30, 60, .13);
+      border-radius: 18px;
+      background: rgba(255, 255, 255, .92);
+      box-shadow: 0 16px 32px rgba(12, 20, 55, .10);
+      padding: 14px 14px 16px;
+      position: relative;
+      min-height: 224px;
+      backdrop-filter: blur(4px);
+      transition: transform .22s ease, box-shadow .22s ease, border-color .22s ease;
+    }
+
+    #guides .workflow-step:hover {
+      transform: translateY(-6px);
+      border-color: rgba(8, 140, 22, .34);
+      box-shadow: 0 20px 36px rgba(12, 20, 55, .16);
+    }
+
+    #guides .workflow-step-no {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 40px;
+      height: 24px;
+      padding: 0 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: .08em;
+      color: #07570f;
+      background: rgba(8, 140, 22, .13);
+      border: 1px solid rgba(8, 140, 22, .22);
+      margin-bottom: 10px;
+    }
+
+    #guides .workflow-icon {
+      width: 54px;
+      height: 54px;
+      border-radius: 14px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+      color: #0a6f16;
+      background: linear-gradient(145deg, rgba(8, 140, 22, .08), rgba(8, 140, 22, .16));
+      border: 1px solid rgba(8, 140, 22, .26);
+      box-shadow: 0 10px 20px rgba(8, 140, 22, .12);
+      margin-bottom: 12px;
+    }
+
+    #guides .workflow-step h6 {
+      font-size: 1.04rem;
+      font-weight: 800;
+      line-height: 1.28;
+      margin-bottom: 8px;
+      color: #0f172a;
+    }
+
+    #guides .workflow-step p {
+      margin: 0;
+      color: rgba(15, 23, 42, .72);
+      font-size: .92rem;
+      line-height: 1.45;
+    }
+
+    #guides .workflow-cta {
+      border-top: 1px solid rgba(20, 30, 60, .12);
+      padding-top: 16px;
+    }
+
+    @keyframes wfTrackMove {
+      from {
+        transform: translateX(0);
+      }
+      to {
+        transform: translateX(32px);
+      }
+    }
+
+    @media (max-width: 1199px) {
+      #guides .workflow-step {
+        min-height: 244px;
+      }
+    }
+
+    @media (max-width: 991px) {
+      #guides .workflow-track {
+        left: 10%;
+        right: 10%;
+      }
+
+      #guides .workflow-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 767px) {
+      #guides .workflow-flow {
+        padding-top: 2px;
+      }
+
+      #guides .workflow-track {
+        display: none;
+      }
+
+      #guides .workflow-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+      }
+
+      #guides .workflow-step {
+        min-height: auto;
+      }
+
+    }

@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+﻿{% extends 'base.html' %}
 
 {% block 'main-content' %}
   <!-- HERO -->
@@ -8,10 +8,10 @@
         <div class="col-lg-6 mb-4 mb-lg-0 hero-left" data-aos="fade-right">
           <div class="d-flex flex-wrap align-items-center mb-3">
             <span class="badge badge-soft px-3 py-2 mr-2 mb-2">
-              <i class="fas fa-check-circle mr-2"></i>Verified OEM cross
+              <i class="fas fa-check-circle mr-2"></i>Verified Product Sellers
             </span>
             <span class="badge badge-ghost px-3 py-2 mr-2 mb-2">
-              <i class="fas fa-shield-alt mr-2"></i>Trusted fitment
+              <i class="fas fa-shield-alt mr-2"></i>Trusted
             </span>
           </div>
 
@@ -20,7 +20,7 @@
           </h1>
 
           <p class="lead muted mb-4">
-            Wahid Pro turns complex fitment and OEM data into crisp, confident decisions for garages,
+            Wahid Pro turns complex fitment and VIN data into crisp, confident decisions for garages,
             fleets, and serious parts buyers.
           </p>
 
@@ -32,7 +32,7 @@
           </div>
 
           <div class="mt-3 muted">
-            Focus: Ethiopia â€¢ Neutral, verified, decisive
+            Focus: Ethiopia &bull; Neutral, verified, decisive
           </div>
         </div>
 
@@ -41,7 +41,7 @@
             <div class="hero-card hero-card--tilt">
               <div class="label">DAILY SIGNAL</div>
               <div class="title">The parts data you need, without the noise.</div>
-              <div class="meta mt-2">Search, fitment, and OEM cross-reference in one place.</div>
+              <div class="meta mt-2">Search, fitment, and VIN cross-reference in one place.</div>
             </div>
 
             <div class="hero-card">
@@ -49,7 +49,7 @@
                 <div class="font-weight-bold">Coverage</div>
                 <span class="badge badge-soft">Updated</span>
               </div>
-              <div class="meta">Brakes â€¢ Filters â€¢ Ignition â€¢ Exhaust â€¢ Suspension</div>
+              <div class="meta">Brakes &bull; Filters &bull; Ignition &bull; Exhaust &bull; Suspension</div>
             </div>
 
             <div class="hero-card compact">
@@ -103,80 +103,60 @@
 
       <div class="text-center mt-3">
         <button class="btn btn-outline-light" id="btnLoadMore">
-          <i class="fas fa-plus mr-2"></i>Load More (demo)
+          <i class="fas fa-plus mr-2"></i>Load More
         </button>
       </div>
     </div>
   </main>
 
-  <!-- GUIDES -->
+  <!-- HOW IT WORKS -->
   <section class="py-4" id="guides">
     <div class="container" data-aos="fade-up">
-      <div class="panel">
+      <div class="panel roadmap-shell">
         <div class="panel-h d-flex align-items-center justify-content-between">
-          <div class="font-weight-bold"><i class="fas fa-book mr-2"></i>Install Guides (Sample)</div>
-          <span class="muted small">Short, high-signal content blocks</span>
+          <div class="font-weight-bold"><i class="fas fa-route mr-2"></i>How Wahid Pro Works</div>
+          <span class="muted small">End-to-end flow in 4 steps</span>
         </div>
         <div class="panel-b">
-          <div class="row">
-            <div class="col-md-4 mb-3">
-              <div class="panel" style="background:var(--glass2)">
-                <div class="panel-b">
-                  <div class="font-weight-bold mb-1">Brake Pads</div>
-                  <div class="muted small mb-2">Torque specs, bedding, safety checks.</div>
-                  <button class="btn btn-outline-light btn-sm"
-                    onclick="toast('Guide', 'Brake pad guide opened (demo).')">
-                    <i class="fas fa-arrow-right mr-2"></i>Open
-                  </button>
-                </div>
-              </div>
-            </div>
-            <div class="col-md-4 mb-3">
-              <div class="panel" style="background:var(--glass2)">
-                <div class="panel-b">
-                  <div class="font-weight-bold mb-1">Oil Filter</div>
-                  <div class="muted small mb-2">Correct thread, gasket lube, hand-tight.</div>
-                  <button class="btn btn-outline-light btn-sm"
-                    onclick="toast('Guide', 'Oil filter guide opened (demo).')">
-                    <i class="fas fa-arrow-right mr-2"></i>Open
-                  </button>
-                </div>
-              </div>
-            </div>
-            <div class="col-md-4 mb-3">
-              <div class="panel" style="background:var(--glass2)">
-                <div class="panel-b">
-                  <div class="font-weight-bold mb-1">Spark Plugs</div>
-                  <div class="muted small mb-2">Gap, anti-seize (engine-specific), torque.</div>
-                  <button class="btn btn-outline-light btn-sm"
-                    onclick="toast('Guide', 'Spark plug guide opened (demo).')">
-                    <i class="fas fa-arrow-right mr-2"></i>Open
-                  </button>
-                </div>
-              </div>
+          <div class="workflow-flow">
+            <div class="workflow-track" aria-hidden="true"></div>
+            <div class="workflow-grid">
+              <article class="workflow-step" data-aos="fade-up" data-aos-delay="60">
+                <div class="workflow-step-no">01</div>
+                <div class="workflow-icon"><i class="fas fa-search"></i></div>
+                <h6>Find The Right Part</h6>
+                <p>Search using VIN, category, or product name and get exact matching options fast.</p>
+              </article>
+
+              <article class="workflow-step" data-aos="fade-up" data-aos-delay="120">
+                <div class="workflow-step-no">02</div>
+                <div class="workflow-icon"><i class="fas fa-balance-scale"></i></div>
+                <h6>Compare Smartly</h6>
+                <p>Compare verified sellers, prices, stock levels, and product ratings in one view.</p>
+              </article>
+
+              <article class="workflow-step" data-aos="fade-up" data-aos-delay="180">
+                <div class="workflow-step-no">03</div>
+                <div class="workflow-icon"><i class="fas fa-shopping-cart"></i></div>
+                <h6>Checkout With Confidence</h6>
+                <p>Add your selected products to cart, confirm quantity, then submit your order securely.</p>
+              </article>
+
+              <article class="workflow-step" data-aos="fade-up" data-aos-delay="240">
+                <div class="workflow-step-no">04</div>
+                <div class="workflow-icon"><i class="fas fa-star"></i></div>
+                <h6>Track and Rate</h6>
+                <p>Track delivery status and rate purchased products to improve marketplace quality.</p>
+              </article>
             </div>
           </div>
 
-          <hr class="divider">
-
-          <div class="row align-items-center">
-            <div class="col-md-7 mb-3 mb-md-0">
-              <h5 class="font-weight-bold mb-1">Newsletter for Mechanics</h5>
-              <div class="muted">Deals, common OEM cross references, and fitment tips.</div>
-            </div>
-            <div class="col-md-5">
-              <div class="input-group">
-                <input class="form-control" id="newsEmail" placeholder="your@email.com" />
-                <div class="input-group-append">
-                  <button class="btn btn-primary" onclick="toast('Subscribed', 'Thanks! (demo)')">
-                    <i class="fas fa-paper-plane"></i>
-                  </button>
-                </div>
-              </div>
-              <small class="muted">No spam. Demo only.</small>
-            </div>
+          <div class="workflow-cta d-flex flex-wrap align-items-center justify-content-between mt-3">
+            <div class="muted mb-2 mb-md-0">Need help in any step? Support is available for fitment and order updates.</div>
+            <button class="btn btn-primary" onclick="document.querySelector('#support').scrollIntoView({behavior:'smooth'})">
+              <i class="fas fa-headset mr-2"></i>Go to Support
+            </button>
           </div>
-
         </div>
       </div>
     </div>
@@ -219,10 +199,10 @@
                 </div>
 
                 <div class="d-flex flex-wrap">
-                  <button class="btn btn-outline-light btn-sm mr-2 mb-2" onclick="toast('Chat', 'Live chat starts soon (demo).')">
+                  <button class="btn btn-outline-light btn-sm mr-2 mb-2" onclick="toast('Chat', 'Live chat is starting soon.')">
                     <i class="fas fa-comments mr-1"></i>Live Chat
                   </button>
-                  <button class="btn btn-outline-light btn-sm mb-2" onclick="toast('Help', 'Support ticket opened (demo).')">
+                  <button class="btn btn-outline-light btn-sm mb-2" onclick="toast('Help', 'Support ticket opened.')">
                     <i class="fas fa-life-ring mr-1"></i>Open Ticket
                   </button>
                 </div>
@@ -273,13 +253,13 @@
       <div class="row">
         <div class="col-md-6">
           <div class="font-weight-bold">Wahid Pro</div>
-          <div class="muted small">Mind-blowing Bootstrap spare-parts e-commerce UI (single-file demo).</div>
+          <div class="muted small">Reliable spare-parts platform for verified search and ordering.</div>
         </div>
         <div class="col-md-6 text-md-right mt-3 mt-md-0">
           <a href="#shop" class="mr-3">Shop</a>
-          <a href="#fitment" class="mr-3">Fitment</a>
-          <a href="#deals" class="mr-3">Deals</a>
-          <a href="#support">Support</a>
+          <a href="#guides" class="mr-3">Guides</a>
+          <a href="#support" class="mr-3">Support</a>
+          <a href="#support">Contact</a>
         </div>
       </div>
 
@@ -342,20 +322,6 @@
 	                  </select>
                 </div>
               </div>
-
-              <div class="panel">
-                <div class="panel-h font-weight-bold">Condition</div>
-                <div class="panel-b">
-                  <div class="custom-control custom-checkbox">
-                    <input type="checkbox" class="custom-control-input" id="condNew" checked>
-                    <label class="custom-control-label" for="condNew">New</label>
-                  </div>
-                  <div class="custom-control custom-checkbox mt-2">
-                    <input type="checkbox" class="custom-control-input" id="condRefurb">
-                    <label class="custom-control-label" for="condRefurb">Refurbished</label>
-                  </div>
-                </div>
-              </div>
             </div>
 
             <div class="col-lg-6">
@@ -370,7 +336,7 @@
                       <input class="form-control" id="maxPrice" placeholder="Max" type="number" min="0" />
                     </div>
                   </div>
-                  <small class="muted">Example: 10 â€” 120</small>
+                  <small class="muted">Example: 10 &mdash; 120</small>
                 </div>
               </div>
 
@@ -383,23 +349,12 @@
                   </div>
                   <div class="custom-control custom-radio mt-2">
                     <input type="radio" id="r4" name="rating" class="custom-control-input">
-                    <label class="custom-control-label" for="r4">4â˜… & up</label>
+                    <label class="custom-control-label" for="r4">4★ & up</label>
                   </div>
                   <div class="custom-control custom-radio mt-2">
                     <input type="radio" id="r45" name="rating" class="custom-control-input">
-                    <label class="custom-control-label" for="r45">4.5â˜… & up</label>
+                    <label class="custom-control-label" for="r45">4.5★ & up</label>
                   </div>
-                </div>
-              </div>
-
-              <div class="panel">
-                <div class="panel-h font-weight-bold">Stock</div>
-                <div class="panel-b">
-                  <select class="custom-select" id="filterStock">
-                    <option value="All">Any stock</option>
-                    <option value="In">In stock</option>
-                    <option value="Low">Low stock (â‰¤ 5)</option>
-                  </select>
                 </div>
               </div>
 
@@ -415,8 +370,7 @@
             <button class="btn btn-outline-light mb-2" id="btnReset2" data-dismiss="modal">
               <i class="fas fa-undo mr-2"></i>Reset
             </button>
-            <div class="ml-auto muted mt-2">Tip: Filters + search are combined for â€œinstant narrowingâ€.</div>
-          </div>
+            <div class="ml-auto muted mt-2">Tip: Filters and search work together for instant narrowing.</div>
         </div>
       </div>
     </div>
@@ -507,7 +461,7 @@
                 <button class="btn btn-success btn-block mr-2" id="qvAdd">
                   <i class="fas fa-cart-plus mr-2"></i>Add to Cart
                 </button>
-                <button class="btn btn-outline-light btn-block" onclick="toast('Share', 'Share link copied (demo).')">
+                <button class="btn btn-outline-light btn-block" onclick="toast('Share', 'Share link copied.')">
                   <i class="fas fa-share-alt mr-2"></i>Share
                 </button>
               </div>
@@ -593,9 +547,9 @@
               <thead>
                 <tr>
                   <th>Field</th>
-                  <th id="c1">â€”</th>
-                  <th id="c2">â€”</th>
-                  <th id="c3">â€”</th>
+                  <th id="c1">&mdash;</th>
+                  <th id="c2">&mdash;</th>
+                  <th id="c3">&mdash;</th>
                 </tr>
               </thead>
               <tbody id="compareTable"></tbody>
@@ -674,7 +628,7 @@
         <button type="button" class="ml-2 mb-1 close" style="color:var(--text)"
           data-dismiss="toast"><span>&times;</span></button>
       </div>
-      <div class="toast-body" id="toastBody">â€”</div>
+      <div class="toast-body" id="toastBody">&mdash;</div>
     </div>
   </div>
   {{ shop_products|json_script:"shop-products-data" }}
