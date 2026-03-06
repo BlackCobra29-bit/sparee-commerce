@@ -1,4 +1,4 @@
-﻿{% extends 'base.html' %}
+{% extends 'base.html' %}
 
 {% block 'main-content' %}
   <!-- HERO -->
@@ -20,7 +20,7 @@
           </h1>
 
           <p class="lead muted mb-4">
-            Wahid Pro turns complex fitment and VIN data into crisp, confident decisions for garages,
+            Wahid Pro turns complex fitment and Part Number data into crisp, confident decisions for garages,
             fleets, and serious parts buyers.
           </p>
 
@@ -41,7 +41,7 @@
             <div class="hero-card hero-card--tilt">
               <div class="label">DAILY SIGNAL</div>
               <div class="title">The parts data you need, without the noise.</div>
-              <div class="meta mt-2">Search, fitment, and VIN cross-reference in one place.</div>
+              <div class="meta mt-2">Search, fitment, and Part Number cross-reference in one place.</div>
             </div>
 
             <div class="hero-card">
@@ -125,7 +125,7 @@
                 <div class="workflow-step-no">01</div>
                 <div class="workflow-icon"><i class="fas fa-search"></i></div>
                 <h6>Find The Right Part</h6>
-                <p>Search using VIN, category, or product name and get exact matching options fast.</p>
+                <p>Search using Part Number, category, or product name and get exact matching options fast.</p>
               </article>
 
               <article class="workflow-step" data-aos="fade-up" data-aos-delay="120">
@@ -349,11 +349,11 @@
                   </div>
                   <div class="custom-control custom-radio mt-2">
                     <input type="radio" id="r4" name="rating" class="custom-control-input">
-                    <label class="custom-control-label" for="r4">4★ & up</label>
+                    <label class="custom-control-label" for="r4">4? & up</label>
                   </div>
                   <div class="custom-control custom-radio mt-2">
                     <input type="radio" id="r45" name="rating" class="custom-control-input">
-                    <label class="custom-control-label" for="r45">4.5★ & up</label>
+                    <label class="custom-control-label" for="r45">4.5? & up</label>
                   </div>
                 </div>
               </div>
@@ -453,7 +453,7 @@
                     <li>Category: <span id="qvCategory"></span></li>
                     <li>Stock: <span id="qvStock"></span></li>
                     <li>Seller: <span id="qvSeller"></span></li>
-                    <li>VIN: <span id="qvSku"></span></li>
+                    <li>Part Number: <span id="qvSku"></span></li>
                   </ul>
                 </div>
               </div>
@@ -632,4 +632,5 @@
   {{ shop_products|json_script:"shop-products-data" }}
   {{ shop_rating_context|json_script:"shop-rating-context" }}
   {% endblock %}
+
 

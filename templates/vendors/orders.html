@@ -1,4 +1,4 @@
-{% extends "vendors/base.html" %}
+﻿{% extends "vendors/base.html" %}
 {% load static %}
 {% block vendor_content %}
 <div class="row">
@@ -44,7 +44,7 @@
                   <div class="d-flex px-2 py-1">
                     <div class="d-flex flex-column justify-content-center">
                       <h6 class="mb-0 text-sm">{{ order.product.name }}</h6>
-                      <p class="text-xs text-secondary mb-0">VIN: {{ order.product.vin }}</p>
+                      <p class="text-xs text-secondary mb-0">Part Number: {{ order.product.vin }}</p>
                     </div>
                   </div>
                 </td>
@@ -336,3 +336,4 @@
   })();
 </script>
 {% endblock %}
+

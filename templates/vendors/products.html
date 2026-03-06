@@ -1,4 +1,4 @@
-{% extends "vendors/base.html" %}
+﻿{% extends "vendors/base.html" %}
 {% load static %}
 {% block vendor_content %}
       <!-- Inventory Table -->
@@ -69,10 +69,10 @@
               </div>
               <div class="col-md-6 mb-3">
                 <label class="form-label d-flex align-items-center" for="vin">
-                  VIN (Vehicle Identification Number) *
-                  <span class="help-dot bg-white" data-tippy-content="Required. Enter the 17-character vehicle VIN." aria-label="VIN help" tabindex="0">?</span>
+                  Part Number *
+                  <span class="help-dot bg-white" data-tippy-content="Required. Enter a valid Part Number." aria-label="Part Number help" tabindex="0">?</span>
                 </label>
-                <input id="vin" name="vin" type="text" class="form-control" placeholder="Enter 17-character VIN" maxlength="17" data-help="Required. VIN must be exactly 17 characters." required data-parsley-required-message="VIN is required." data-parsley-length="[17, 17]" data-parsley-length-message="VIN must be exactly 17 characters.">
+                <input id="vin" name="vin" type="text" class="form-control" placeholder="Enter Part Number" maxlength="17" data-help="Required. Part Number can be up to 17 characters." required data-parsley-required-message="Part Number is required.">
               </div>
             </div>
             <div class="row">
@@ -168,7 +168,7 @@
                 </div>
                 <div class="col-md-6">
                   <div class="border rounded p-2">
-                    <small class="text-muted d-block">VIN</small>
+                    <small class="text-muted d-block">Part Number</small>
                     <strong id="viewProductVin">-</strong>
                   </div>
                 </div>
@@ -230,7 +230,7 @@
                 <input id="editProductName" name="name" type="text" class="form-control" required minlength="3">
               </div>
               <div class="col-md-6 mb-3">
-                <label class="form-label" for="editVin">VIN *</label>
+                <label class="form-label" for="editVin">Part Number *</label>
                 <input id="editVin" name="vin" type="text" class="form-control" maxlength="17" required>
               </div>
             </div>
@@ -944,3 +944,4 @@
 </script>
 {% endif %}
 {% endblock %}
+

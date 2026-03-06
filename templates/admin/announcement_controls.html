@@ -1,0 +1,101 @@
+{% extends "vendors/base.html" %}
+
+{% block vendor_title %}Announcement Controls - Wahid Spare Hub{% endblock %}
+
+{% block vendor_content %}
+<div class="row">
+  <div class="col-lg-8 col-12 mb-4">
+    <div class="card">
+      <div class="card-header pb-0">
+        <h6 class="mb-0">Homepage Announcement</h6>
+        <p class="text-sm text-muted mb-0">This note appears at the top of the public website.</p>
+      </div>
+      <div class="card-body">
+        <form id="announcementForm" method="post" action="{% url 'admin_site_announcement_save' %}">
+          {% csrf_token %}
+          <div class="mb-3">
+            <label for="announcement-message" class="form-label">Announcement Message</label>
+            <textarea
+              id="announcement-message"
+              name="message"
+              rows="4"
+              class="form-control"
+              maxlength="280"
+              required
+              placeholder="Example: Happy New Year to all our customers!"
+            >{{ announcement_form.message.value|default:'' }}</textarea>
+            <small class="text-muted">Max 280 characters.</small>
+          </div>
+          <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+            <button type="submit" class="btn bg-gradient-primary mb-0">Save Announcement</button>
+            <small id="announcementLastUpdated" class="text-muted">
+              {% if announcement_row %}
+              Last updated: {{ announcement_row.updated_at|date:"j M Y, H:i" }}
+              {% endif %}
+            </small>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block vendor_extra_js %}
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    function showToast(message, isSuccess) {
+      if (typeof Toastify === "undefined") return;
+      Toastify({
+        text: message,
+        duration: 3000,
+        gravity: "bottom",
+        position: "center",
+        close: true,
+        stopOnFocus: true,
+        style: {
+          background: isSuccess ? "#2dce89" : "#f5365c"
+        }
+      }).showToast();
+    }
+
+    var announcementForm = document.getElementById("announcementForm");
+    var announcementLastUpdated = document.getElementById("announcementLastUpdated");
+
+    if (!announcementForm) return;
+
+    announcementForm.addEventListener("submit", function (event) {
+      event.preventDefault();
+      var formData = new FormData(announcementForm);
+      var submitBtn = announcementForm.querySelector('button[type="submit"]');
+      if (submitBtn) submitBtn.disabled = true;
+
+      fetch(announcementForm.action, {
+        method: "POST",
+        headers: {
+          "X-Requested-With": "XMLHttpRequest"
+        },
+        body: formData
+      })
+        .then(function (response) { return response.json(); })
+        .then(function (data) {
+          if (!data.ok) {
+            showToast(data.message || "Failed to save announcement.", false);
+            return;
+          }
+
+          if (announcementLastUpdated && data.announcement && data.announcement.updated_at) {
+            announcementLastUpdated.textContent = "Last updated: " + data.announcement.updated_at;
+          }
+          showToast(data.message || "Announcement updated successfully.", true);
+        })
+        .catch(function () {
+          showToast("Request failed. Please try again.", false);
+        })
+        .finally(function () {
+          if (submitBtn) submitBtn.disabled = false;
+        });
+    });
+  });
+</script>
+{% endblock %}

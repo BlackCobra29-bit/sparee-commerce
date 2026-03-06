@@ -1,4 +1,4 @@
-import json
+﻿import json
 from decimal import Decimal
 from datetime import date
 
@@ -19,7 +19,14 @@ from django.urls import reverse, reverse_lazy
 from django.views.generic import FormView, TemplateView, View
 from django_htmx.http import HttpResponseClientRedirect
 
-from .forms import ForgotPasswordForm, LoginForm, ProductCategoryForm, ProductForm, SignupForm
+from .forms import (
+    ForgotPasswordForm,
+    LoginForm,
+    ProductCategoryForm,
+    ProductForm,
+    SignupForm,
+    SiteAnnouncementForm,
+)
 from .models import (
     AccountRegistration,
     ContactMessage,
@@ -27,6 +34,7 @@ from .models import (
     Product,
     ProductCategory,
     ProductRating,
+    SiteAnnouncement,
 )
 
 
@@ -128,6 +136,16 @@ def _build_shop_products(category_name=None, search_term=None):
     return shop_products
 
 
+def _get_active_site_announcement():
+    announcement = (
+        SiteAnnouncement.objects
+        .only("message")
+        .order_by("-updated_at")
+        .first()
+    )
+    return announcement.message if announcement else ""
+
+
 class HomeView(TemplateView):
     template_name = "index.html"
 
@@ -137,9 +155,7 @@ class HomeView(TemplateView):
         nav_user_photo_url = ""
         show_nav_user = self.request.user.is_authenticated
         if show_nav_user:
-            nav_user_name = (
-                self.request.user.get_full_name().strip() or self.request.user.username
-            )
+            nav_user_name = self.request.user.get_full_name().strip() or "Account"
             account = (
                 AccountRegistration.objects.filter(user_id=self.request.user.id)
                 .only("profile_picture")
@@ -183,6 +199,7 @@ class HomeView(TemplateView):
             "login_url": reverse("login"),
             "rate_url_template": reverse("product_rate", kwargs={"sku": "__SKU__"}),
         }
+        context["announcement_note"] = _get_active_site_announcement()
         return context
 
 
@@ -197,9 +214,7 @@ class CategoryProductsView(TemplateView):
         nav_user_photo_url = ""
         show_nav_user = self.request.user.is_authenticated
         if show_nav_user:
-            nav_user_name = (
-                self.request.user.get_full_name().strip() or self.request.user.username
-            )
+            nav_user_name = self.request.user.get_full_name().strip() or "Account"
             account = (
                 AccountRegistration.objects.filter(user_id=self.request.user.id)
                 .only("profile_picture")
@@ -243,6 +258,7 @@ class CategoryProductsView(TemplateView):
             "login_url": reverse("login"),
             "rate_url_template": reverse("product_rate", kwargs={"sku": "__SKU__"}),
         }
+        context["announcement_note"] = _get_active_site_announcement()
         return context
 
 
@@ -257,9 +273,7 @@ class SearchProductsView(TemplateView):
         nav_user_photo_url = ""
         show_nav_user = self.request.user.is_authenticated
         if show_nav_user:
-            nav_user_name = (
-                self.request.user.get_full_name().strip() or self.request.user.username
-            )
+            nav_user_name = self.request.user.get_full_name().strip() or "Account"
             account = (
                 AccountRegistration.objects.filter(user_id=self.request.user.id)
                 .only("profile_picture")
@@ -303,6 +317,7 @@ class SearchProductsView(TemplateView):
             "login_url": reverse("login"),
             "rate_url_template": reverse("product_rate", kwargs={"sku": "__SKU__"}),
         }
+        context["announcement_note"] = _get_active_site_announcement()
         return context
 
 
@@ -753,7 +768,80 @@ class AdminSystemControlsView(SuperuserRequiredMixin, TemplateView):
         context["category_visible_count"] = categories.filter(is_visible=True).count()
         context["category_hidden_count"] = categories.filter(is_visible=False).count()
         context["category_form"] = kwargs.get("category_form") or ProductCategoryForm()
+        current_announcement = SiteAnnouncement.objects.order_by("-updated_at").first()
+        context["announcement_row"] = current_announcement
+        context["announcement_form"] = kwargs.get("announcement_form") or SiteAnnouncementForm(
+            instance=current_announcement
+        )
         return context
+
+
+class AdminCategoryControlsView(SuperuserRequiredMixin, View):
+    http_method_names = ["get"]
+
+    def get(self, request, *args, **kwargs):
+        return redirect("admin_system_controls")
+
+
+class AdminAnnouncementControlsView(SuperuserRequiredMixin, View):
+    http_method_names = ["get"]
+
+    def get(self, request, *args, **kwargs):
+        return redirect("admin_system_controls")
+
+
+class AdminSiteAnnouncementSaveView(SuperuserRequiredMixin, View):
+    http_method_names = ["post"]
+
+    def post(self, request, *args, **kwargs):
+        instance = SiteAnnouncement.objects.order_by("-updated_at").first()
+        form = SiteAnnouncementForm(request.POST, instance=instance)
+        is_ajax = request.headers.get("x-requested-with") == "XMLHttpRequest"
+
+        if form.is_valid():
+            announcement = form.save()
+            # Keep a single announcement row; new saves replace the current message.
+            SiteAnnouncement.objects.exclude(pk=announcement.pk).delete()
+            if is_ajax:
+                return JsonResponse(
+                    {
+                        "ok": True,
+                        "message": "Announcement updated successfully.",
+                        "announcement": {
+                            "message": announcement.message,
+                            "updated_at": announcement.updated_at.strftime("%d %b %Y, %H:%M"),
+                        },
+                    }
+                )
+            messages.success(request, "Announcement updated successfully.")
+            return redirect("admin_system_controls")
+
+        if is_ajax:
+            errors = []
+            for field_errors in form.errors.values():
+                errors.extend(field_errors)
+            return JsonResponse(
+                {
+                    "ok": False,
+                    "message": errors[0] if errors else "Unable to save announcement.",
+                    "errors": form.errors,
+                },
+                status=422,
+            )
+
+        for field_name, errors in form.errors.items():
+            if field_name == "__all__":
+                for error in errors:
+                    messages.error(request, error)
+                continue
+            label = form.fields[field_name].label or field_name.replace("_", " ").title()
+            for error in errors:
+                messages.error(request, f"{label}: {error}")
+
+        view = AdminSystemControlsView()
+        view.setup(request)
+        context = view.get_context_data(announcement_form=form)
+        return view.render_to_response(context, status=422)
 
 
 class AdminProductCategoryCreateView(SuperuserRequiredMixin, View):
@@ -1365,7 +1453,7 @@ class OrderCreateView(View):
                 )
                 if qty > available:
                     stock_errors.append(
-                        f"{product.name} (VIN: {sku}) has only {available} in stock."
+                        f"{product.name} (Part Number: {sku}) has only {available} in stock."
                     )
 
             if stock_errors:
@@ -1855,3 +1943,4 @@ class LogoutView(LoginRequiredMixin, View):
         logout(request)
         messages.success(request, "You have been signed out successfully.")
         return redirect("login")
+

@@ -1,4 +1,4 @@
-from decimal import Decimal
+﻿from decimal import Decimal
 
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
@@ -38,8 +38,8 @@ class AccountRegistration(models.Model):
 
 class Product(models.Model):
     vin_validator = RegexValidator(
-        regex=r"^[A-HJ-NPR-Z0-9]{17}$",
-        message="VIN must be exactly 17 characters (letters and numbers, excluding I, O, and Q).",
+        regex=r"^[A-HJ-NPR-Z0-9]{1,17}$",
+        message="Part Number must be 1 to 17 characters (letters and numbers, excluding I, O, and Q).",
     )
 
     vendor = models.ForeignKey(User, on_delete=models.CASCADE, related_name="products")
@@ -157,6 +157,18 @@ class ProductCategory(models.Model):
         return self.name
 
 
+class SiteAnnouncement(models.Model):
+    message = models.CharField(max_length=280)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ("-updated_at",)
+
+    def __str__(self):
+        return self.message
+
+
 class ContactMessage(models.Model):
     user = models.ForeignKey(
         User,
@@ -177,3 +189,4 @@ class ContactMessage(models.Model):
 
     def __str__(self):
         return f"{self.name} - {self.subject}"
+

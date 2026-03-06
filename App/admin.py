@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import AccountRegistration, ContactMessage, Order, Product, ProductRating
+from .models import AccountRegistration, ContactMessage, Order, Product, ProductRating, SiteAnnouncement
 
 
 @admin.register(AccountRegistration)
@@ -49,3 +49,11 @@ class ContactMessageAdmin(admin.ModelAdmin):
     list_filter = ("message_seen", "created_at")
     search_fields = ("name", "email", "subject", "message_body")
     readonly_fields = ("created_at",)
+
+
+@admin.register(SiteAnnouncement)
+class SiteAnnouncementAdmin(admin.ModelAdmin):
+    list_display = ("message", "updated_at")
+    list_filter = ("updated_at",)
+    search_fields = ("message",)
+    readonly_fields = ("created_at", "updated_at")

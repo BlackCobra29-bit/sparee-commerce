@@ -141,6 +141,18 @@
       font-size: .84rem;
     }
 
+    #vendorTopNav .navbar-nav.ms-lg-auto.account-actions .btn.active,
+    #vendorTopNav .navbar-nav.ms-lg-auto.account-actions .btn:active,
+    #vendorTopNav .navbar-nav.ms-lg-auto.account-actions .btn.show {
+      color: #000 !important;
+    }
+
+    #vendorTopNav .navbar-nav.ms-lg-auto.account-actions .btn.active i,
+    #vendorTopNav .navbar-nav.ms-lg-auto.account-actions .btn:active i,
+    #vendorTopNav .navbar-nav.ms-lg-auto.account-actions .btn.show i {
+      color: #000 !important;
+    }
+
     @media (max-width: 991.98px) {
       .navbar-light .navbar-toggler {
         border-color: #000;
@@ -149,6 +161,33 @@
       .navbar-light .navbar-toggler-icon {
         background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%280, 0, 0, 1%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
       }
+
+      .vendor-cart-mobile-btn {
+        min-height: 34px;
+        padding: .28rem .62rem;
+        font-size: .78rem;
+      }
+
+      .vendor-mobile-top-actions {
+        gap: .45rem;
+      }
+
+      .vendor-mobile-icon-link {
+        width: 32px;
+        height: 32px;
+      }
+
+      #vendorTopNav .navbar-nav.account-actions {
+        flex-direction: row;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: .5rem;
+      }
+
+      #vendorTopNav .navbar-nav.account-actions .nav-item + .nav-item {
+        margin-top: 0;
+      }
+
     }
 
     #cartModal .cart-seller-inline {
@@ -220,6 +259,60 @@
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#vendorTopNav" aria-controls="vendorTopNav" aria-expanded="false" aria-label="Toggle navigation">
           <span class="navbar-toggler-icon"></span>
         </button>
+        <div class="d-lg-none ms-auto d-flex align-items-center vendor-mobile-top-actions">
+          {% if request.user.account_registration.account_type == 'buyer' %}
+          <button
+            class="btn btn-outline-light btn-sm mb-0 d-flex align-items-center text-white vendor-cart-mobile-btn"
+            id="cartModalBtnMobile"
+            data-bs-toggle="modal"
+            data-bs-target="#cartModal"
+            type="button"
+          >
+            <i class="fa fa-shopping-cart me-1"></i>
+            <span>Cart</span>
+            <span class="badge bg-danger ms-2 cart-count-badge">0</span>
+          </button>
+          {% endif %}
+          {% if request.user.account_registration.account_type == 'seller' %}
+          <a href="{% url 'vendor_orders' %}" class="nav-link text-white p-0 position-relative d-inline-flex align-items-center justify-content-center vendor-mobile-icon-link" title="View orders">
+            <i class="fa fa-bell cursor-pointer"></i>
+            {% if seller_notification_count > 0 %}
+            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger px-1 py-0" style="font-size: 0.6rem; min-width: 1rem;">
+              {% if seller_notification_count > 99 %}99+{% else %}{{ seller_notification_count }}{% endif %}
+            </span>
+            {% endif %}
+          </a>
+          {% endif %}
+          {% if request.user.is_superuser %}
+          <a
+            href="{% url 'admin_messages_inbox' %}"
+            class="nav-link text-white p-0 position-relative d-inline-flex align-items-center justify-content-center vendor-mobile-icon-link"
+            title="Contact messages inbox"
+          >
+            <i class="fa fa-envelope cursor-pointer" style="font-size: 0.95rem; line-height: 1;"></i>
+            {% if superadmin_unseen_message_count > 0 %}
+            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger px-1 py-0" style="font-size: 0.6rem; min-width: 1rem;">
+              {% if superadmin_unseen_message_count > 99 %}99+{% else %}{{ superadmin_unseen_message_count }}{% endif %}
+            </span>
+            {% endif %}
+          </a>
+          <a
+            href="#"
+            class="nav-link text-white p-0 position-relative d-inline-flex align-items-center justify-content-center vendor-mobile-icon-link"
+            title="New seller approvals"
+            data-bs-toggle="modal"
+            data-bs-target="#superadminSellerNotificationModal"
+            onclick="return false;"
+          >
+            <i class="fa fa-bell cursor-pointer" style="font-size: 0.95rem; line-height: 1;"></i>
+            {% if superadmin_notification_count > 0 %}
+            <span class="superadmin-seller-notification-badge position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger px-1 py-0" style="font-size: 0.6rem; min-width: 1rem;">
+              {% if superadmin_notification_count > 99 %}99+{% else %}{{ superadmin_notification_count }}{% endif %}
+            </span>
+            {% endif %}
+          </a>
+          {% endif %}
+        </div>
 	        <div class="collapse navbar-collapse" id="vendorTopNav">
 	          <ul class="navbar-nav me-auto mb-2 mb-lg-0">
               {% if request.user.is_superuser %}
@@ -252,7 +345,7 @@
                 <div class="icon icon-shape icon-sm border-radius-md {% if current_url_name == 'admin_system_controls' %}bg-gradient-primary text-white{% else %}bg-white text-dark{% endif %} text-center me-2 d-flex align-items-center justify-content-center">
                   <i class="fa fa-sliders"></i>
                 </div>
-                <span class="nav-link-text ms-1">Category Controls</span>
+                <span class="nav-link-text ms-1">System Control</span>
               </a>
             </li>
               {% endif %}
@@ -335,16 +428,16 @@
 	          </ul>
           <ul class="navbar-nav ms-lg-auto mb-2 mb-lg-0 align-items-lg-center account-actions">
             {% if request.user.account_registration.account_type == 'buyer' %}
-            <li class="nav-item me-lg-3">
+            <li class="nav-item me-lg-3 d-none d-lg-block">
               <button class="btn btn-outline-light btn-sm mb-0 d-flex align-items-center text-white" id="cartModalBtn" data-bs-toggle="modal" data-bs-target="#cartModal" type="button">
                 <i class="fa fa-shopping-cart me-1"></i>
                 <span>Cart</span>
-                <span class="badge bg-danger ms-2" id="cartCount">0</span>
+                <span class="badge bg-danger ms-2 cart-count-badge" id="cartCount">0</span>
               </button>
             </li>
             {% endif %}
             {% if request.user.account_registration.account_type == 'seller' %}
-            <li class="nav-item me-lg-3 pe-3">
+            <li class="nav-item me-lg-3 pe-3 d-none d-lg-block">
               <a href="{% url 'vendor_orders' %}" class="nav-link text-white p-0 position-relative" title="View orders">
                 <i class="fa fa-bell cursor-pointer"></i>
                 {% if seller_notification_count > 0 %}
@@ -356,7 +449,7 @@
             </li>
             {% endif %}
             {% if request.user.is_superuser %}
-            <li class="nav-item me-lg-3 pe-3">
+            <li class="nav-item me-lg-3 pe-3 d-none d-lg-block">
               <a
                 href="{% url 'admin_messages_inbox' %}"
                 class="nav-link text-white p-0 position-relative d-inline-flex align-items-center justify-content-center"
@@ -371,7 +464,7 @@
                 {% endif %}
               </a>
             </li>
-            <li class="nav-item me-lg-3 pe-3">
+            <li class="nav-item me-lg-3 pe-3 d-none d-lg-block">
               <a
                 href="#"
                 class="nav-link text-white p-0 position-relative d-inline-flex align-items-center justify-content-center"
@@ -383,7 +476,7 @@
               >
                 <i class="fa fa-bell cursor-pointer" style="font-size: 0.95rem; line-height: 1;"></i>
                 {% if superadmin_notification_count > 0 %}
-                <span id="superadminSellerNotificationBadge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger px-1 py-0" style="font-size: 0.6rem; min-width: 1rem;">
+                <span id="superadminSellerNotificationBadge" class="superadmin-seller-notification-badge position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger px-1 py-0" style="font-size: 0.6rem; min-width: 1rem;">
                   {% if superadmin_notification_count > 99 %}99+{% else %}{{ superadmin_notification_count }}{% endif %}
                 </span>
                 {% endif %}
@@ -628,17 +721,19 @@
       function updateSuperadminBellCount() {
         var rows = document.querySelectorAll('[id^="superadmin-seller-notification-row-"]');
         var count = rows.length;
-        var badge = document.getElementById('superadminSellerNotificationBadge');
+        var badges = document.querySelectorAll('.superadmin-seller-notification-badge');
         if (count <= 0) {
-          if (badge) badge.remove();
+          badges.forEach(function (badge) { badge.remove(); });
           var tbody = document.getElementById('superadminSellerNotificationTableBody');
           if (tbody && !document.getElementById('superadminSellerNotificationEmptyRow')) {
             tbody.insertAdjacentHTML('beforeend', '<tr id="superadminSellerNotificationEmptyRow"><td colspan="4" class="text-center text-sm text-secondary py-4">No pending seller accounts.</td></tr>');
           }
           return;
         }
-        if (!badge) return;
-        badge.textContent = count > 99 ? '99+' : String(count);
+        if (!badges.length) return;
+        badges.forEach(function (badge) {
+          badge.textContent = count > 99 ? '99+' : String(count);
+        });
       }
 
       document.addEventListener('click', function (event) {

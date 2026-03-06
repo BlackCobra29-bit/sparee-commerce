@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+﻿{% extends 'base.html' %}
 
 {% block 'main-content' %}
 <section class="py-4">
@@ -10,7 +10,7 @@
           {% if search_query %}
           Query: "<b>{{ search_query }}</b>" - <b id="resultCount">{{ search_products|length }}</b> result(s)
           {% else %}
-          Enter a VIN, product name, or category.
+          Enter a Part Number, product name, or category.
           {% endif %}
         </p>
       </div>
@@ -86,3 +86,4 @@
 {{ search_products|json_script:"shop-products-data" }}
 {{ shop_rating_context|json_script:"shop-rating-context" }}
 {% endblock %}
+

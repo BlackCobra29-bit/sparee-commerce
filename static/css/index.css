@@ -1,4 +1,4 @@
-﻿:root {
+:root {
       --bg0: #eef7f0;
       --bg1: #f7f3da;
       --glass: rgba(255, 255, 255, .65);
@@ -32,6 +32,7 @@
     }
   
     body {
+      margin: 0;
       background: #fff;
       color: var(--text);
       overflow-x: hidden;
@@ -107,9 +108,7 @@
        NAVBAR (UPDATED: Compact like image)
     ================================== */
     .navbar {
-      background: radial-gradient(900px 500px at 18% 18%, rgba(8, 140, 22, .20), transparent 60%), radial-gradient(900px 500px at 85% 25%, rgba(0, 144, 2, .18), #ffffff00 62%
-62%
-), linear-gradient(222deg, #ffffff, #ffffff);
+      background: radial-gradient(900px 500px at 18% 18%, rgba(8, 140, 22, .20), transparent 60%), radial-gradient(900px 500px at 85% 25%, rgba(0, 144, 2, .18), #ffffff00 62%), linear-gradient(222deg, #ffffff, #ffffff);
       backdrop-filter: blur(12px);
       padding: .6rem 0;
     }

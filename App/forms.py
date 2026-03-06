@@ -3,7 +3,7 @@ import os
 from django import forms
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
-from .models import AccountRegistration, Product, ProductCategory
+from .models import AccountRegistration, Product, ProductCategory, SiteAnnouncement
 
 
 class LoginForm(forms.Form):
@@ -198,3 +198,12 @@ class ProductCategoryForm(forms.ModelForm):
 
     def clean_description(self):
         return (self.cleaned_data.get("description") or "").strip()
+
+
+class SiteAnnouncementForm(forms.ModelForm):
+    class Meta:
+        model = SiteAnnouncement
+        fields = ("message",)
+
+    def clean_message(self):
+        return (self.cleaned_data.get("message") or "").strip()

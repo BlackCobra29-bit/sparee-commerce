@@ -1,4 +1,4 @@
-// ==========================
+﻿// ==========================
 // PRODUCT DATA (from Django view)
 // ==========================
 function toNumber(value, fallback = 0) {
@@ -518,9 +518,9 @@ function buildSuggestions(q) {
             <div class="d-flex align-items-center justify-content-between">
               <div>
                 <div class="font-weight-bold">${escapeHtml(p.name)}</div>
-                <div class="muted small">${escapeHtml(p.brand)} • ${escapeHtml(
+                <div class="muted small">${escapeHtml(p.brand)} â€¢ ${escapeHtml(
       p.category
-    )} • SKU: ${escapeHtml(p.sku)}</div>
+    )} â€¢ SKU: ${escapeHtml(p.sku)}</div>
               </div>
               <div class="font-weight-bold">${money(p.price)}</div>
             </div>
@@ -694,10 +694,10 @@ function openQuickView(sku) {
       p.seller_photo || sellerAvatarDataUri(p.seller_name || p.brand)
     )
     .attr("alt", (p.seller_name || p.brand || "Seller") + " profile");
-  $("#qvCategory").text(p.category || "—");
-  $("#qvCondition").text(p.condition || "—");
-  $("#qvSeller").text(p.seller_name || p.brand || "—");
-  $("#qvOem").text(p.oem || "—");
+  $("#qvCategory").text(p.category || "â€”");
+  $("#qvCondition").text(p.condition || "â€”");
+  $("#qvSeller").text(p.seller_name || p.brand || "â€”");
+  $("#qvOem").text(p.oem || "â€”");
   $("#qvStock").text(p.stock);
   $("#qvMeta").text(
     p.brand +
@@ -872,6 +872,7 @@ function clearCart() {
 function renderCartBadge() {
   const count = cart.reduce((acc, x) => acc + x.qty, 0);
   $("#cartCount").text(count);
+  $(".cart-count-badge").text(count);
 }
 
 function renderCartTable() {
@@ -896,7 +897,7 @@ function renderCartTable() {
             <td class="ps-3">Unknown seller</td>
             <td>
               <div class="cart-item-name">Unknown product</div>
-              <div class="small"><span class="kbd">VIN: ${escapeHtml(item.sku || "-")}</span></div>
+              <div class="small"><span class="kbd">Part Number: ${escapeHtml(item.sku || "-")}</span></div>
             </td>
             <td class="text-end fw-semibold">-</td>
             <td class="text-center">${Math.max(1, Number(item.qty) || 1)}</td>
@@ -943,7 +944,7 @@ function renderCartTable() {
             </td>
             <td>
               <div class="cart-item-name">${escapeHtml(p.name)}</div>
-              <div class="small"><span class="kbd">VIN: ${escapeHtml(
+              <div class="small"><span class="kbd">Part Number: ${escapeHtml(
                 p.sku
               )}</span></div>
             </td>
@@ -1160,9 +1161,9 @@ function renderFitmentRecs() {
                   <div class="font-weight-bold">${escapeHtml(p.name)}</div>
                   <div class="font-weight-bold">${money(p.price)}</div>
                 </div>
-                <div class="muted small">${escapeHtml(p.brand)} • ${escapeHtml(
+                <div class="muted small">${escapeHtml(p.brand)} â€¢ ${escapeHtml(
       p.category
-    )} • OEM: ${escapeHtml(p.oem || "—")}</div>
+    )} â€¢ OEM: ${escapeHtml(p.oem || "â€”")}</div>
                 <div class="d-flex mt-2">
                   <button class="btn btn-success btn-sm btn-block mr-2" onclick="addToCartBySku('${
                     p.sku
@@ -1217,7 +1218,7 @@ function renderWizard() {
                 <option value="">Select</option>
                 <option>2018</option><option>2019</option><option>2020</option><option>2021</option><option>2022</option>
               </select>
-              <div class="muted small mt-2">Pro: use VIN decode to auto-fill this step.</div>
+              <div class="muted small mt-2">Pro: use Part Number decode to auto-fill this step.</div>
             </div>
           </div>
         `);
@@ -1243,13 +1244,13 @@ function renderWizard() {
                 <div class="col-md-6 mb-2">
                   <div class="muted small">Make</div>
                   <div class="font-weight-bold" id="wizSummaryMake">${escapeHtml(
-                    wiz.make || "—"
+                    wiz.make || "â€”"
                   )}</div>
                 </div>
                 <div class="col-md-6 mb-2">
                   <div class="muted small">Year</div>
                   <div class="font-weight-bold" id="wizSummaryYear">${escapeHtml(
-                    wiz.year || "—"
+                    wiz.year || "â€”"
                   )}</div>
                 </div>
               </div>
@@ -1371,11 +1372,11 @@ $(function () {
     const vin = ($("#vin").val() || "").trim();
 
     if (!vin && (!make || !year)) {
-      toast("Fitment", "Enter VIN or select Make + Year.");
+      toast("Fitment", "Enter Part Number or select Make + Year.");
       return;
     }
-    const chosenMake = make || "VIN vehicle";
-    const chosenYear = year || "—";
+    const chosenMake = make || "Part Number vehicle";
+    const chosenYear = year || "â€”";
 
     savedVehicle = { make: chosenMake, year: chosenYear };
     saveLS(LS.vehicle, savedVehicle);
@@ -1511,3 +1512,4 @@ window.removeFromCart = removeFromCart;
 window.submitOrder = submitOrder;
 window.submitRating = submitRating;
 window.openRateModal = openRateModal;
+

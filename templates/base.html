@@ -34,6 +34,20 @@
     .navbar-toggler:focus {
       box-shadow: 0 0 0 .12rem rgba(17, 24, 39, .35);
     }
+    .nav-cart-mobile {
+      width: 38px;
+      height: 38px;
+      padding: 0;
+      justify-content: center;
+    }
+    .nav-cart-mobile-count {
+      position: absolute;
+      top: -5px;
+      right: -2px;
+      font-size: 11px;
+      font-weight: 800;
+      line-height: 1;
+    }
     @media (max-width: 991px) {
       #navMain {
         margin-top: .7rem;
@@ -65,7 +79,11 @@
     <div class="container d-flex align-items-center justify-content-between">
       <small class="topbar-note">
         <i class="fas fa-bolt mr-2"></i>
-        New Year Promo: <b>15% OFF</b> brake kits • Free delivery over <b>75 ETB</b> • <span class="kbd">WHD15</span>
+        {% if announcement_note %}
+          {{ announcement_note }}
+        {% else %}
+          Announcements will appear here.
+        {% endif %}
       </small>
       <div class="topbar-search">
         <div class="search-wrap">
@@ -79,7 +97,7 @@
               id="q"
               name="q"
               class="form-control"
-              placeholder="Search by VIN, product name, or category"
+              placeholder="Search by Part Number, product name, or category"
               autocomplete="off"
               value="{{ request.GET.q|default:'' }}" />
             <div class="input-group-append">
@@ -95,15 +113,21 @@
   <!-- NAVBAR -->
   <nav class="navbar navbar-expand-lg navbar-dark sticky-top">
     <div class="container">
-      <a class="navbar-brand d-flex align-items-center" href="{% url 'home' %}">
-        <img
-          src="{% static 'image/logo.png' %}"
-          alt="Wahid Pro logo"
-          style="height:38px; width:auto; object-fit:contain;">
-      </a>
-    
-      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navMain">
-        <span class="navbar-toggler-icon"></span>
+      <div class="d-flex align-items-center">
+        <a class="navbar-brand d-flex align-items-center mb-0" href="{% url 'home' %}">
+          <img
+            src="{% static 'image/logo.png' %}"
+            alt="Wahid Pro logo"
+            style="height:38px; width:auto; object-fit:contain;">
+        </a>
+        <button class="navbar-toggler ml-2" type="button" data-toggle="collapse" data-target="#navMain">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+      </div>
+
+      <button class="nav-btn nav-btn--icon nav-cart-mobile d-inline-flex d-lg-none ml-auto mr-2 position-relative" data-toggle="modal" data-target="#cartModal" type="button" aria-label="Open cart">
+        <i class="fas fa-shopping-cart"></i>
+        <span class="text-danger cart-count-badge nav-cart-mobile-count">0</span>
       </button>
 
       <div class="collapse navbar-collapse" id="navMain">
@@ -131,10 +155,10 @@
         </ul>
 
         <div class="d-flex align-items-center w-100 w-lg-auto ml-lg-auto justify-content-lg-end nav-actions">
-          <button class="nav-btn" id="cartModalBtn" data-toggle="modal" data-target="#cartModal">
+          <button class="nav-btn d-none d-lg-inline-flex" id="cartModalBtn" data-toggle="modal" data-target="#cartModal">
             <i class="fas fa-shopping-cart"></i>
             <span class="d-none d-md-inline ml-1">Cart</span>
-            <span class="ml-1 text-danger" id="cartCount">0</span>
+            <span class="ml-1 text-danger cart-count-badge" id="cartCount">0</span>
           </button>
 
           {% if show_nav_user %}
@@ -146,19 +170,19 @@
               class="rounded-circle mr-2"
               style="width:28px; height:28px; object-fit:cover;">
             {% endif %}
-            <span class="d-none d-md-inline">
+            <span>
               {{ nav_user_name }}
             </span>
           </a>
           {% else %}  
           <a class="nav-btn" href="{% url 'login' %}">
             <i class="fas fa-sign-in-alt"></i>
-            <span class="d-none d-md-inline ml-1">Login</span>
+            <span class="ml-1">Login</span>
           </a>
 
           <a class="nav-btn nav-btn--primary" href="{% url 'signup' %}">
             <i class="fas fa-user-plus"></i>
-            <span class="d-none d-md-inline ml-1">Create account</span>
+            <span class="ml-1">Create account</span>
           </a>
           {% endif %}
         </div>
@@ -201,3 +225,4 @@
 </body>
 
 </html>
+
