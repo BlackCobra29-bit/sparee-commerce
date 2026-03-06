@@ -8,7 +8,7 @@
         <h2 class="h4 font-weight-bold mb-1">Search Results</h2>
         <p class="muted mb-0">
           {% if search_query %}
-          Query: "<b>{{ search_query }}</b>" — {{ search_products|length }} result(s)
+          Query: "<b>{{ search_query }}</b>" - <b id="resultCount">{{ search_products|length }}</b> result(s)
           {% else %}
           Enter a VIN, product name, or category.
           {% endif %}
@@ -19,34 +19,70 @@
       </a>
     </div>
 
-    <div class="row">
-      {% for p in search_products %}
-      <div class="col-sm-6 col-lg-3 mb-4">
-        <div class="product-card h-100">
-          <div class="p-img">
-            <img src="{{ p.img }}" alt="{{ p.name }}">
-          </div>
-          <div class="p-3">
-            <div class="muted small mb-1"><b class="text-success">Category:</b> {{ p.category }}</div>
-            <div class="font-weight-bold mb-1">{{ p.name }}</div>
-            <div class="muted small mb-2">VIN: {{ p.sku }}</div>
-            <div class="d-flex justify-content-between align-items-center">
-              <div class="price">{{ p.price }} ETB</div>
-              <div class="muted small">Stock: <b>{{ p.stock }}</b></div>
-            </div>
-          </div>
-        </div>
+    <div class="row" id="productGrid"></div>
+
+    {% if not search_products %}
+    <div class="panel mt-2">
+      <div class="panel-b text-center muted py-5">
+        No products found for your search.
       </div>
-      {% empty %}
-      <div class="col-12">
-        <div class="panel">
-          <div class="panel-b text-center muted py-5">
-            No products found for your search.
-          </div>
-        </div>
-      </div>
-      {% endfor %}
     </div>
+    {% endif %}
   </div>
 </section>
+
+<!-- CART MODAL -->
+<div class="modal fade" id="cartModal" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title font-weight-bold"><i class="fas fa-shopping-cart mr-2"></i>Your Cart</h5>
+        <button type="button" class="close" style="color:var(--text)" data-dismiss="modal"><span>&times;</span></button>
+      </div>
+      <div class="modal-body">
+        <div class="cart-table-wrap">
+          <table class="table cart-table">
+            <thead>
+              <tr>
+                <th>Seller</th>
+                <th>Item</th>
+                <th class="text-right">Price</th>
+                <th class="text-center">Qty</th>
+                <th class="text-right">Total</th>
+                <th class="text-right" style="width:56px;">Remove</th>
+              </tr>
+            </thead>
+            <tbody id="cartTable"></tbody>
+          </table>
+        </div>
+
+        <div class="d-flex align-items-center justify-content-between mt-3 flex-wrap">
+          <div class="muted small mb-2 mb-md-0">Total amount for items currently in your cart.</div>
+          <div class="text-right">
+            <div class="muted small">Subtotal</div>
+            <div class="h5 mb-0" id="cartSubtotal">0.00 ETB</div>
+          </div>
+        </div>
+
+        <hr class="divider mt-3 mb-3">
+
+        <div class="d-flex flex-wrap">
+          <button class="btn btn-outline-light mr-2 mb-2" type="button" onclick="clearCart()">
+            <i class="fas fa-trash mr-2"></i>Clear
+          </button>
+          <button
+            type="button"
+            class="btn btn-success ml-auto mb-2"
+            id="submitOrderBtn"
+            data-order-url="{% url 'order_create' %}">
+            <i class="fas fa-lock mr-2"></i>Submit Order
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{{ search_products|json_script:"shop-products-data" }}
+{{ shop_rating_context|json_script:"shop-rating-context" }}
 {% endblock %}

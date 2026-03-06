@@ -20,6 +20,11 @@
     #navMain .navbar-nav > .nav-item {
       margin-right: .8rem;
     }
+    .topbar-note {
+      flex: 1 1 280px;
+      margin-bottom: 0;
+      line-height: 1.35;
+    }
     .navbar-toggler {
       border-color: rgba(31, 41, 55, .45);
     }
@@ -28,6 +33,24 @@
     }
     .navbar-toggler:focus {
       box-shadow: 0 0 0 .12rem rgba(17, 24, 39, .35);
+    }
+    @media (max-width: 991px) {
+      #navMain {
+        margin-top: .7rem;
+      }
+      .nav-actions {
+        width: 100%;
+        margin-top: .65rem;
+      }
+    }
+    @media (max-width: 767px) {
+      .topbar .container {
+        align-items: flex-start !important;
+      }
+      .topbar-note {
+        width: 100%;
+        font-size: .76rem;
+      }
     }
   </style>
   
@@ -40,7 +63,7 @@
   <!-- TOP ANNOUNCEMENT BAR -->
   <div class="topbar py-2">
     <div class="container d-flex align-items-center justify-content-between">
-      <small>
+      <small class="topbar-note">
         <i class="fas fa-bolt mr-2"></i>
         New Year Promo: <b>15% OFF</b> brake kits • Free delivery over <b>75 ETB</b> • <span class="kbd">WHD15</span>
       </small>
@@ -66,7 +89,6 @@
           <div class="suggest" id="suggestBox"></div>
         </div>
       </div>
-      </small>
     </div>
   </div>
 

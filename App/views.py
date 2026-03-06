@@ -174,6 +174,8 @@ class HomeView(TemplateView):
             ).exists()
         context["shop_rating_context"] = {
             "is_authenticated": self.request.user.is_authenticated,
+            "is_superadmin": self.request.user.is_authenticated
+            and self.request.user.is_superuser,
             "can_rate": self.request.user.is_authenticated
             and (not self.request.user.is_superuser)
             and has_registered_account,
@@ -218,12 +220,29 @@ class CategoryProductsView(TemplateView):
             ]
 
         products = _build_shop_products(selected_category or None)
+        has_registered_account = False
+        if self.request.user.is_authenticated:
+            has_registered_account = AccountRegistration.objects.filter(
+                user_id=self.request.user.id
+            ).exists()
+
         context["category_products"] = products
         context["selected_category"] = selected_category or "All Categories"
         context["shop_category_options"] = category_options
         context["show_nav_user"] = show_nav_user
         context["nav_user_name"] = nav_user_name
         context["nav_user_photo_url"] = nav_user_photo_url
+        context["shop_rating_context"] = {
+            "is_authenticated": self.request.user.is_authenticated,
+            "is_superadmin": self.request.user.is_authenticated
+            and self.request.user.is_superuser,
+            "can_rate": self.request.user.is_authenticated
+            and (not self.request.user.is_superuser)
+            and has_registered_account,
+            "current_user_id": self.request.user.id if self.request.user.is_authenticated else None,
+            "login_url": reverse("login"),
+            "rate_url_template": reverse("product_rate", kwargs={"sku": "__SKU__"}),
+        }
         return context
 
 
@@ -261,12 +280,29 @@ class SearchProductsView(TemplateView):
             ]
 
         products = _build_shop_products(search_term=query or None)
+        has_registered_account = False
+        if self.request.user.is_authenticated:
+            has_registered_account = AccountRegistration.objects.filter(
+                user_id=self.request.user.id
+            ).exists()
+
         context["search_query"] = query
         context["search_products"] = products
         context["shop_category_options"] = category_options
         context["show_nav_user"] = show_nav_user
         context["nav_user_name"] = nav_user_name
         context["nav_user_photo_url"] = nav_user_photo_url
+        context["shop_rating_context"] = {
+            "is_authenticated": self.request.user.is_authenticated,
+            "is_superadmin": self.request.user.is_authenticated
+            and self.request.user.is_superuser,
+            "can_rate": self.request.user.is_authenticated
+            and (not self.request.user.is_superuser)
+            and has_registered_account,
+            "current_user_id": self.request.user.id if self.request.user.is_authenticated else None,
+            "login_url": reverse("login"),
+            "rate_url_template": reverse("product_rate", kwargs={"sku": "__SKU__"}),
+        }
         return context
 
 
@@ -832,9 +868,6 @@ class AdminMessagesInboxView(SuperuserRequiredMixin, TemplateView):
             .order_by("-created_at")
         )
         context["contact_messages"] = messages_qs
-        context["contact_messages_total"] = messages_qs.count()
-        context["contact_messages_unseen"] = messages_qs.filter(message_seen=False).count()
-        context["contact_messages_seen"] = messages_qs.filter(message_seen=True).count()
         return context
 
 
@@ -1258,7 +1291,7 @@ class OrderCreateView(View):
     def post(self, request, *args, **kwargs):
         if request.user.is_authenticated and request.user.is_superuser:
             return JsonResponse(
-                {"error": "You are loggd in as a system admin"},
+                {"error": "System admins cannot place orders."},
                 status=403,
             )
 

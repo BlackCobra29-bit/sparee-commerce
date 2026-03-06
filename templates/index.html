@@ -69,20 +69,20 @@
   <main class="py-4 mt-3" id="shop">
     <div class="container" data-aos="fade-up">
       <!-- TOP BAR -->
-      <div class="d-flex flex-wrap align-items-center justify-content-between mb-3">
-        <div class="d-flex align-items-center mb-2 mb-md-0">
+      <div class="shop-toolbar d-flex flex-wrap align-items-center justify-content-between mb-3">
+        <div class="shop-toolbar-meta d-flex align-items-center mb-2 mb-md-0">
           <h2 class="h4 font-weight-bold mb-0 mr-3">Shop Parts</h2>
           <span class="muted">Showing <b id="resultCount">0</b> items</span>
           <span class="badge badge-ghost ml-3 d-none d-md-inline" id="savedVehicle">No vehicle saved</span>
         </div>
 
-        <div class="d-flex align-items-center">
-          <button class="btn btn-outline-light mr-2" data-toggle="modal" data-target="#filtersModal">
+        <div class="shop-toolbar-actions d-flex align-items-center">
+          <button class="btn btn-outline-light mr-2 shop-filter-btn" data-toggle="modal" data-target="#filtersModal">
             <i class="fas fa-sliders-h mr-2"></i>Filters
             <span class="badge badge-light ml-2" id="activeFilters">0</span>
           </button>
 
-          <select class="custom-select mr-2" id="sortBy" style="width:220px">
+          <select class="custom-select mr-2 shop-sort-select" id="sortBy" style="width:220px">
             <option value="relevance">Sort: Relevance</option>
             <option value="priceAsc">Price: Low to High</option>
             <option value="priceDesc">Price: High to Low</option>
@@ -90,7 +90,7 @@
             <option value="stockDesc">Stock: High to Low</option>
           </select>
 
-          <button class="btn btn-outline-light" id="btnReset">
+          <button class="btn btn-outline-light shop-reset-btn" id="btnReset">
             <i class="fas fa-undo mr-2"></i>Reset
           </button>
         </div>
@@ -312,7 +312,7 @@
               </div>
 
               <div class="panel mb-3">
-                <div class="panel-h font-weight-bold">Brand</div>
+                <div class="panel-h font-weight-bold">Seller</div>
                 <div class="panel-b">
 	                  <select class="custom-select" id="filterBrand">
 	                    <option value="All">All</option>

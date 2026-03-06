@@ -1325,3 +1325,355 @@
       }
 
     }
+
+    /* Core mobile responsiveness for homepage sections */
+    img,
+    svg,
+    video {
+      max-width: 100%;
+      height: auto;
+    }
+
+    @media (max-width: 991px) {
+      .topbar {
+        padding-top: .55rem !important;
+        padding-bottom: .55rem !important;
+      }
+
+      .topbar small {
+        font-size: .78rem;
+      }
+
+      .topbar-search {
+        flex: 1 1 100%;
+        max-width: none;
+      }
+
+      .search-wrap .form-control {
+        font-size: 13px;
+      }
+
+      .navbar .container {
+        align-items: center;
+      }
+
+      .navbar-brand img {
+        height: 34px !important;
+      }
+
+      #navMain .navbar-nav {
+        margin-bottom: .5rem;
+      }
+
+      #navMain .navbar-nav > .nav-item {
+        margin-right: 0 !important;
+        margin-bottom: .2rem;
+      }
+
+      .nav-actions {
+        gap: .4rem;
+        flex-wrap: wrap;
+      }
+
+      .nav-btn {
+        height: 36px;
+        padding: 0 12px;
+        font-size: 11px;
+      }
+
+      .hero {
+        padding-top: 1rem !important;
+        padding-bottom: 1.2rem !important;
+      }
+
+      .hero .display-4 {
+        font-size: 2rem;
+        line-height: 1.12 !important;
+      }
+
+      .hero .lead {
+        font-size: 1rem;
+        margin-bottom: 1.05rem !important;
+      }
+
+      .hero-left::after {
+        display: none;
+      }
+
+      .hero-stack {
+        gap: 12px;
+      }
+
+      .hero-card {
+        border-radius: 18px;
+        padding: 14px;
+      }
+
+      .hero-card .title {
+        font-size: 16px;
+      }
+
+      .shop-toolbar {
+        align-items: stretch !important;
+      }
+
+      .shop-toolbar-meta,
+      .shop-toolbar-actions {
+        width: 100%;
+      }
+
+      .shop-toolbar-meta {
+        align-items: flex-start !important;
+        gap: .25rem .65rem;
+      }
+
+      .shop-toolbar-meta .h4 {
+        font-size: 1.25rem;
+      }
+
+      .shop-toolbar-actions {
+        flex-wrap: wrap;
+        gap: .5rem;
+      }
+
+      .shop-toolbar-actions .btn,
+      .shop-toolbar-actions .custom-select {
+        margin-right: 0 !important;
+      }
+
+      .shop-filter-btn,
+      .shop-reset-btn {
+        flex: 1 1 calc(50% - .25rem);
+      }
+
+      .shop-sort-select {
+        flex: 1 1 100%;
+        width: 100% !important;
+      }
+
+      #support .support-shell,
+      #guides .roadmap-shell {
+        border-radius: 20px;
+      }
+
+      #support .support-contact-card {
+        gap: 10px;
+      }
+
+      .dock {
+        left: 10px;
+        right: 10px;
+        bottom: 10px;
+      }
+
+      .dock .inner {
+        border-radius: 14px;
+        padding: 10px;
+      }
+
+      #compareDock .btn {
+        padding-left: .7rem;
+        padding-right: .7rem;
+      }
+
+      .modal-dialog {
+        margin: .7rem;
+      }
+    }
+
+    @media (max-width: 767px) {
+      .topbar .container {
+        gap: .45rem;
+      }
+
+      .search-wrap {
+        border-radius: 12px;
+      }
+
+      .search-wrap .form-control {
+        height: 32px;
+      }
+
+      .search-wrap .btn {
+        height: 32px;
+      }
+
+      .navbar {
+        padding: .45rem 0;
+      }
+
+      .navbar-brand img {
+        height: 30px !important;
+      }
+
+      .nav-actions {
+        justify-content: space-between;
+      }
+
+      .nav-actions .nav-btn {
+        flex: 1 1 calc(33.33% - .35rem);
+        justify-content: center;
+      }
+
+      .hero .display-4 {
+        font-size: 1.7rem;
+      }
+
+      .hero .lead {
+        font-size: .95rem;
+      }
+
+      .hero .btn-lg {
+        width: 100%;
+        font-size: 1rem;
+      }
+
+      .panel,
+      .product-card {
+        border-radius: 16px;
+      }
+
+      #productGrid > [class*="col-"] {
+        margin-bottom: .9rem !important;
+      }
+
+      .p-actions {
+        right: 8px;
+        top: 8px;
+        gap: .3rem;
+      }
+
+      .icon-btn {
+        width: 34px;
+        height: 34px;
+        border-radius: 12px;
+      }
+
+      .workflow-cta {
+        flex-direction: column;
+        align-items: flex-start !important;
+      }
+
+      .workflow-cta .btn {
+        width: 100%;
+      }
+
+      #support .support-left h4,
+      #support .support-form-wrap h5 {
+        font-size: 1.35rem;
+      }
+
+      #support .support-send-btn {
+        height: 48px;
+        font-size: .98rem;
+      }
+
+      .footer .row > [class*="col-"] {
+        text-align: left !important;
+      }
+
+      .footer a {
+        display: inline-block;
+        margin-bottom: .3rem;
+      }
+
+      .dock {
+        left: 8px;
+        right: 8px;
+      }
+
+      .dock .inner .d-flex.align-items-center.justify-content-between.flex-wrap {
+        gap: .45rem;
+      }
+
+      .dock .mini {
+        padding: 6px 8px;
+      }
+
+      .cart-table-wrap {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+
+      .cart-table {
+        min-width: 680px;
+      }
+
+      #filtersModal .modal-dialog,
+      #quickView .modal-dialog,
+      #fitmentWizard .modal-dialog,
+      #cartModal .modal-dialog,
+      #compareModal .modal-dialog {
+        max-width: calc(100% - 1rem);
+        margin: .5rem auto;
+      }
+    }
+
+    @media (max-width: 575px) {
+      .topbar small {
+        font-size: .73rem;
+      }
+
+      .search-wrap .form-control {
+        font-size: 12px;
+      }
+
+      .search-wrap .input-group-text {
+        padding-left: .55rem;
+        padding-right: .35rem;
+      }
+
+      .nav-actions .nav-btn {
+        flex: 1 1 calc(50% - .35rem);
+      }
+
+      .nav-btn--primary {
+        order: 1;
+      }
+
+      .hero .display-4 {
+        font-size: 1.45rem;
+      }
+
+      .hero .badge {
+        font-size: .68rem;
+      }
+
+      .shop-toolbar-meta .h4 {
+        font-size: 1.1rem;
+      }
+
+      .shop-toolbar-meta span {
+        font-size: .86rem;
+      }
+
+      .shop-filter-btn,
+      .shop-reset-btn {
+        flex: 1 1 100%;
+      }
+
+      .shop-toolbar-actions .btn,
+      .shop-toolbar-actions .custom-select {
+        width: 100%;
+      }
+
+      #support .support-left-inner,
+      #support .support-form-wrap {
+        padding: 16px 14px;
+      }
+
+      #support .support-input {
+        height: 46px;
+        padding: 0 13px;
+      }
+
+      #support textarea.support-input {
+        min-height: 140px;
+      }
+
+      .dock .btn {
+        font-size: .78rem;
+        padding-left: .55rem;
+        padding-right: .55rem;
+      }
+    }

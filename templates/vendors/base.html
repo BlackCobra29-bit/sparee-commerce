@@ -12,7 +12,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   <link rel="apple-touch-icon" sizes="76x76" href="{% static 'vendors/img/apple-icon.png' %}">
-  <link rel="icon" type="image/png" href="{% static 'vendors/img/logo-ct.png' %}">
+  <link rel="icon" type="image/png" href="{% static 'image/logo.png' %}">
   <title>{% block vendor_title %}Inventory Management - Wahid Spare Hub{% endblock %}</title>
   <!--     Fonts and icons     -->
   <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700" rel="stylesheet" />
@@ -217,9 +217,6 @@
     {% with current_url_name=request.resolver_match.url_name %}
     <nav class="navbar navbar-expand-lg navbar-light bg-white px-3 py-2 fixed-top top-0 start-0 end-0 w-100 border-bottom" style="z-index: 1030;">
       <div class="container-fluid">
-        <a class="navbar-brand d-flex align-items-center me-4" href="{% url 'vendor_dashboard_home' %}">
-          <img src="{% static 'image/logo.png' %}" alt="main_logo" width="42" height="42" class="me-2">
-        </a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#vendorTopNav" aria-controls="vendorTopNav" aria-expanded="false" aria-label="Toggle navigation">
           <span class="navbar-toggler-icon"></span>
         </button>

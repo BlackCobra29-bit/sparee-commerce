@@ -47,6 +47,7 @@ function readRatingContext() {
   if (!node) {
     return {
       is_authenticated: false,
+      is_superadmin: false,
       can_rate: false,
       login_url: "/login/",
       rate_url_template: "/products/__SKU__/rate/",
@@ -56,6 +57,7 @@ function readRatingContext() {
     const parsed = JSON.parse(node.textContent || "{}");
     return {
       is_authenticated: !!parsed.is_authenticated,
+      is_superadmin: !!parsed.is_superadmin,
       can_rate: !!parsed.can_rate,
       current_user_id: toNumber(parsed.current_user_id, 0),
       login_url: String(parsed.login_url || "/login/"),
@@ -66,6 +68,7 @@ function readRatingContext() {
   } catch (e) {
     return {
       is_authenticated: false,
+      is_superadmin: false,
       can_rate: false,
       current_user_id: 0,
       login_url: "/login/",
@@ -230,7 +233,9 @@ function renderQuickViewRateControls(sku) {
   }
 
   if (!RATING_CONTEXT.can_rate) {
-    const msg = RATING_CONTEXT.is_authenticated
+    const msg = RATING_CONTEXT.is_superadmin
+      ? "System admins cannot rate products."
+      : RATING_CONTEXT.is_authenticated
       ? "Only registered accounts can rate."
       : "Log in to rate this product.";
     starsBox.html(`<span class="muted small">${escapeHtml(msg)}</span>`);
@@ -258,6 +263,11 @@ function openRateModal(sku) {
   const normalizedSku = String(sku || "").trim();
   if (!normalizedSku) return;
 
+  if (RATING_CONTEXT.is_superadmin) {
+    toast("Rating", "System admins cannot rate products.", "error");
+    return;
+  }
+
   if (ratedSkus.has(normalizedSku)) {
     toast(
       "Rating",
@@ -277,6 +287,11 @@ function openRateModal(sku) {
 async function submitRating(sku, rating) {
   const normalizedSku = String(sku || "").trim();
   if (!normalizedSku) return;
+
+  if (RATING_CONTEXT.is_superadmin) {
+    toast("Rating", "System admins cannot rate products.", "error");
+    return;
+  }
 
   if (ratedSkus.has(normalizedSku)) {
     toast(
@@ -801,6 +816,11 @@ function renderCompareUI() {
 // CART
 // ==========================
 function addToCartBySku(sku) {
+  if (RATING_CONTEXT.is_superadmin) {
+    toast("Cart", "System admins cannot add items to cart.", "error");
+    return;
+  }
+
   const p = bySku(sku);
   if (!p) return;
   const item = cart.find((x) => x.sku === sku);
@@ -958,6 +978,11 @@ function renderCartTable() {
 }
 
 async function submitOrder() {
+  if (RATING_CONTEXT.is_superadmin) {
+    toast("Order", "System admins cannot place orders.", "error");
+    return;
+  }
+
   if (!cart.length) {
     toast("Order", "Your cart is empty.", "error");
     return;
