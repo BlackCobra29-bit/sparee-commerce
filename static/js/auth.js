@@ -252,6 +252,7 @@
 
   document.addEventListener("DOMContentLoaded", function () {
     initAuthUi();
+    hideAuthLoading();
   });
 
   document.addEventListener("htmx:beforeRequest", function (event) {
@@ -278,11 +279,38 @@
     }
   });
 
+  document.addEventListener("htmx:abort", function () {
+    hideAuthLoading();
+  });
+
+  document.addEventListener("htmx:historyRestore", function () {
+    hideAuthLoading();
+    initAuthUi();
+  });
+
+  document.addEventListener("htmx:historyCacheMissLoadError", function () {
+    hideAuthLoading();
+  });
+
   document.addEventListener("htmx:afterSwap", function (event) {
     const target = event.target;
     if (!target) return;
     if (target.id === "auth-page" || (target.closest && target.closest("#auth-page"))) {
       initAuthUi();
+      hideAuthLoading();
+    }
+  });
+
+  window.addEventListener("pageshow", function () {
+    hideAuthLoading();
+  });
+
+  window.addEventListener("popstate", function () {
+    hideAuthLoading();
+  });
+
+  document.addEventListener("visibilitychange", function () {
+    if (!document.hidden) {
       hideAuthLoading();
     }
   });

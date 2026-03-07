@@ -1,30 +1,4 @@
 <main id="auth-page" class="auth-shell">
-  <section class="auth-grid">
-    <aside class="auth-side">
-      <a href="{% url 'home' %}" class="go-home">Back to Store</a>
-      <div class="brand-pill" style="margin-top:14px;">
-        <span class="brand-dot"><i class="fas fa-cog"></i></span>
-        <span>Wahid Pro Access</span>
-      </div>
-      <h2 class="auth-headline">Sign in to your spare parts workspace.</h2>
-      <p class="auth-copy">
-        Keep your fitment profiles, cart, and purchasing signals synced in one secure dashboard.
-      </p>
-      <div class="stats">
-        <div class="stat-card">
-          <span>Saved fitment profiles</span>
-          <b>Active</b>
-        </div>
-        <div class="stat-card">
-          <span>Cross-reference lookup</span>
-          <b>Real-time</b>
-        </div>
-        <div class="stat-card">
-          <span>Fleet purchase history</span>
-          <b>Encrypted</b>
-        </div>
-      </div>
-    </aside>
 
     <section class="auth-form-wrap">
       <h1>Welcome back</h1>
@@ -60,7 +34,7 @@
             <button type="button" class="toggle-pass" data-toggle-password data-target="password">Show</button>
           </div>
           <div class="meta-row">
-            <span>Minimum recommended: 8 characters</span>
+            <span>Minimum: 8 characters</span>
             <a href="{% url 'forgot_password' %}" hx-get="{% url 'forgot_password' %}"
                hx-target="#auth-page" hx-swap="outerHTML" hx-push-url="true">Forgot password?</a>
           </div>
@@ -80,5 +54,4 @@
            hx-target="#auth-page" hx-swap="outerHTML" hx-push-url="true">Create account</a>
       </div>
     </section>
-  </section>
 </main>
