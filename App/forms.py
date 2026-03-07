@@ -30,6 +30,19 @@ class LoginForm(forms.Form):
         )
         if self.user_cache is None:
             raise forms.ValidationError("Invalid credentials. Please try again.")
+
+        account = (
+            AccountRegistration.objects.filter(user_id=self.user_cache.id)
+            .only("account_type", "is_verified")
+            .first()
+        )
+        if (
+            account
+            and account.account_type == AccountRegistration.ACCOUNT_TYPE_SELLER
+            and not account.is_verified
+        ):
+            self.user_cache = None
+            raise forms.ValidationError("Your account is pending for approval.")
         return cleaned_data
 
     def get_user(self):
@@ -50,6 +63,7 @@ class SignupForm(forms.Form):
     confirm_password = forms.CharField(widget=forms.PasswordInput)
     profile_picture = forms.ImageField(required=True)
     license_file = forms.FileField(required=False)
+    oem_authorization_certificate = forms.FileField(required=False)
     terms = forms.BooleanField(required=True)
 
     def clean_username(self):
@@ -93,6 +107,22 @@ class SignupForm(forms.Form):
         if profile_picture.size > 5 * 1024 * 1024:
             raise forms.ValidationError("Profile picture must be 5MB or smaller.")
         return profile_picture
+
+    def clean_oem_authorization_certificate(self):
+        certificate = self.cleaned_data.get("oem_authorization_certificate")
+        if not certificate:
+            return certificate
+        allowed_ext = {".pdf", ".png", ".jpg", ".jpeg"}
+        ext = os.path.splitext(certificate.name)[1].lower()
+        if ext not in allowed_ext:
+            raise forms.ValidationError(
+                "OEM authorization certificate must be PDF, PNG, JPG, or JPEG."
+            )
+        if certificate.size > 5 * 1024 * 1024:
+            raise forms.ValidationError(
+                "OEM authorization certificate must be 5MB or smaller."
+            )
+        return certificate
 
     def clean(self):
         cleaned_data = super().clean()

@@ -146,23 +146,40 @@ def _get_active_site_announcement():
     return announcement.message if announcement else ""
 
 
+def _build_public_nav_user_context(user):
+    nav_context = {
+        "show_nav_user": False,
+        "nav_user_name": "",
+        "nav_user_photo_url": "",
+    }
+    if not user.is_authenticated:
+        return nav_context
+
+    account = (
+        AccountRegistration.objects.filter(user_id=user.id)
+        .only("account_type", "is_verified", "profile_picture")
+        .first()
+    )
+    if (
+        account
+        and account.account_type == AccountRegistration.ACCOUNT_TYPE_SELLER
+        and not account.is_verified
+    ):
+        return nav_context
+
+    nav_context["show_nav_user"] = True
+    nav_context["nav_user_name"] = user.get_full_name().strip() or "Account"
+    if account and account.profile_picture:
+        nav_context["nav_user_photo_url"] = account.profile_picture.url
+    return nav_context
+
+
 class HomeView(TemplateView):
     template_name = "index.html"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        nav_user_name = ""
-        nav_user_photo_url = ""
-        show_nav_user = self.request.user.is_authenticated
-        if show_nav_user:
-            nav_user_name = self.request.user.get_full_name().strip() or "Account"
-            account = (
-                AccountRegistration.objects.filter(user_id=self.request.user.id)
-                .only("profile_picture")
-                .first()
-            )
-            if account and account.profile_picture:
-                nav_user_photo_url = account.profile_picture.url
+        nav_context = _build_public_nav_user_context(self.request.user)
 
         shop_products = _build_shop_products()
 
@@ -180,9 +197,9 @@ class HomeView(TemplateView):
         context["shop_products"] = shop_products
         context["shop_category_options"] = category_options
         context["shop_brand_options"] = sorted({p["brand"] for p in shop_products})
-        context["show_nav_user"] = show_nav_user
-        context["nav_user_name"] = nav_user_name
-        context["nav_user_photo_url"] = nav_user_photo_url
+        context["show_nav_user"] = nav_context["show_nav_user"]
+        context["nav_user_name"] = nav_context["nav_user_name"]
+        context["nav_user_photo_url"] = nav_context["nav_user_photo_url"]
         has_registered_account = False
         if self.request.user.is_authenticated:
             has_registered_account = AccountRegistration.objects.filter(
@@ -210,18 +227,7 @@ class CategoryProductsView(TemplateView):
         context = super().get_context_data(**kwargs)
         selected_category = (self.request.GET.get("category") or "").strip()
 
-        nav_user_name = ""
-        nav_user_photo_url = ""
-        show_nav_user = self.request.user.is_authenticated
-        if show_nav_user:
-            nav_user_name = self.request.user.get_full_name().strip() or "Account"
-            account = (
-                AccountRegistration.objects.filter(user_id=self.request.user.id)
-                .only("profile_picture")
-                .first()
-            )
-            if account and account.profile_picture:
-                nav_user_photo_url = account.profile_picture.url
+        nav_context = _build_public_nav_user_context(self.request.user)
 
         category_options = [
             {"value": category.name, "label": category.name}
@@ -244,9 +250,9 @@ class CategoryProductsView(TemplateView):
         context["category_products"] = products
         context["selected_category"] = selected_category or "All Categories"
         context["shop_category_options"] = category_options
-        context["show_nav_user"] = show_nav_user
-        context["nav_user_name"] = nav_user_name
-        context["nav_user_photo_url"] = nav_user_photo_url
+        context["show_nav_user"] = nav_context["show_nav_user"]
+        context["nav_user_name"] = nav_context["nav_user_name"]
+        context["nav_user_photo_url"] = nav_context["nav_user_photo_url"]
         context["shop_rating_context"] = {
             "is_authenticated": self.request.user.is_authenticated,
             "is_superadmin": self.request.user.is_authenticated
@@ -269,18 +275,7 @@ class SearchProductsView(TemplateView):
         context = super().get_context_data(**kwargs)
         query = (self.request.GET.get("q") or "").strip()
 
-        nav_user_name = ""
-        nav_user_photo_url = ""
-        show_nav_user = self.request.user.is_authenticated
-        if show_nav_user:
-            nav_user_name = self.request.user.get_full_name().strip() or "Account"
-            account = (
-                AccountRegistration.objects.filter(user_id=self.request.user.id)
-                .only("profile_picture")
-                .first()
-            )
-            if account and account.profile_picture:
-                nav_user_photo_url = account.profile_picture.url
+        nav_context = _build_public_nav_user_context(self.request.user)
 
         category_options = [
             {"value": category.name, "label": category.name}
@@ -303,9 +298,9 @@ class SearchProductsView(TemplateView):
         context["search_query"] = query
         context["search_products"] = products
         context["shop_category_options"] = category_options
-        context["show_nav_user"] = show_nav_user
-        context["nav_user_name"] = nav_user_name
-        context["nav_user_photo_url"] = nav_user_photo_url
+        context["show_nav_user"] = nav_context["show_nav_user"]
+        context["nav_user_name"] = nav_context["nav_user_name"]
+        context["nav_user_photo_url"] = nav_context["nav_user_photo_url"]
         context["shop_rating_context"] = {
             "is_authenticated": self.request.user.is_authenticated,
             "is_superadmin": self.request.user.is_authenticated
@@ -1843,6 +1838,7 @@ class SignupView(HtmxTemplateMixin, FormView):
         account_type = form.cleaned_data["account_type"]
         profile_picture = form.cleaned_data["profile_picture"]
         license_file = form.cleaned_data.get("license_file")
+        oem_authorization_certificate = form.cleaned_data.get("oem_authorization_certificate")
 
         user = User.objects.create_user(
             username=form.cleaned_data["username"],
@@ -1858,13 +1854,16 @@ class SignupView(HtmxTemplateMixin, FormView):
             phone_number=form.cleaned_data["phone"],
             profile_picture=profile_picture,
             license_file=license_file if account_type == "seller" else None,
+            oem_authorization_certificate=(
+                oem_authorization_certificate if account_type == "seller" else None
+            ),
             is_verified=(account_type != "seller"),
         )
 
         if account_type == "seller":
-            messages.success(
+            messages.warning(
                 self.request,
-                "Account registered successfully. Waiting approval by admin.",
+                "Your account is pending for approval.",
             )
             return self.render_to_response(
                 self.get_context_data(
@@ -1882,7 +1881,7 @@ class SignupView(HtmxTemplateMixin, FormView):
 
         login(self.request, user)
         messages.success(self.request, "Your buyer account was created successfully.")
-        return self.client_redirect(self.get_success_url())
+        return self.client_redirect(str(reverse_lazy("buyer_dashboard")))
 
     def form_invalid(self, form):
         for field_name, errors in form.errors.items():

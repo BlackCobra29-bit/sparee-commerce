@@ -28,6 +28,11 @@ class AccountRegistration(models.Model):
     )
     profile_picture = models.ImageField(upload_to="profile_pictures/", blank=True, null=True)
     license_file = models.FileField(upload_to="license_uploads/", blank=True, null=True)
+    oem_authorization_certificate = models.FileField(
+        upload_to="oem_authorization_certificates/",
+        blank=True,
+        null=True,
+    )
     is_verified = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

@@ -163,6 +163,8 @@
     const accountType = document.getElementById("account_type");
     const licenseWrap = document.getElementById("licenseFieldWrap");
     const licenseInput = document.getElementById("license_file");
+    const oemWrap = document.getElementById("oemCertificateFieldWrap");
+    const oemInput = document.getElementById("oem_authorization_certificate");
     if (!accountType || !licenseWrap || !licenseInput) return;
 
     function applyView() {
@@ -173,15 +175,23 @@
         licenseWrap.classList.remove("is-hidden");
         licenseInput.disabled = false;
         licenseInput.setAttribute("required", "required");
+        if (oemWrap) oemWrap.classList.remove("is-hidden");
+        if (oemInput) oemInput.disabled = false;
       } else {
         licenseWrap.classList.add("is-hidden");
         licenseInput.value = "";
         licenseInput.disabled = true;
         licenseInput.removeAttribute("required");
+        if (oemWrap) oemWrap.classList.add("is-hidden");
+        if (oemInput) {
+          oemInput.value = "";
+          oemInput.disabled = true;
+        }
       }
 
       if (window.jQuery && window.jQuery.fn && window.jQuery.fn.parsley) {
         window.jQuery(licenseInput).parsley().reset();
+        if (oemInput) window.jQuery(oemInput).parsley().reset();
         if (hasType) {
           window.jQuery(accountType).parsley().validate();
         }

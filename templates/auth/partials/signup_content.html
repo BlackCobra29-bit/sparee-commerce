@@ -148,6 +148,18 @@
           </div>
         </div>
 
+        <div class="field {% if prefill.account_type != 'seller' %}is-hidden{% endif %}" id="oemCertificateFieldWrap">
+          <label for="oem_authorization_certificate">OEM Authorization Certificate (Optional)</label>
+          <input id="oem_authorization_certificate" name="oem_authorization_certificate" type="file" class="input"
+                 accept=".pdf,.png,.jpg,.jpeg"
+                 data-parsley-fileextension="pdf,png,jpg,jpeg"
+                 data-parsley-maxfilesize="5">
+          <div class="meta-row">
+            <span>Accepted: PDF, PNG, JPG, JPEG</span>
+            <span>Max: 5MB</span>
+          </div>
+        </div>
+
         <div class="field">
           <label for="profile_picture">Profile Picture</label>
           <input id="profile_picture" name="profile_picture" type="file" class="input"
@@ -178,3 +190,38 @@
     </section>
   </section>
 </main>
+
+<script>
+  (function () {
+    var accountType = document.getElementById("account_type");
+    var licenseWrap = document.getElementById("licenseFieldWrap");
+    var licenseInput = document.getElementById("license_file");
+    var oemWrap = document.getElementById("oemCertificateFieldWrap");
+    var oemInput = document.getElementById("oem_authorization_certificate");
+    if (!accountType || !licenseWrap || !licenseInput || !oemWrap || !oemInput) return;
+
+    function applySellerFields() {
+      var selectedType = (accountType.value || "").trim().toLowerCase();
+      var isSeller = selectedType === "seller";
+
+      if (isSeller) {
+        licenseWrap.classList.remove("is-hidden");
+        licenseInput.disabled = false;
+        licenseInput.setAttribute("required", "required");
+        oemWrap.classList.remove("is-hidden");
+        oemInput.disabled = false;
+      } else {
+        licenseWrap.classList.add("is-hidden");
+        licenseInput.value = "";
+        licenseInput.disabled = true;
+        licenseInput.removeAttribute("required");
+        oemWrap.classList.add("is-hidden");
+        oemInput.value = "";
+        oemInput.disabled = true;
+      }
+    }
+
+    accountType.addEventListener("change", applySellerFields);
+    applySellerFields();
+  })();
+</script>

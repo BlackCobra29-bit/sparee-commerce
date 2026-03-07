@@ -30,6 +30,12 @@
     {% else %}
     <span class="d-block text-xs mt-1 text-secondary">No license file</span>
     {% endif %}
+
+    {% if seller.oem_authorization_certificate %}
+    <a href="{{ seller.oem_authorization_certificate.url }}" target="_blank" class="d-block text-xs mt-1">View OEM authorization certificate</a>
+    {% else %}
+    <span class="d-block text-xs mt-1 text-secondary">No OEM authorization certificate</span>
+    {% endif %}
   </td>
   <td>
     <div class="text-xs text-secondary">
