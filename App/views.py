@@ -26,6 +26,7 @@ from .forms import (
     ProductForm,
     SignupForm,
     SiteAnnouncementForm,
+    SystemAdminCreateForm,
 )
 from .models import (
     AccountRegistration,
@@ -769,6 +770,81 @@ class AdminSystemControlsView(SuperuserRequiredMixin, TemplateView):
             instance=current_announcement
         )
         return context
+
+
+class AdminSystemAdminsView(SuperuserRequiredMixin, TemplateView):
+    template_name = "admin/system_admins.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["admin_rows"] = (
+            User.objects.filter(is_superuser=True)
+            .order_by("-date_joined")
+        )
+        context["admin_form"] = kwargs.get("admin_form") or SystemAdminCreateForm()
+        return context
+
+
+class AdminSystemAdminCreateView(SuperuserRequiredMixin, View):
+    http_method_names = ["post"]
+
+    def post(self, request, *args, **kwargs):
+        form = SystemAdminCreateForm(request.POST)
+        if form.is_valid():
+            user = User.objects.create_user(
+                username=form.cleaned_data["username"],
+                email=form.cleaned_data["email"],
+                password=form.cleaned_data["password"],
+                first_name=form.cleaned_data["first_name"].strip(),
+                last_name=form.cleaned_data["last_name"].strip(),
+            )
+            user.is_staff = True
+            user.is_superuser = True
+            user.is_active = True
+            user.save(update_fields=["is_staff", "is_superuser", "is_active"])
+            messages.success(request, "System admin account created successfully.")
+            return redirect("admin_system_admins")
+
+        for field_name, errors in form.errors.items():
+            if field_name == "__all__":
+                for error in errors:
+                    messages.error(request, error)
+                continue
+            label = form.fields[field_name].label or field_name.replace("_", " ").title()
+            for error in errors:
+                messages.error(request, f"{label}: {error}")
+
+        view = AdminSystemAdminsView()
+        view.setup(request)
+        context = view.get_context_data(admin_form=form)
+        return view.render_to_response(context, status=422)
+
+
+class AdminSystemAdminStatusUpdateView(SuperuserRequiredMixin, View):
+    http_method_names = ["post"]
+
+    def post(self, request, *args, **kwargs):
+        target_admin = get_object_or_404(
+            User.objects.only("id", "is_superuser", "is_active"),
+            pk=kwargs.get("pk"),
+            is_superuser=True,
+        )
+        action = (request.POST.get("action") or "").strip().lower()
+        if action not in {"enable", "disable"}:
+            messages.error(request, "Invalid admin action.")
+            return redirect("admin_system_admins")
+
+        if target_admin.id == request.user.id and action == "disable":
+            messages.error(request, "You cannot disable your own account.")
+            return redirect("admin_system_admins")
+
+        target_admin.is_active = action == "enable"
+        target_admin.save(update_fields=["is_active"])
+        if target_admin.is_active:
+            messages.success(request, "System admin account enabled.")
+        else:
+            messages.success(request, "System admin account disabled.")
+        return redirect("admin_system_admins")
 
 
 class AdminCategoryControlsView(SuperuserRequiredMixin, View):

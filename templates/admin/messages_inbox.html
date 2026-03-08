@@ -22,6 +22,15 @@
     border-color: #f5365c !important;
     box-shadow: 0 0 0 0.14rem rgba(245, 54, 92, 0.2) !important;
   }
+  #contactMessageReadModal .modal-content {
+    overflow: hidden;
+  }
+  #msgModalBody {
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+    max-width: 100%;
+  }
 </style>
 {% endblock %}
 
@@ -200,7 +209,7 @@
         </div>
         <div class="border rounded-3 p-3 bg-gray-100">
           <div class="text-xs text-secondary text-uppercase mb-1">Message</div>
-          <div class="text-sm text-dark" id="msgModalBody" style="white-space: pre-wrap;"></div>
+          <div class="text-sm text-dark" id="msgModalBody"></div>
         </div>
       </div>
       <div class="modal-footer pt-2">

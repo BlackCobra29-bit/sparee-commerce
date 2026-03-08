@@ -15,7 +15,7 @@
   <!-- Toastify -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
 
-  <link rel='stylesheet' href='{% static "css/index.css" %}?v=20260223-7'>
+  <link rel='stylesheet' href='{% static "css/index.css" %}?v=20260223-8'>
   <style>
     #navMain .navbar-nav > .nav-item {
       margin-right: .8rem;
@@ -39,14 +39,59 @@
       height: 38px;
       padding: 0;
       justify-content: center;
+      background: transparent !important;
+      border: 0 !important;
+      border-radius: 0 !important;
+      box-shadow: none !important;
+      min-width: auto !important;
     }
     .nav-cart-mobile-count {
       position: absolute;
       top: -5px;
       right: -2px;
-      font-size: 11px;
+      font-size: 10px;
       font-weight: 800;
       line-height: 1;
+      background: #dc3545;
+      color: #fff !important;
+      border-radius: 999px;
+      min-width: 16px;
+      height: 16px;
+      padding: 0 4px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+    #cartModalBtn i {
+      font-size: 1.15rem;
+    }
+    #cartModalBtn {
+      position: relative;
+      background: transparent !important;
+      border: 0 !important;
+      border-radius: 0 !important;
+      box-shadow: none !important;
+      padding: 0 .2rem !important;
+      min-width: auto !important;
+      margin-right: 1rem;
+    }
+    #cartCount {
+      position: absolute;
+      top: -4px;
+      right: -6px;
+      margin-left: 0 !important;
+      font-size: 10px;
+      font-weight: 800;
+      line-height: 1;
+      background: #dc3545;
+      color: #fff !important;
+      border-radius: 999px;
+      min-width: 16px;
+      height: 16px;
+      padding: 0 4px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
     }
     @media (max-width: 991px) {
       #navMain {
@@ -111,7 +156,7 @@
   </div>
 
   <!-- NAVBAR -->
-  <nav class="navbar navbar-expand-lg navbar-dark sticky-top">
+  <nav class="navbar navbar-expand-lg navbar-dark sticky-top" style="background:#fff !important; background-image:none !important;">
     <div class="container">
       <div class="d-flex align-items-center">
         <a class="navbar-brand d-flex align-items-center mb-0" href="{% url 'home' %}">
@@ -134,8 +179,6 @@
         <ul class="navbar-nav mr-auto mt-2 mt-lg-0">
           <li class="nav-item mr-2"><a class="nav-link nav-pill" href="{% url 'home' %}"><i class="fas fa-home mr-1"></i>Home</a>
           </li>
-          <li class="nav-item mr-2"><a class="nav-link nav-pill" href="#shop"><i class="fas fa-store mr-1"></i>Shop</a>
-          </li>
           <li class="nav-item mr-2 dropdown">
             <a class="nav-link nav-pill dropdown-toggle" href="#" id="navCategoryDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
               <i class="fas fa-list mr-1"></i>Category
@@ -157,8 +200,7 @@
         <div class="d-flex align-items-center w-100 w-lg-auto ml-lg-auto justify-content-lg-end nav-actions">
           <button class="nav-btn d-none d-lg-inline-flex" id="cartModalBtn" data-toggle="modal" data-target="#cartModal">
             <i class="fas fa-shopping-cart"></i>
-            <span class="d-none d-md-inline ml-1">Cart</span>
-            <span class="ml-1 text-danger cart-count-badge" id="cartCount">0</span>
+            <span class="text-danger cart-count-badge" id="cartCount">0</span>
           </button>
 
           {% if show_nav_user %}
@@ -225,4 +267,3 @@
 </body>
 
 </html>
-

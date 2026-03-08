@@ -190,6 +190,32 @@
 
     }
 
+    @media (max-width: 767.98px) {
+      .vendor-page-content.container-fluid {
+        padding-left: 0.45rem !important;
+        padding-right: 0.45rem !important;
+      }
+
+      .vendor-page-content .row {
+        --bs-gutter-x: 0.45rem;
+      }
+
+      .vendor-page-content .card .card-body {
+        padding-left: 0.45rem !important;
+        padding-right: 0.45rem !important;
+      }
+
+      .vendor-page-content .table-responsive {
+        margin-left: -0.45rem;
+        margin-right: -0.45rem;
+      }
+
+      .vendor-page-content .table-responsive > .table {
+        width: 100%;
+        min-width: 760px;
+      }
+    }
+
     #cartModal .cart-seller-inline {
       display: inline-flex;
       align-items: center;
@@ -346,6 +372,14 @@
                   <i class="fa fa-sliders"></i>
                 </div>
                 <span class="nav-link-text ms-1">System Control</span>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link d-flex align-items-center{% if current_url_name == 'admin_system_admins' %} active fw-bold{% endif %}" href="{% url 'admin_system_admins' %}" hx-boost="false">
+                <div class="icon icon-shape icon-sm border-radius-md {% if current_url_name == 'admin_system_admins' %}bg-gradient-primary text-white{% else %}bg-white text-dark{% endif %} text-center me-2 d-flex align-items-center justify-content-center">
+                  <i class="fa fa-user-shield"></i>
+                </div>
+                <span class="nav-link-text ms-1">System Admins</span>
               </a>
             </li>
               {% endif %}
@@ -627,7 +661,7 @@
             <div class="col-lg-6 mb-lg-0 mb-4">
               <div class="copyright text-center text-sm text-muted text-lg-start">
                 &copy <script>document.write(new Date().getFullYear())</script>,
-                Vendor Portal — Wahid Pro Marketplace.
+                Wahid Spare parts Hub
               </div>
             </div>
             <div class="col-lg-6">
@@ -824,10 +858,10 @@
     {% endfor %}
   });
 </script>
+
+<style>
+  .canvasjs-chart-credit { display: none !important; }
+</style>
+
 </body>
 </html>
-
-
-
-
-

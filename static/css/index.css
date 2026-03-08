@@ -1501,6 +1501,10 @@
         padding: .45rem 0;
       }
 
+      .navbar-brand {
+        margin-left: .5rem;
+      }
+
       .navbar-brand img {
         height: 30px !important;
       }
