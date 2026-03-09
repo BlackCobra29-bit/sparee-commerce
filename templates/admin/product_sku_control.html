@@ -1,7 +1,7 @@
 ﻿{% extends "vendors/base.html" %}
-{% load number_format %}
+{% load number_format translation_tags %}
 
-{% block vendor_title %}Product and SKU Control - Wahid Spare Hub{% endblock %}
+{% block vendor_title %}{% t "admin_product_sku_control_title" "Product and SKU Control - Wahid Spare Hub" %}{% endblock %}
 
 {% block vendor_extra_css %}
 <link rel="stylesheet" href="https://cdn.datatables.net/2.0.8/css/dataTables.bootstrap5.css">
@@ -12,20 +12,20 @@
   <div class="col-12">
     <div class="card mb-4">
       <div class="card-header pb-0">
-        <h6>Product &amp; SKU Control Page</h6>
+        <h6>{% t "admin_product_sku_control_page" "Product & SKU Control Page" %}</h6>
       </div>
       <div class="card-body">
         <div class="table-responsive">
           <table class="table align-items-center mb-0" id="productManagementTable">
             <thead>
               <tr>
-                <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Product</th>
-                <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Part Number</th>
-                <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Seller</th>
-                <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Category</th>
-                <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Price</th>
-                <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Stock</th>
-                <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Performance</th>
+                <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">{% t "quickview_product" "Product" %}</th>
+                <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">{% t "part_number" "Part Number" %}</th>
+                <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">{% t "seller" "Seller" %}</th>
+                <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">{% t "category" "Category" %}</th>
+                <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">{% t "price" "Price" %}</th>
+                <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">{% t "js_stock" "Stock" %}</th>
+                <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">{% t "admin_performance" "Performance" %}</th>
               </tr>
             </thead>
             <tbody>
@@ -41,11 +41,11 @@
                       <p class="text-xs text-secondary mb-0">
                         {% with stock_value=product.current_stock|default_if_none:product.initial_stock %}
                           {% if stock_value == 0 %}
-                          <span class="badge badge-sm bg-gradient-danger">No Item</span>
+                          <span class="badge badge-sm bg-gradient-danger">{% t "admin_no_item" "No Item" %}</span>
                           {% elif stock_value <= product.reorder_level %}
-                          <span class="badge badge-sm bg-gradient-warning">Low Stock</span>
+                          <span class="badge badge-sm bg-gradient-warning">{% t "vendor_low_stock" "Low Stock" %}</span>
                           {% else %}
-                          <span class="badge badge-sm bg-gradient-success">Active</span>
+                          <span class="badge badge-sm bg-gradient-success">{% t "admin_active" "Active" %}</span>
                           {% endif %}
                         {% endwith %}
                       </p>
@@ -80,25 +80,25 @@
                 </td>
                 <td>
                   <div class="text-xs text-secondary">
-                    Pending orders: <b>{{ product.pending_orders|number_separator }}</b>
+                    {% t "admin_pending_orders" "Pending orders:" %} <b>{{ product.pending_orders|number_separator }}</b>
                   </div>
                   <div class="text-xs text-secondary">
                     {% if product.delivered_orders %}
                     <a href="#" class="open-product-orders-modal text-primary font-weight-bold" data-product-id="{{ product.id }}" data-product-name="{{ product.name|escape }}">
-                      Delivered orders: <b>{{ product.delivered_orders|number_separator }}</b>
+                      {% t "admin_delivered_orders" "Delivered orders:" %} <b>{{ product.delivered_orders|number_separator }}</b>
                     </a>
                     {% else %}
-                    Delivered orders: <b>{{ product.delivered_orders|number_separator }}</b>
+                    {% t "admin_delivered_orders" "Delivered orders:" %} <b>{{ product.delivered_orders|number_separator }}</b>
                     {% endif %}
                   </div>
                   <div class="text-xs text-secondary">
-                    Quantity sold: <b>{{ product.sold_quantity|number_separator }}</b>
+                    {% t "admin_quantity_sold_label" "Quantity sold:" %} <b>{{ product.sold_quantity|number_separator }}</b>
                   </div>
                 </td>
               </tr>
               {% empty %}
               <tr>
-                <td colspan="7" class="text-center text-sm text-secondary py-4">No products found.</td>
+                <td colspan="7" class="text-center text-sm text-secondary py-4">{% t "admin_no_products_found" "No products found." %}</td>
               </tr>
               {% endfor %}
             </tbody>
@@ -113,7 +113,7 @@
   <div class="modal-dialog modal-lg modal-dialog-centered">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title fw-bold" id="productOrdersModalTitle">Delivered Order Details</h5>
+        <h5 class="modal-title fw-bold" id="productOrdersModalTitle">{% t "admin_delivered_order_details" "Delivered Order Details" %}</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
@@ -121,11 +121,11 @@
           <table class="table table-hover align-middle mb-0" id="productOrdersModalTable">
             <thead>
               <tr>
-                <th>Buyer</th>
-                <th class="text-center">Date</th>
-                <th class="text-center">Quantity</th>
-                <th class="text-end">Price/Item</th>
-                <th class="text-end">Total Price</th>
+                <th>{% t "admin_buyer" "Buyer" %}</th>
+                <th class="text-center">{% t "date" "Date" %}</th>
+                <th class="text-center">{% t "vendor_quantity" "Quantity" %}</th>
+                <th class="text-end">{% t "admin_price_per_item" "Price/Item" %}</th>
+                <th class="text-end">{% t "vendor_total_price" "Total Price" %}</th>
               </tr>
             </thead>
             <tbody id="productOrdersModalTableBody"></tbody>
@@ -148,7 +148,7 @@
         pageLength: 10,
         order: [[0, "asc"]],
         language: {
-          search: "Search products:"
+          search: '{% t "admin_dt_search_products" "Search products:" %}'
         }
       });
     }
@@ -178,14 +178,14 @@
         if (!modal || !tableBody || !modalTitleElement) return;
 
         var productId = String(this.getAttribute("data-product-id") || "");
-        var productName = this.getAttribute("data-product-name") || "Product";
+        var productName = this.getAttribute("data-product-name") || "{% t 'quickview_product' 'Product' %}";
         var rows = ordersMap[productId] || [];
 
-        modalTitleElement.textContent = productName + " - Delivered Order Details";
+        modalTitleElement.textContent = productName + " - {% t 'admin_delivered_order_details' 'Delivered Order Details' %}";
         tableBody.innerHTML = "";
 
         if (!rows.length) {
-          tableBody.innerHTML = "<tr><td colspan=\"5\" class=\"text-center text-sm text-secondary py-3\">No delivered order details found.</td></tr>";
+          tableBody.innerHTML = "<tr><td colspan=\"5\" class=\"text-center text-sm text-secondary py-3\">{% t 'admin_no_delivered_order_details_found' 'No delivered order details found.' %}</td></tr>";
         } else {
           rows.forEach(function (row) {
             var buyerCell = "";
@@ -227,7 +227,7 @@
             lengthChange: false,
             order: [],
             language: {
-              search: "Search orders:"
+              search: '{% t "admin_dt_search_orders" "Search orders:" %}'
             }
           });
         }

@@ -1,7 +1,7 @@
 {% extends "vendors/base.html" %}
-{% load number_format %}
+{% load number_format translation_tags %}
 
-{% block vendor_title %}System Admins - Wahid Spare Hub{% endblock %}
+{% block vendor_title %}{% t "admin_system_admins_title" "System Admins - Wahid Spare Hub" %}{% endblock %}
 
 {% block vendor_extra_css %}
 <link rel="stylesheet" href="https://cdn.datatables.net/2.0.8/css/dataTables.bootstrap5.css">
@@ -13,11 +13,11 @@
     <div class="card mb-4">
       <div class="card-header pb-0 d-flex align-items-center justify-content-between flex-wrap gap-2">
         <div>
-          <h6 class="mb-0">System Admin Management</h6>
-          <p class="text-sm text-secondary mb-0">Manage active system admin accounts.</p>
+          <h6 class="mb-0">{% t "admin_system_admin_management" "System Admin Management" %}</h6>
+          <p class="text-sm text-secondary mb-0">{% t "admin_manage_active_system_admin_accounts" "Manage active system admin accounts." %}</p>
         </div>
         <button type="button" class="btn bg-gradient-primary mb-0" data-bs-toggle="modal" data-bs-target="#addSystemAdminModal">
-          <i class="fa fa-user-plus me-1"></i>Add New Admin
+          <i class="fa fa-user-plus me-1"></i>{% t "admin_add_new_admin" "Add New Admin" %}
         </button>
       </div>
       <div class="card-body">
@@ -25,11 +25,11 @@
           <table class="table align-items-center mb-0" id="systemAdminsTable">
             <thead>
               <tr>
-                <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Admin</th>
-                <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Username</th>
-                <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Joined</th>
-                <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Status</th>
-                <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 text-center">Action</th>
+                <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">{% t "admin_admin" "Admin" %}</th>
+                <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">{% t "auth_username" "Username" %}</th>
+                <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">{% t "admin_joined" "Joined" %}</th>
+                <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">{% t "vendor_status" "Status" %}</th>
+                <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 text-center">{% t "action" "Action" %}</th>
               </tr>
             </thead>
             <tbody>
@@ -51,32 +51,32 @@
                 </td>
                 <td>
                   {% if admin_user.is_active %}
-                  <span class="badge badge-sm bg-gradient-success">Active</span>
+                  <span class="badge badge-sm bg-gradient-success">{% t "admin_active" "Active" %}</span>
                   {% else %}
-                  <span class="badge badge-sm bg-gradient-danger">Disabled</span>
+                  <span class="badge badge-sm bg-gradient-danger">{% t "admin_disabled" "Disabled" %}</span>
                   {% endif %}
                 </td>
                 <td class="align-middle text-center">
                   {% if admin_user.id == request.user.id %}
-                  <span class="text-xs text-secondary">Current account</span>
+                  <span class="text-xs text-secondary">{% t "admin_current_account" "Current account" %}</span>
                   {% elif admin_user.is_active %}
                   <form method="post" action="{% url 'admin_system_admin_status_update' admin_user.id %}" class="d-inline">
                     {% csrf_token %}
                     <input type="hidden" name="action" value="disable">
-                    <button type="submit" class="btn btn-sm bg-gradient-danger mb-0 py-1 px-2 text-xs">Disable</button>
+                    <button type="submit" class="btn btn-sm bg-gradient-danger mb-0 py-1 px-2 text-xs">{% t "admin_disable" "Disable" %}</button>
                   </form>
                   {% else %}
                   <form method="post" action="{% url 'admin_system_admin_status_update' admin_user.id %}" class="d-inline">
                     {% csrf_token %}
                     <input type="hidden" name="action" value="enable">
-                    <button type="submit" class="btn btn-sm bg-gradient-success mb-0 py-1 px-2 text-xs">Enable</button>
+                    <button type="submit" class="btn btn-sm bg-gradient-success mb-0 py-1 px-2 text-xs">{% t "admin_enable" "Enable" %}</button>
                   </form>
                   {% endif %}
                 </td>
               </tr>
               {% empty %}
               <tr>
-                <td colspan="5" class="text-center text-sm text-secondary py-4">No system admin records found.</td>
+                <td colspan="5" class="text-center text-sm text-secondary py-4">{% t "admin_no_system_admin_records_found" "No system admin records found." %}</td>
               </tr>
               {% endfor %}
             </tbody>
@@ -93,40 +93,40 @@
       <form method="post" action="{% url 'admin_system_admin_create' %}">
         {% csrf_token %}
         <div class="modal-header">
-          <h5 class="modal-title">Create New System Admin</h5>
+          <h5 class="modal-title">{% t "admin_create_new_system_admin" "Create New System Admin" %}</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
           <div class="row">
             <div class="col-md-6 mb-3">
-              <label for="admin-first-name" class="form-label">First Name</label>
+              <label for="admin-first-name" class="form-label">{% t "vendor_first_name" "First Name" %}</label>
               <input id="admin-first-name" name="first_name" type="text" class="form-control" value="{{ admin_form.first_name.value|default:'' }}" required>
             </div>
             <div class="col-md-6 mb-3">
-              <label for="admin-last-name" class="form-label">Last Name</label>
+              <label for="admin-last-name" class="form-label">{% t "vendor_last_name" "Last Name" %}</label>
               <input id="admin-last-name" name="last_name" type="text" class="form-control" value="{{ admin_form.last_name.value|default:'' }}" required>
             </div>
           </div>
           <div class="mb-3">
-            <label for="admin-username" class="form-label">Username</label>
+            <label for="admin-username" class="form-label">{% t "auth_username" "Username" %}</label>
             <input id="admin-username" name="username" type="text" class="form-control" value="{{ admin_form.username.value|default:'' }}" required>
           </div>
           <div class="mb-3">
-            <label for="admin-email" class="form-label">Email</label>
+            <label for="admin-email" class="form-label">{% t "auth_email" "Email" %}</label>
             <input id="admin-email" name="email" type="email" class="form-control" value="{{ admin_form.email.value|default:'' }}" required>
           </div>
           <div class="mb-3">
-            <label for="admin-password" class="form-label">Password</label>
+            <label for="admin-password" class="form-label">{% t "auth_password" "Password" %}</label>
             <input id="admin-password" name="password" type="password" class="form-control" required>
           </div>
           <div class="mb-0">
-            <label for="admin-confirm-password" class="form-label">Confirm Password</label>
+            <label for="admin-confirm-password" class="form-label">{% t "auth_confirm_password" "Confirm Password" %}</label>
             <input id="admin-confirm-password" name="confirm_password" type="password" class="form-control" required>
           </div>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-outline-secondary mb-0" data-bs-dismiss="modal">Cancel</button>
-          <button type="submit" class="btn bg-gradient-primary mb-0">Create Admin</button>
+          <button type="button" class="btn btn-outline-secondary mb-0" data-bs-dismiss="modal">{% t "cancel" "Cancel" %}</button>
+          <button type="submit" class="btn bg-gradient-primary mb-0">{% t "admin_create_admin" "Create Admin" %}</button>
         </div>
       </form>
     </div>
@@ -155,7 +155,7 @@
         pageLength: 10,
         order: [[2, "desc"]],
         language: {
-          search: "Search admins:"
+          search: '{% t "admin_dt_search_admins" "Search admins:" %}'
         }
       });
     }

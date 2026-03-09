@@ -1,5 +1,5 @@
 ﻿{% extends "vendors/base.html" %}
-{% load static %}
+{% load static translation_tags %}
 {% block vendor_content %}
 <div class="row">
   <div class="col-12">
@@ -7,10 +7,10 @@
       <div class="card-header pb-0">
         <div class="row">
           <div class="col-lg-6 col-7">
-            <h6>All Orders</h6>
+            <h6>{% t "vendor_all_orders" "All Orders" %}</h6>
             <p class="text-sm mb-0">
               <i class="fa fa-info-circle text-info" aria-hidden="true"></i>
-              <span id="ordersTotalText" class="font-weight-bold ms-1">{{ orders_total }} orders</span> found
+              <span id="ordersTotalText" class="font-weight-bold ms-1">{{ orders_total }} {% t "vendor_orders" "orders" %}</span> {% t "vendor_found" "found" %}
             </p>
           </div>
         </div>
@@ -20,14 +20,14 @@
           <table class="table align-items-center mb-0">
             <thead>
               <tr>
-                <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Order ID</th>
-                <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Product</th>
-                <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Customer</th>
-                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Phone Number</th>
-                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Quantity</th>
-                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Amount</th>
-                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Delivered</th>
-                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Date</th>
+                <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">{% t "vendor_order_id" "Order ID" %}</th>
+                <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">{% t "quickview_product" "Product" %}</th>
+                <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">{% t "vendor_customer" "Customer" %}</th>
+                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">{% t "auth_phone_number" "Phone Number" %}</th>
+                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">{% t "vendor_quantity" "Quantity" %}</th>
+                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">{% t "vendor_amount" "Amount" %}</th>
+                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">{% t "vendor_delivered" "Delivered" %}</th>
+                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">{% t "date" "Date" %}</th>
               </tr>
             </thead>
             <tbody>
@@ -44,7 +44,7 @@
                   <div class="d-flex px-2 py-1">
                     <div class="d-flex flex-column justify-content-center">
                       <h6 class="mb-0 text-sm">{{ order.product.name }}</h6>
-                      <p class="text-xs text-secondary mb-0">Part Number: {{ order.product.vin }}</p>
+                      <p class="text-xs text-secondary mb-0">{% t "part_number" "Part Number" %}: {{ order.product.vin }}</p>
                     </div>
                   </div>
                 </td>
@@ -78,14 +78,14 @@
                   <span class="text-xs font-weight-bold">{{ order.quantity }}</span>
                 </td>
                 <td class="align-middle text-center text-sm">
-                  <span class="text-xs font-weight-bold">{{ order.total_price|number_separator }} birr</span>
+                  <span class="text-xs font-weight-bold">{{ order.total_price|number_separator }} {% t "vendor_birr" "birr" %}</span>
                 </td>
                 <td class="align-middle text-center">
                   <form id="deliveredForm{{ order.id }}" method="post" action="{% url 'vendor_order_delivered_update' order.id %}" class="d-inline-block m-0">
                     {% csrf_token %}
                     {% if order.is_delivered %}
                     <span class="text-success text-xs font-weight-bold">
-                      <i class="fa fa-check me-1" aria-hidden="true"></i>Delivered
+                      <i class="fa fa-check me-1" aria-hidden="true"></i>{% t "vendor_delivered" "Delivered" %}
                     </span>
                     {% else %}
                     <input type="hidden" name="is_delivered" value="1">
@@ -95,7 +95,7 @@
                       data-bs-toggle="modal"
                       data-bs-target="#confirmDeliveredModal"
                       data-form-id="deliveredForm{{ order.id }}">
-                      Mark Delivered
+                      {% t "vendor_mark_delivered" "Mark Delivered" %}
                     </button>
                     {% endif %}
                   </form>
@@ -108,7 +108,7 @@
                       data-bs-toggle="modal"
                       data-bs-target="#confirmUnacceptModal"
                       data-form-id="unacceptForm{{ order.id }}">
-                      Unaccept Order
+                      {% t "vendor_unaccept_order" "Unaccept Order" %}
                     </button>
                   </form>
                   {% endif %}
@@ -119,7 +119,7 @@
               </tr>
               {% empty %}
               <tr id="ordersEmptyRow">
-                <td colspan="8" class="text-center text-sm text-muted py-4">No orders for your products yet.</td>
+                <td colspan="8" class="text-center text-sm text-muted py-4">{% t "vendor_no_orders_for_products_yet" "No orders for your products yet." %}</td>
               </tr>
               {% endfor %}
             </tbody>
@@ -169,15 +169,15 @@
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
       <div class="modal-header">
-        <h6 class="modal-title mb-0">Confirm Delivery</h6>
+        <h6 class="modal-title mb-0">{% t "vendor_confirm_delivery" "Confirm Delivery" %}</h6>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
-        Mark this order as delivered?
+        {% t "vendor_mark_order_as_delivered_q" "Mark this order as delivered?" %}
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-light btn-sm mb-0" data-bs-dismiss="modal">No</button>
-        <button type="button" id="confirmDeliveredBtn" class="btn btn-success btn-sm mb-0">Yes, Mark Delivered</button>
+        <button type="button" class="btn btn-light btn-sm mb-0" data-bs-dismiss="modal">{% t "vendor_no" "No" %}</button>
+        <button type="button" id="confirmDeliveredBtn" class="btn btn-success btn-sm mb-0">{% t "vendor_yes_mark_delivered" "Yes, Mark Delivered" %}</button>
       </div>
     </div>
   </div>
@@ -187,15 +187,15 @@
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
       <div class="modal-header">
-        <h6 class="modal-title mb-0">Confirm Unaccept</h6>
+        <h6 class="modal-title mb-0">{% t "vendor_confirm_unaccept" "Confirm Unaccept" %}</h6>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
-        Unaccept this order? This will remove it and restore stock.
+        {% t "vendor_unaccept_order_restore_stock_q" "Unaccept this order? This will remove it and restore stock." %}
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-light btn-sm mb-0" data-bs-dismiss="modal">No</button>
-        <button type="button" id="confirmUnacceptBtn" class="btn btn-danger btn-sm mb-0">Yes, Unaccept</button>
+        <button type="button" class="btn btn-light btn-sm mb-0" data-bs-dismiss="modal">{% t "vendor_no" "No" %}</button>
+        <button type="button" id="confirmUnacceptBtn" class="btn btn-danger btn-sm mb-0">{% t "vendor_yes_unaccept" "Yes, Unaccept" %}</button>
       </div>
     </div>
   </div>
@@ -255,7 +255,7 @@
       if (rows.length === 0 && !emptyRow) {
         tbody.insertAdjacentHTML(
           'beforeend',
-          '<tr id="ordersEmptyRow"><td colspan="8" class="text-center text-sm text-muted py-4">No orders for your products yet.</td></tr>'
+          '<tr id="ordersEmptyRow"><td colspan="8" class="text-center text-sm text-muted py-4">{% t "vendor_no_orders_for_products_yet" "No orders for your products yet." %}</td></tr>'
         );
       } else if (rows.length > 0 && emptyRow) {
         emptyRow.remove();
@@ -266,7 +266,7 @@
       var totalText = document.getElementById('ordersTotalText');
       if (!totalText) return;
       var rows = document.querySelectorAll('tr[data-order-row-id]');
-      totalText.textContent = rows.length + ' orders';
+      totalText.textContent = rows.length + ' {% t "vendor_orders" "orders" %}';
     }
 
     async function submitAction(formId, modalEl, onSuccess) {
@@ -291,14 +291,14 @@
         }
 
         if (!response.ok || !data.ok) {
-          throw new Error(data.message || 'Request failed.');
+          throw new Error(data.message || '{% t "vendor_toast_request_failed" "Request failed." %}');
         }
 
         hideModal(modalEl);
         if (typeof onSuccess === 'function') onSuccess(data);
-        showToast(data.message || 'Done.', false);
+        showToast(data.message || '{% t "done" "Done" %}.', false);
       } catch (error) {
-        showToast(error.message || 'Action failed.', true);
+        showToast(error.message || '{% t "vendor_toast_action_failed" "Action failed." %}', true);
       }
     }
 
@@ -311,7 +311,7 @@
           if (!deliveredForm) return;
 
           deliveredForm.innerHTML =
-            '<span class="text-success text-xs font-weight-bold"><i class="fa fa-check me-1" aria-hidden="true"></i>Delivered</span>';
+            '<span class="text-success text-xs font-weight-bold"><i class="fa fa-check me-1" aria-hidden="true"></i>{% t "vendor_delivered" "Delivered" %}</span>';
 
           var orderId = currentFormId.replace('deliveredForm', '');
           var unacceptForm = document.getElementById('unacceptForm' + orderId);

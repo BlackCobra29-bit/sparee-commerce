@@ -1,7 +1,7 @@
 {% extends "vendors/base.html" %}
-{% load number_format %}
+{% load number_format translation_tags %}
 
-{% block vendor_title %}Seller Management - Wahid Spare Hub{% endblock %}
+{% block vendor_title %}{% t "admin_seller_management_title" "Seller Management - Wahid Spare Hub" %}{% endblock %}
 
 {% block vendor_extra_css %}
 <link rel="stylesheet" href="https://cdn.datatables.net/2.0.8/css/dataTables.bootstrap5.css">
@@ -12,17 +12,17 @@
   <div class="col-12">
     <div class="card mb-4">
       <div class="card-header pb-0">
-        <h6>Seller Management Page</h6>
+        <h6>{% t "admin_seller_management_page" "Seller Management Page" %}</h6>
       </div>
       <div class="card-body">
         <div class="table-responsive">
           <table class="table align-items-center mb-0" id="sellerManagementTable">
             <thead>
               <tr>
-                <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Seller</th>
-                <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Verification Status</th>
-                <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Performance Indicators</th>
-                <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 text-center">Approve / Reject</th>
+                <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">{% t "seller" "Seller" %}</th>
+                <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">{% t "admin_verification_status" "Verification Status" %}</th>
+                <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">{% t "admin_performance_indicators" "Performance Indicators" %}</th>
+                <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 text-center">{% t "admin_approve_reject" "Approve / Reject" %}</th>
               </tr>
             </thead>
             <tbody>
@@ -30,7 +30,7 @@
               {% include "admin/partials/seller_row.html" with seller=seller %}
               {% empty %}
               <tr>
-                <td colspan="4" class="text-center text-sm text-secondary py-4">No seller records found.</td>
+                <td colspan="4" class="text-center text-sm text-secondary py-4">{% t "admin_no_seller_records_found" "No seller records found." %}</td>
               </tr>
               {% endfor %}
             </tbody>
@@ -52,7 +52,7 @@
         pageLength: 10,
         order: [[0, "asc"]],
         language: {
-          search: "Search sellers:"
+          search: '{% t "admin_dt_search_sellers" "Search sellers:" %}'
         }
       });
     }
@@ -93,25 +93,25 @@
       if (!row || !url || typeof Swal === "undefined") return;
 
       var titleMap = {
-        approve: "Approve seller?",
-        reject: "Reject seller?",
-        disable: "Disable seller account?",
-        enable: "Enable seller account?",
-        delete: "Delete seller account permanently?"
+        approve: '{% t "admin_swal_approve_seller_title" "Approve seller?" %}',
+        reject: '{% t "admin_swal_reject_seller_title" "Reject seller?" %}',
+        disable: '{% t "admin_swal_disable_seller_title" "Disable seller account?" %}',
+        enable: '{% t "admin_swal_enable_seller_title" "Enable seller account?" %}',
+        delete: '{% t "admin_swal_delete_seller_title" "Delete seller account permanently?" %}'
       };
       var textMap = {
-        approve: "Do you want to verify this seller account?",
-        reject: "Do you want to reject this seller and disable the account?",
-        disable: "Do you want to disable this verified seller account?",
-        enable: "Do you want to enable this seller account?",
-        delete: "This will permanently remove the seller account and delete available unsold products. Continue?"
+        approve: '{% t "admin_swal_approve_seller_text" "Do you want to verify this seller account?" %}',
+        reject: '{% t "admin_swal_reject_seller_text" "Do you want to reject this seller and disable the account?" %}',
+        disable: '{% t "admin_swal_disable_seller_text" "Do you want to disable this verified seller account?" %}',
+        enable: '{% t "admin_swal_enable_seller_text" "Do you want to enable this seller account?" %}',
+        delete: '{% t "admin_swal_delete_seller_text" "This will permanently remove the seller account and delete available unsold products. Continue?" %}'
       };
       var buttonMap = {
-        approve: "Yes, approve",
-        reject: "Yes, reject",
-        disable: "Yes, disable",
-        enable: "Yes, enable",
-        delete: "Yes, delete"
+        approve: '{% t "admin_swal_yes_approve" "Yes, approve" %}',
+        reject: '{% t "admin_swal_yes_reject" "Yes, reject" %}',
+        disable: '{% t "admin_swal_yes_disable" "Yes, disable" %}',
+        enable: '{% t "admin_swal_yes_enable" "Yes, enable" %}',
+        delete: '{% t "admin_swal_yes_delete" "Yes, delete" %}'
       };
       var colorMap = {
         approve: "#2dce89",
@@ -122,12 +122,12 @@
       };
 
       Swal.fire({
-        title: titleMap[action] || "Confirm action?",
-        text: textMap[action] || "Proceed with this action?",
+        title: titleMap[action] || '{% t "admin_swal_confirm_action_title" "Confirm action?" %}',
+        text: textMap[action] || '{% t "admin_swal_proceed_action_text" "Proceed with this action?" %}',
         icon: "warning",
         showCancelButton: true,
-        confirmButtonText: buttonMap[action] || "Yes, continue",
-        cancelButtonText: "Cancel",
+        confirmButtonText: buttonMap[action] || '{% t "admin_swal_yes_continue" "Yes, continue" %}',
+        cancelButtonText: '{% t "cancel" "Cancel" %}',
         confirmButtonColor: colorMap[action] || "#5e72e4",
         reverseButtons: true
       }).then(function (result) {
@@ -145,21 +145,21 @@
           .then(function (response) { return response.json(); })
             .then(function (data) {
               if (!data.ok) {
-                showToast(data.message || "Unable to update seller account.", false);
+                showToast(data.message || '{% t "vendor_toast_unable_update_seller_account" "Unable to update seller account." %}', false);
                 return;
               }
               if (data.deleted) {
                 row.remove();
-                showToast(data.message || "Seller account deleted.", true);
+                showToast(data.message || '{% t "admin_toast_seller_account_deleted" "Seller account deleted." %}', true);
                 return;
               }
               if (data.row_html) {
                 row.outerHTML = data.row_html;
               }
-            showToast(data.message || "Seller verification updated.", true);
+            showToast(data.message || '{% t "admin_toast_seller_verification_updated" "Seller verification updated." %}', true);
           })
           .catch(function () {
-            showToast("Request failed. Please try again.", false);
+            showToast('{% t "admin_toast_request_failed_try_again" "Request failed. Please try again." %}', false);
           });
       });
     }

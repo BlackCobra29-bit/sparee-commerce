@@ -1,7 +1,7 @@
 {% extends "vendors/base.html" %}
-{% load number_format %}
+{% load number_format translation_tags %}
 
-{% block vendor_title %}Admin Dashboard - Wahid Spare Hub{% endblock %}
+{% block vendor_title %}{% t "admin_dashboard_title" "Admin Dashboard - Wahid Spare Hub" %}{% endblock %}
 
 {% block vendor_content %}
 <div class="row">
@@ -11,7 +11,7 @@
         <div class="row">
           <div class="col-8">
             <div class="numbers">
-              <p class="text-sm mb-0 text-capitalize font-weight-bold">Verified Sellers</p>
+              <p class="text-sm mb-0 text-capitalize font-weight-bold">{% t "admin_verified_sellers" "Verified Sellers" %}</p>
               <h5 class="font-weight-bolder mb-0">
                 {{ total_sellers_count|number_separator }}
               </h5>
@@ -33,10 +33,10 @@
         <div class="row">
           <div class="col-8">
             <div class="numbers">
-              <p class="text-sm mb-0 text-capitalize font-weight-bold">Pending Approvals</p>
+              <p class="text-sm mb-0 text-capitalize font-weight-bold">{% t "admin_pending_approvals" "Pending Approvals" %}</p>
               <h5 class="font-weight-bolder mb-0">
                 {{ pending_approvals_count|number_separator }}
-                <span class="text-warning text-sm font-weight-bolder">Needs action</span>
+                <span class="text-warning text-sm font-weight-bolder">{% t "admin_needs_action" "Needs action" %}</span>
               </h5>
             </div>
           </div>
@@ -56,7 +56,7 @@
         <div class="row">
           <div class="col-8">
             <div class="numbers">
-              <p class="text-sm mb-0 text-capitalize font-weight-bold">Products Sold</p>
+              <p class="text-sm mb-0 text-capitalize font-weight-bold">{% t "admin_products_sold" "Products Sold" %}</p>
               <h5 class="font-weight-bolder mb-0">
                 {{ products_sold_count|number_separator }}
               </h5>
@@ -78,7 +78,7 @@
         <div class="row">
           <div class="col-8">
             <div class="numbers">
-              <p class="text-sm mb-0 text-capitalize font-weight-bold">Active Products</p>
+              <p class="text-sm mb-0 text-capitalize font-weight-bold">{% t "admin_active_products" "Active Products" %}</p>
               <h5 class="font-weight-bolder mb-0">
                 {{ active_products_count|number_separator }}
               </h5>
@@ -99,8 +99,8 @@
   <div class="col-lg-6 mb-4">
     <div class="card mb-4">
       <div class="card-header pb-0">
-        <h6 class="mb-1">Product Quantities Sold (Last 6 Months)</h6>
-        <p class="text-sm mb-0 text-secondary">Delivered product quantities by month.</p>
+        <h6 class="mb-1">{% t "admin_product_quantities_sold_last_6_months" "Product Quantities Sold (Last 6 Months)" %}</h6>
+        <p class="text-sm mb-0 text-secondary">{% t "admin_delivered_product_quantities_by_month" "Delivered product quantities by month." %}</p>
       </div>
       <div class="card-body">
         <div id="admin-quantity-chart" style="height: 340px; width: 100%;"></div>
@@ -110,8 +110,8 @@
   <div class="col-lg-6 mb-4">
     <div class="card mb-4">
       <div class="card-header pb-0">
-        <h6 class="mb-1">Money Transacted/Sold (Last 6 Months)</h6>
-        <p class="text-sm mb-0 text-secondary">Total delivered sales amount (ETB) by month.</p>
+        <h6 class="mb-1">{% t "admin_money_transacted_sold_last_6_months" "Money Transacted/Sold (Last 6 Months)" %}</h6>
+        <p class="text-sm mb-0 text-secondary">{% t "admin_total_delivered_sales_amount_by_month" "Total delivered sales amount (ETB) by month." %}</p>
       </div>
       <div class="card-body">
         <div id="admin-amount-chart" style="height: 340px; width: 100%;"></div>
@@ -140,7 +140,7 @@
       animationEnabled: true,
       backgroundColor: "transparent",
       axisY: {
-        title: "Quantity Sold",
+        title: "{% t 'admin_quantity_sold' 'Quantity Sold' %}",
         includeZero: true,
         gridThickness: 0,
       },
@@ -150,7 +150,7 @@
       data: [
         {
           type: "column",
-          name: "Quantity Sold",
+          name: "{% t 'admin_quantity_sold' 'Quantity Sold' %}",
           color: "#4f81bd",
           yValueFormatString: "#,##0",
           dataPoints: quantityData,
@@ -162,7 +162,7 @@
       animationEnabled: true,
       backgroundColor: "transparent",
       axisY: {
-        title: "Amount Sold (ETB)",
+        title: "{% t 'admin_amount_sold_etb' 'Amount Sold (ETB)' %}",
         includeZero: true,
         prefix: "ETB ",
         gridThickness: 0,
@@ -173,7 +173,7 @@
       data: [
         {
           type: "line",
-          name: "Amount Sold",
+          name: "{% t 'admin_amount_sold' 'Amount Sold' %}",
           color: "#2dce89",
           lineThickness: 3,
           markerType: "circle",

@@ -1,4 +1,13 @@
+from .i18n import get_request_language, get_ui_text
 from .models import AccountRegistration, ContactMessage, Order
+
+
+def ui_language_context(request):
+    language = get_request_language(request)
+    return {
+        "shop_language": language,
+        "ui_text": get_ui_text(language),
+    }
 
 
 def seller_order_notifications(request):

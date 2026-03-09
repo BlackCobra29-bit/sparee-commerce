@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load translation_tags %}
 
 {% block 'main-content' %}
   <!-- HERO -->
@@ -8,57 +9,44 @@
         <div class="col-lg-6 mb-4 mb-lg-0 hero-left" data-aos="fade-right">
           <div class="d-flex flex-wrap align-items-center mb-3">
             <span class="badge badge-soft px-3 py-2 mr-2 mb-2">
-              <i class="fas fa-check-circle mr-2"></i>Verified Product Sellers
+              <i class="fas fa-check-circle mr-2"></i>{% t "hero_verified_sellers" "Verified Product Sellers" %}
             </span>
             <span class="badge badge-ghost px-3 py-2 mr-2 mb-2">
-              <i class="fas fa-shield-alt mr-2"></i>Trusted
+              <i class="fas fa-shield-alt mr-2"></i>{% t "hero_trusted" "Trusted" %}
             </span>
           </div>
 
           <h1 class="display-4 font-weight-bold mb-3" style="line-height:1.05;">
-            Clarity for the people shaping <span style="color:var(--brand)">smart part</span> decisions.
+            {% t "hero_title" "Clarity for the people shaping smart part decisions." %}
           </h1>
 
           <p class="lead muted mb-4">
-            Wahid Pro turns complex fitment and Part Number data into crisp, confident decisions for garages,
-            fleets, and serious parts buyers.
+            {% t "hero_subtitle" "Wahid Parts turns complex fitment and Part Number data into crisp, confident decisions for garages, fleets, and serious parts buyers." %}
           </p>
 
           <div class="mt-4 d-flex flex-wrap">
             <button class="btn btn-primary btn-lg mr-2 mb-2"
               onclick="document.querySelector('#shop').scrollIntoView({behavior:'smooth'})">
-              <i class="fas fa-store mr-2"></i>Browse Parts
+              <i class="fas fa-store mr-2"></i>{% t "hero_browse_parts" "Browse Parts" %}
             </button>
-          </div>
-
-          <div class="mt-3 muted">
-            Focus: Ethiopia &bull; Neutral, verified, decisive
           </div>
         </div>
 
         <div class="col-lg-6" data-aos="fade-left">
           <div class="hero-stack">
             <div class="hero-card hero-card--tilt">
-              <div class="label">DAILY SIGNAL</div>
-              <div class="title">The parts data you need, without the noise.</div>
-              <div class="meta mt-2">Search, fitment, and Part Number cross-reference in one place.</div>
+              <div class="label">{% t "hero_daily_signal" "DAILY SIGNAL" %}</div>
+              <div class="title">{% t "hero_daily_signal_title" "The parts data you need, without the noise." %}</div>
+              <div class="meta mt-2">{% t "hero_daily_signal_meta" "Search, fitment, and Part Number cross-reference in one place." %}</div>
             </div>
 
             <div class="hero-card">
               <div class="d-flex align-items-center justify-content-between mb-2">
-                <div class="font-weight-bold">Coverage</div>
-                <span class="badge badge-soft">Updated</span>
+                <div class="font-weight-bold">{% t "hero_coverage" "Coverage" %}</div>
               </div>
-              <div class="meta">Brakes &bull; Filters &bull; Ignition &bull; Exhaust &bull; Suspension</div>
+              <div class="meta">{% t "hero_coverage_items" "Brakes • Filters • Ignition • Exhaust • Suspension" %}</div>
             </div>
 
-            <div class="hero-card compact">
-              <div class="logo-badge">W</div>
-              <div>
-                <div class="label">WAHID PRO</div>
-                <div class="meta">Independent spare-parts intelligence.</div>
-              </div>
-            </div>
           </div>
         </div>
       </div>
@@ -71,27 +59,27 @@
       <!-- TOP BAR -->
       <div class="shop-toolbar d-flex flex-wrap align-items-center justify-content-between mb-3">
         <div class="shop-toolbar-meta d-flex align-items-center mb-2 mb-md-0">
-          <h2 class="h4 font-weight-bold mb-0 mr-3">Shop Parts</h2>
-          <span class="muted">Showing <b id="resultCount">0</b> items</span>
-          <span class="badge badge-ghost ml-3 d-none d-md-inline" id="savedVehicle">No vehicle saved</span>
+          <h2 class="h4 font-weight-bold mb-0 mr-3">{% t "shop_parts" "Shop Parts" %}</h2>
+          <span class="muted">{% t "showing_items" "Showing" %} <b id="resultCount">0</b> {% t "items" "items" %}</span>
+          <span class="badge badge-ghost ml-3 d-none d-md-inline" id="savedVehicle">{% t "no_vehicle_saved" "No vehicle saved" %}</span>
         </div>
 
         <div class="shop-toolbar-actions d-flex align-items-center">
           <button class="btn btn-outline-light mr-2 shop-filter-btn" data-toggle="modal" data-target="#filtersModal">
-            <i class="fas fa-sliders-h mr-2"></i>Filters
+            <i class="fas fa-sliders-h mr-2"></i>{% t "filters" "Filters" %}
             <span class="badge badge-light ml-2" id="activeFilters">0</span>
           </button>
 
           <select class="custom-select mr-2 shop-sort-select" id="sortBy" style="width:220px">
-            <option value="relevance">Sort: Relevance</option>
-            <option value="priceAsc">Price: Low to High</option>
-            <option value="priceDesc">Price: High to Low</option>
-            <option value="ratingDesc">Rating: High to Low</option>
-            <option value="stockDesc">Stock: High to Low</option>
+            <option value="relevance">{% t "sort_relevance" "Sort: Relevance" %}</option>
+            <option value="priceAsc">{% t "sort_price_low" "Price: Low to High" %}</option>
+            <option value="priceDesc">{% t "sort_price_high" "Price: High to Low" %}</option>
+            <option value="ratingDesc">{% t "sort_rating_high" "Rating: High to Low" %}</option>
+            <option value="stockDesc">{% t "sort_stock_high" "Stock: High to Low" %}</option>
           </select>
 
           <button class="btn btn-outline-light shop-reset-btn" id="btnReset">
-            <i class="fas fa-undo mr-2"></i>Reset
+            <i class="fas fa-undo mr-2"></i>{% t "reset" "Reset" %}
           </button>
         </div>
       </div>
@@ -103,7 +91,7 @@
 
       <div class="text-center mt-3">
         <button class="btn btn-outline-light" id="btnLoadMore">
-          <i class="fas fa-plus mr-2"></i>Load More
+          <i class="fas fa-plus mr-2"></i>{% t "load_more" "Load More" %}
         </button>
       </div>
     </div>
@@ -114,8 +102,8 @@
     <div class="container" data-aos="fade-up">
       <div class="panel roadmap-shell">
         <div class="panel-h d-flex align-items-center justify-content-between">
-          <div class="font-weight-bold"><i class="fas fa-route mr-2"></i>How Wahid Pro Works</div>
-          <span class="muted small">End-to-end flow in 4 steps</span>
+          <div class="font-weight-bold"><i class="fas fa-route mr-2"></i>{% t "how_it_works" "How Wahid Parts Works" %}</div>
+          <span class="muted small">{% t "workflow_4_steps" "End-to-end flow in 4 steps" %}</span>
         </div>
         <div class="panel-b">
           <div class="workflow-flow">
@@ -124,29 +112,29 @@
               <article class="workflow-step" data-aos="fade-up" data-aos-delay="60">
                 <div class="workflow-step-no">01</div>
                 <div class="workflow-icon"><i class="fas fa-search"></i></div>
-                <h6>Find The Right Part</h6>
-                <p>Search using Part Number, category, or product name and get exact matching options fast.</p>
+                <h6>{% t "workflow_step1_title" "Find The Right Part" %}</h6>
+                <p>{% t "workflow_step1_desc" "Search using Part Number, category, or product name and get exact matching options fast." %}</p>
               </article>
 
               <article class="workflow-step" data-aos="fade-up" data-aos-delay="120">
                 <div class="workflow-step-no">02</div>
                 <div class="workflow-icon"><i class="fas fa-balance-scale"></i></div>
-                <h6>Compare Smartly</h6>
-                <p>Compare verified sellers, prices, stock levels, and product ratings in one view.</p>
+                <h6>{% t "workflow_step2_title" "Compare Smartly" %}</h6>
+                <p>{% t "workflow_step2_desc" "Compare verified sellers, prices, stock levels, and product ratings in one view." %}</p>
               </article>
 
               <article class="workflow-step" data-aos="fade-up" data-aos-delay="180">
                 <div class="workflow-step-no">03</div>
                 <div class="workflow-icon"><i class="fas fa-shopping-cart"></i></div>
-                <h6>Checkout With Confidence</h6>
-                <p>Add your selected products to cart, confirm quantity, then submit your order securely.</p>
+                <h6>{% t "workflow_step3_title" "Checkout With Confidence" %}</h6>
+                <p>{% t "workflow_step3_desc" "Add your selected products to cart, confirm quantity, then submit your order securely." %}</p>
               </article>
 
               <article class="workflow-step" data-aos="fade-up" data-aos-delay="240">
                 <div class="workflow-step-no">04</div>
                 <div class="workflow-icon"><i class="fas fa-star"></i></div>
-                <h6>Track and Rate</h6>
-                <p>Track delivery status and rate purchased products to improve marketplace quality.</p>
+                <h6>{% t "workflow_step4_title" "Track and Rate" %}</h6>
+                <p>{% t "workflow_step4_desc" "Track delivery status and rate purchased products to improve marketplace quality." %}</p>
               </article>
             </div>
           </div>
@@ -163,63 +151,56 @@
           <div class="row no-gutters">
             <div class="col-lg-5 support-left">
               <div class="support-left-inner">
-                <div class="support-kicker">Premium Assistance</div>
-                <h4 class="font-weight-bold mb-2">Need help with a part or order?</h4>
-                <p class="muted mb-4">Our support team helps with fitment, order issues, and seller communication.</p>
+                <div class="support-kicker">{% t "support_premium_assistance" "Premium Assistance" %}</div>
+                <h4 class="font-weight-bold mb-2">{% t "support_title" "Need help with a part or order?" %}</h4>
+                <p class="muted mb-4">{% t "support_subtitle" "Our support team helps with fitment, order issues, and seller communication." %}</p>
 
                 <div class="support-contact-card mb-3">
                   <div class="support-icon"><i class="fas fa-envelope"></i></div>
                   <div>
-                    <div class="font-weight-bold">Email</div>
-                    <div class="muted small">support@wahid.example</div>
+                    <div class="font-weight-bold">{% t "support_email" "Email" %}</div>
+                    <div class="muted small">corporationwahid@gmail.com</div>
                   </div>
                 </div>
 
                 <div class="support-contact-card mb-3">
                   <div class="support-icon"><i class="fas fa-phone-alt"></i></div>
                   <div>
-                    <div class="font-weight-bold">Phone</div>
-                    <div class="muted small">+251 000 000 000</div>
+                    <div class="font-weight-bold">{% t "support_phone" "Phone" %}</div>
+                    <div class="muted small">0944075566</div>
                   </div>
                 </div>
-
-                <div class="support-contact-card mb-4">
-                  <div class="support-icon"><i class="fas fa-clock"></i></div>
-                  <div>
-                    <div class="font-weight-bold">Hours</div>
-                    <div class="muted small">Mon-Sat, 9:00-18:00</div>
-                  </div>
-                </div>
+                
               </div>
             </div>
 
             <div class="col-lg-7 support-right">
               <div class="support-form-wrap">
                 <div class="d-flex align-items-center justify-content-between mb-3">
-                  <h5 class="font-weight-bold mb-0"><i class="fas fa-paper-plane mr-2"></i>Contact Us</h5>
-                  <span class="badge badge-soft">Response in 24h</span>
+                  <h5 class="font-weight-bold mb-0"><i class="fas fa-paper-plane mr-2"></i>{% t "contact_us" "Contact Us" %}</h5>
+                  <span class="badge badge-soft">{% t "response_24h" "Response in 24h" %}</span>
                 </div>
                 <form id="contactUsFormModal" data-submit-url="{% url 'contact_message_create' %}" data-parsley-validate novalidate>
                   <div class="form-row">
                     <div class="col-md-6 mb-3">
-                      <label class="small text-uppercase mb-1">Name</label>
-                      <input type="text" class="form-control support-input" name="name" placeholder="Your full name" required data-parsley-required-message="Name is required." data-parsley-trigger="change blur">
+                      <label class="small text-uppercase mb-1">{% t "contact_name" "Name" %}</label>
+                      <input type="text" class="form-control support-input" name="name" placeholder="{% t 'contact_name_placeholder' 'Your full name' %}" required data-parsley-required-message="{% t 'contact_name_required' 'Name is required.' %}" data-parsley-trigger="change blur">
                     </div>
                     <div class="col-md-6 mb-3">
-                      <label class="small text-uppercase mb-1">Email</label>
-                      <input type="email" class="form-control support-input" name="email" placeholder="you@example.com" required data-parsley-type="email" data-parsley-required-message="Email is required." data-parsley-type-message="Enter a valid email address." data-parsley-trigger="change blur">
+                      <label class="small text-uppercase mb-1">{% t "contact_email" "Email" %}</label>
+                      <input type="email" class="form-control support-input" name="email" placeholder="{% t 'contact_email_placeholder' 'you@example.com' %}" required data-parsley-type="email" data-parsley-required-message="{% t 'contact_email_required' 'Email is required.' %}" data-parsley-type-message="{% t 'contact_email_invalid' 'Enter a valid email address.' %}" data-parsley-trigger="change blur">
                     </div>
                   </div>
                   <div class="form-group mb-3">
-                    <label class="small text-uppercase mb-1">Subject</label>
-                    <input type="text" class="form-control support-input" name="subject" placeholder="What do you need help with?" required data-parsley-required-message="Subject is required." data-parsley-maxlength="180" data-parsley-maxlength-message="Subject must be 180 characters or less." data-parsley-trigger="change blur">
+                    <label class="small text-uppercase mb-1">{% t "contact_subject" "Subject" %}</label>
+                    <input type="text" class="form-control support-input" name="subject" placeholder="{% t 'contact_subject_placeholder' 'What do you need help with?' %}" required data-parsley-required-message="{% t 'contact_subject_required' 'Subject is required.' %}" data-parsley-maxlength="180" data-parsley-maxlength-message="{% t 'contact_subject_max' 'Subject must be 180 characters or less.' %}" data-parsley-trigger="change blur">
                   </div>
                   <div class="form-group mb-3">
-                    <label class="small text-uppercase mb-1">Message</label>
-                    <textarea class="form-control support-input" name="message_body" rows="6" placeholder="Write your message here..." required data-parsley-required-message="Message is required." data-parsley-minlength="10" data-parsley-minlength-message="Message should be at least 10 characters." data-parsley-trigger="change blur"></textarea>
+                    <label class="small text-uppercase mb-1">{% t "contact_message" "Message" %}</label>
+                    <textarea class="form-control support-input" name="message_body" rows="6" placeholder="{% t 'contact_message_placeholder' 'Write your message here...' %}" required data-parsley-required-message="{% t 'contact_message_required' 'Message is required.' %}" data-parsley-minlength="10" data-parsley-minlength-message="{% t 'contact_message_min' 'Message should be at least 10 characters.' %}" data-parsley-trigger="change blur"></textarea>
                   </div>
                   <button type="submit" class="btn btn-primary btn-block support-send-btn" id="contactUsSubmitBtn">
-                    <i class="fas fa-paper-plane mr-2"></i>Submit Message
+                    <i class="fas fa-paper-plane mr-2"></i>{% t "contact_submit" "Submit Message" %}
                   </button>
                 </form>
               </div>
@@ -236,14 +217,14 @@
     <div class="container" data-aos="fade-up">
       <div class="row">
         <div class="col-md-6">
-          <div class="font-weight-bold">Wahid Pro</div>
-          <div class="muted small">Reliable spare-parts platform for verified search and ordering.</div>
+          <div class="font-weight-bold">Wahid Parts</div>
+          <div class="muted small">{% t "footer_subtitle" "Reliable spare-parts platform for verified search and ordering." %}</div>
         </div>
         <div class="col-md-6 text-md-right mt-3 mt-md-0">
-          <a href="#shop" class="mr-3">Shop</a>
-          <a href="#guides" class="mr-3">Guides</a>
-          <a href="#support" class="mr-3">Support</a>
-          <a href="#support">Contact</a>
+          <a href="#shop" class="mr-3">{% t "footer_shop" "Shop" %}</a>
+          <a href="#guides" class="mr-3">{% t "footer_guides" "Guides" %}</a>
+          <a href="#support" class="mr-3">{% t "footer_support" "Support" %}</a>
+          <a href="#support">{% t "footer_contact" "Contact" %}</a>
         </div>
       </div>
 
@@ -255,16 +236,16 @@
     <div class="inner">
       <div class="d-flex align-items-center justify-content-between flex-wrap">
         <div class="d-flex align-items-center">
-          <div class="font-weight-bold mr-3"><i class="fas fa-balance-scale mr-2"></i>Compare</div>
-          <div class="muted small">Select up to 3 parts</div>
+          <div class="font-weight-bold mr-3"><i class="fas fa-balance-scale mr-2"></i>{% t "compare" "Compare" %}</div>
+          <div class="muted small">{% t "compare_select_up_to_3" "Select up to 3 parts" %}</div>
         </div>
         <div class="d-flex align-items-center mt-2 mt-md-0">
-          <div class="mini mr-2"><span class="muted">Selected:</span> <b id="dockCount">0</b></div>
+          <div class="mini mr-2"><span class="muted">{% t "selected" "Selected" %}:</span> <b id="dockCount">0</b></div>
           <button class="btn btn-primary mr-2" data-toggle="modal" data-target="#compareModal">
-            <i class="fas fa-columns mr-2"></i>Open
+            <i class="fas fa-columns mr-2"></i>{% t "open" "Open" %}
           </button>
           <button class="btn btn-outline-light" onclick="clearCompare()">
-            <i class="fas fa-trash mr-2"></i>Clear
+            <i class="fas fa-trash mr-2"></i>{% t "clear" "Clear" %}
           </button>
         </div>
       </div>
@@ -276,7 +257,7 @@
     <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title font-weight-bold"><i class="fas fa-sliders-h mr-2"></i>Advanced Filters</h5>
+          <h5 class="modal-title font-weight-bold"><i class="fas fa-sliders-h mr-2"></i>{% t "advanced_filters" "Advanced Filters" %}</h5>
           <button type="button" class="close" style="color:var(--text)"
             data-dismiss="modal"><span>&times;</span></button>
         </div>
@@ -284,10 +265,10 @@
           <div class="row">
             <div class="col-lg-6">
               <div class="panel mb-3">
-                <div class="panel-h font-weight-bold">Category</div>
+                <div class="panel-h font-weight-bold">{% t "category" "Category" %}</div>
                 <div class="panel-b">
 	                  <select class="custom-select" id="filterCategory">
-	                    <option value="All">All</option>
+	                    <option value="All">{% t "all" "All" %}</option>
 	                    {% for category in shop_category_options %}
 	                    <option value="{{ category.value }}">{{ category.label }}</option>
 	                    {% endfor %}
@@ -296,10 +277,10 @@
               </div>
 
               <div class="panel mb-3">
-                <div class="panel-h font-weight-bold">Seller</div>
+                <div class="panel-h font-weight-bold">{% t "seller" "Seller" %}</div>
                 <div class="panel-b">
 	                  <select class="custom-select" id="filterBrand">
-	                    <option value="All">All</option>
+	                    <option value="All">{% t "all" "All" %}</option>
 	                    {% for brand in shop_brand_options %}
 	                    <option value="{{ brand }}">{{ brand }}</option>
 	                    {% endfor %}
@@ -310,34 +291,34 @@
 
             <div class="col-lg-6">
               <div class="panel mb-3">
-                <div class="panel-h font-weight-bold">Price Range (ETB)</div>
+                <div class="panel-h font-weight-bold">{% t "price_range_etb" "Price Range (ETB)" %}</div>
                 <div class="panel-b">
                   <div class="form-row">
                     <div class="col-6">
-                      <input class="form-control" id="minPrice" placeholder="Min" type="number" min="0" />
+                      <input class="form-control" id="minPrice" placeholder="{% t 'min' 'Min' %}" type="number" min="0" />
                     </div>
                     <div class="col-6">
-                      <input class="form-control" id="maxPrice" placeholder="Max" type="number" min="0" />
+                      <input class="form-control" id="maxPrice" placeholder="{% t 'max' 'Max' %}" type="number" min="0" />
                     </div>
                   </div>
-                  <small class="muted">Example: 10 &mdash; 120</small>
+                  <small class="muted">{% t "filters_example" "Example: 10 — 120" %}</small>
                 </div>
               </div>
 
               <div class="panel mb-3">
-                <div class="panel-h font-weight-bold">Rating</div>
+                <div class="panel-h font-weight-bold">{% t "rating" "Rating" %}</div>
                 <div class="panel-b">
                   <div class="custom-control custom-radio">
                     <input type="radio" id="rAll" name="rating" class="custom-control-input" checked>
-                    <label class="custom-control-label" for="rAll">Any</label>
+                    <label class="custom-control-label" for="rAll">{% t "any" "Any" %}</label>
                   </div>
                   <div class="custom-control custom-radio mt-2">
                     <input type="radio" id="r4" name="rating" class="custom-control-input">
-                    <label class="custom-control-label" for="r4">4? & up</label>
+                    <label class="custom-control-label" for="r4">{% t "rating_4_up" "4★ & up" %}</label>
                   </div>
                   <div class="custom-control custom-radio mt-2">
                     <input type="radio" id="r45" name="rating" class="custom-control-input">
-                    <label class="custom-control-label" for="r45">4.5? & up</label>
+                    <label class="custom-control-label" for="r45">{% t "rating_45_up" "4.5★ & up" %}</label>
                   </div>
                 </div>
               </div>
@@ -348,13 +329,13 @@
           <hr class="divider">
 
           <div class="d-flex flex-wrap">
-            <button class="btn btn-primary mr-2 mb-2" id="btnApply" data-dismiss="modal">
-              <i class="fas fa-check mr-2"></i>Apply
+              <button class="btn btn-primary mr-2 mb-2" id="btnApply" data-dismiss="modal">
+              <i class="fas fa-check mr-2"></i>{% t "apply" "Apply" %}
             </button>
             <button class="btn btn-outline-light mb-2" id="btnReset2" data-dismiss="modal">
-              <i class="fas fa-undo mr-2"></i>Reset
+              <i class="fas fa-undo mr-2"></i>{% t "reset" "Reset" %}
             </button>
-            <div class="ml-auto muted mt-2">Tip: Filters and search work together for instant narrowing.</div>
+            <div class="ml-auto muted mt-2">{% t "filters_tip" "Tip: Filters and search work together for instant narrowing." %}</div>
         </div>
         </div>
       </div>
@@ -366,7 +347,7 @@
     <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title font-weight-bold" id="qvTitle">Product</h5>
+          <h5 class="modal-title font-weight-bold" id="qvTitle">{% t "quickview_product" "Product" %}</h5>
           <button type="button" class="close" style="color:var(--text)"
             data-dismiss="modal"><span>&times;</span></button>
         </div>
@@ -374,27 +355,27 @@
           <div class="row">
             <div class="col-md-6 mb-3 mb-md-0">
               <div class="p-img" style="border-radius:16px; border:1px solid var(--line)">
-                <img id="qvImg" alt="Product image" src="">
+                <img id="qvImg" alt="{% t 'quickview_product_image_alt' 'Product image' %}" src="">
               </div>
               <div class="muted small mt-2" id="qvMeta"></div>
 
               <div class="panel mt-3" style="background:var(--glass2)">
                 <div class="panel-b">
-                  <div class="font-weight-bold mb-2"><i class="fas fa-user-tie mr-2"></i>Seller</div>
+                  <div class="font-weight-bold mb-2"><i class="fas fa-user-tie mr-2"></i>{% t "seller" "Seller" %}</div>
                   <div class="d-flex align-items-center">
                     <img
                       id="qvSellerPhoto"
                       src=""
-                      alt="Seller profile"
+                      alt="{% t 'quickview_seller_profile_alt' 'Seller profile' %}"
                       class="rounded-circle mr-2"
                       style="width:44px; height:44px; object-fit:cover; border:1px solid var(--line);">
                     <div>
                       <div class="font-weight-bold d-flex align-items-center">
-                        <span id="qvSellerName">Unknown Seller</span>
+                        <span id="qvSellerName">{% t "js_unknown_seller" "Unknown Seller" %}</span>
                         <span
                           class="ml-2 d-inline-flex align-items-center justify-content-center"
-                          aria-label="Verified seller"
-                          title="Verified seller"
+                          aria-label="{% t 'verified_seller' 'Verified seller' %}"
+                          title="{% t 'verified_seller' 'Verified seller' %}"
                           style="width:20px;height:20px;line-height:0;flex:0 0 20px;">
                           <svg
                             width="20"
@@ -409,7 +390,7 @@
                           </svg>
                         </span>
                       </div>
-                      <div class="muted small">Verified seller panel</div>
+                      <div class="muted small">{% t "verified_seller_panel" "Verified seller panel" %}</div>
                     </div>
                   </div>
                 </div>
@@ -422,7 +403,7 @@
                 <div class="rating" id="qvRating"></div>
               </div>
               <div class="mt-2" id="qvRateBox">
-                <span class="muted small mr-2">Rate this product:</span>
+                <span class="muted small mr-2">{% t "rate_this_product" "Rate this product:" %}</span>
                 <span id="qvRateStars" class="d-inline-flex align-items-center"></span>
               </div>
 
@@ -431,23 +412,23 @@
               <div class="panel" style="background:var(--glass2)">
                 <div class="panel-b">
                   <div class="d-flex align-items-center justify-content-between mb-2">
-                    <span class="badge badge-soft" id="qvFitBadge">Details</span>
+                    <span class="badge badge-soft" id="qvFitBadge">{% t "details" "Details" %}</span>
                   </div>
                   <ul class="muted mb-0" style="padding-left:18px">
-                    <li>Category: <span id="qvCategory"></span></li>
-                    <li>Stock: <span id="qvStock"></span></li>
-                    <li>Seller: <span id="qvSeller"></span></li>
-                    <li>Part Number: <span id="qvSku"></span></li>
+                    <li>{% t "category" "Category" %}: <span id="qvCategory"></span></li>
+                    <li>{% t "js_stock" "Stock" %}: <span id="qvStock"></span></li>
+                    <li>{% t "seller" "Seller" %}: <span id="qvSeller"></span></li>
+                    <li>{% t "part_number" "Part Number" %}: <span id="qvSku"></span></li>
                   </ul>
                 </div>
               </div>
 
               <div class="d-flex mt-3">
                 <button class="btn btn-success btn-block mr-2" id="qvAdd">
-                  <i class="fas fa-cart-plus mr-2"></i>Add to Cart
+                  <i class="fas fa-cart-plus mr-2"></i>{% t "quickview_add_to_cart" "Add to Cart" %}
                 </button>
-                <button class="btn btn-outline-light btn-block" onclick="toast('Share', 'Share link copied.')">
-                  <i class="fas fa-share-alt mr-2"></i>Share
+                <button class="btn btn-outline-light btn-block" onclick="toast('{% t 'share' 'Share' %}', '{% t 'share_link_copied' 'Share link copied.' %}')">
+                  <i class="fas fa-share-alt mr-2"></i>{% t "share" "Share" %}
                 </button>
               </div>
 
@@ -463,19 +444,19 @@
     <div class="modal-dialog modal-dialog-centered" role="document">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title font-weight-bold"><i class="fas fa-star mr-2"></i>Rate Product</h5>
+          <h5 class="modal-title font-weight-bold"><i class="fas fa-star mr-2"></i>{% t "rate_product" "Rate Product" %}</h5>
           <button type="button" class="close" style="color:var(--text)" data-dismiss="modal"><span>&times;</span></button>
         </div>
         <div class="modal-body">
-          <div class="muted mb-2">Choose your rating:</div>
+          <div class="muted mb-2">{% t "choose_rating" "Choose your rating:" %}</div>
           <div id="rateConfirmStars" class="rating mb-2"></div>
-          <div id="rateConfirmValue" class="small mb-2">Selected: 0 / 5</div>
+          <div id="rateConfirmValue" class="small mb-2">{% t "selected" "Selected" %}: 0 / 5</div>
           <div class="small muted" id="rateConfirmProduct"></div>
-          <div class="small text-warning mt-2">You can rate only once per product.</div>
+          <div class="small text-warning mt-2">{% t "rate_once_note" "You can rate only once per product." %}</div>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-outline-light" data-dismiss="modal">Cancel</button>
-          <button type="button" class="btn btn-primary" id="rateConfirmSubmit" disabled>Submit</button>
+          <button type="button" class="btn btn-outline-light" data-dismiss="modal">{% t "cancel" "Cancel" %}</button>
+          <button type="button" class="btn btn-primary" id="rateConfirmSubmit" disabled>{% t "submit" "Submit" %}</button>
         </div>
       </div>
     </div>
@@ -486,7 +467,7 @@
     <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title font-weight-bold"><i class="fas fa-magic mr-2"></i>Fitment Wizard</h5>
+          <h5 class="modal-title font-weight-bold"><i class="fas fa-magic mr-2"></i>{% t "fitment_wizard" "Fitment Wizard" %}</h5>
           <button type="button" class="close" style="color:var(--text)"
             data-dismiss="modal"><span>&times;</span></button>
         </div>
@@ -494,8 +475,8 @@
           <div class="panel mb-3" style="background:var(--glass2)">
             <div class="panel-b">
               <div class="d-flex align-items-center justify-content-between">
-                <div class="font-weight-bold">Step <span id="wizStep">1</span> / 3</div>
-                <div class="muted small" id="wizHint">Select a Make</div>
+                <div class="font-weight-bold">{% t "step" "Step" %} <span id="wizStep">1</span> / 3</div>
+                <div class="muted small" id="wizHint">{% t "select_make" "Select a Make" %}</div>
               </div>
               <div class="progress mt-2" style="height:10px;border-radius:999px;background:rgba(255,255,255,.08)">
                 <div class="progress-bar" id="wizProg"
@@ -509,8 +490,8 @@
 
         </div>
         <div class="modal-footer">
-          <button class="btn btn-outline-light" id="wizBack">Back</button>
-          <button class="btn btn-primary" id="wizNext">Next</button>
+          <button class="btn btn-outline-light" id="wizBack">{% t "back" "Back" %}</button>
+          <button class="btn btn-primary" id="wizNext">{% t "next" "Next" %}</button>
         </div>
       </div>
     </div>
@@ -521,7 +502,7 @@
     <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title font-weight-bold"><i class="fas fa-shopping-cart mr-2"></i>Your Cart</h5>
+          <h5 class="modal-title font-weight-bold"><i class="fas fa-shopping-cart mr-2"></i>{% t "your_cart" "Your Cart" %}</h5>
           <button type="button" class="close" style="color:var(--text)" data-dismiss="modal"><span>&times;</span></button>
         </div>
         <div class="modal-body">
@@ -529,12 +510,12 @@
             <table class="table cart-table">
               <thead>
                 <tr>
-                  <th>Seller</th>
-                  <th>Item</th>
-                  <th class="text-right">Price</th>
-                  <th class="text-center">Qty</th>
-                  <th class="text-right">Total</th>
-                  <th class="text-right" style="width:56px;">Remove</th>
+                  <th>{% t "seller" "Seller" %}</th>
+                  <th>{% t "item" "Item" %}</th>
+                  <th class="text-right">{% t "price" "Price" %}</th>
+                  <th class="text-center">{% t "qty" "Qty" %}</th>
+                  <th class="text-right">{% t "total" "Total" %}</th>
+                  <th class="text-right" style="width:56px;">{% t "remove" "Remove" %}</th>
                 </tr>
               </thead>
               <tbody id="cartTable"></tbody>
@@ -542,9 +523,9 @@
           </div>
 
           <div class="d-flex align-items-center justify-content-between mt-3 flex-wrap">
-            <div class="muted small mb-2 mb-md-0">Total amount for items currently in your cart.</div>
+            <div class="muted small mb-2 mb-md-0">{% t "cart_total_note" "Total amount for items currently in your cart." %}</div>
             <div class="text-right">
-              <div class="muted small">Subtotal</div>
+              <div class="muted small">{% t "subtotal" "Subtotal" %}</div>
               <div class="h5 mb-0" id="cartSubtotal">0.00 ETB</div>
             </div>
           </div>
@@ -553,14 +534,14 @@
 
           <div class="d-flex flex-wrap">
             <button class="btn btn-outline-light mr-2 mb-2" type="button" onclick="clearCart()">
-              <i class="fas fa-trash mr-2"></i>Clear
+              <i class="fas fa-trash mr-2"></i>{% t "clear" "Clear" %}
             </button>
             <button
               type="button"
               class="btn btn-success ml-auto mb-2"
               id="submitOrderBtn"
               data-order-url="{% url 'order_create' %}">
-              <i class="fas fa-lock mr-2"></i>Submit Order
+              <i class="fas fa-lock mr-2"></i>{% t "submit_order" "Submit Order" %}
             </button>
           </div>
         </div>
@@ -573,17 +554,17 @@
     <div class="modal-dialog modal-dialog-centered modal-xl" role="document">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title font-weight-bold"><i class="fas fa-balance-scale mr-2"></i>Compare Parts</h5>
+          <h5 class="modal-title font-weight-bold"><i class="fas fa-balance-scale mr-2"></i>{% t "compare_parts" "Compare Parts" %}</h5>
           <button type="button" class="close" style="color:var(--text)"
             data-dismiss="modal"><span>&times;</span></button>
         </div>
         <div class="modal-body">
-          <div class="muted mb-3">Compare is stored in localStorage. Select up to 3 items.</div>
+          <div class="muted mb-3">{% t "compare_stored_note" "Compare is stored in localStorage. Select up to 3 items." %}</div>
           <div class="table-responsive">
             <table class="table table-dark table-hover mb-0" style="background:transparent;">
               <thead>
                 <tr>
-                  <th>Field</th>
+                  <th>{% t "field" "Field" %}</th>
                   <th id="c1">&mdash;</th>
                   <th id="c2">&mdash;</th>
                   <th id="c3">&mdash;</th>
@@ -594,8 +575,8 @@
           </div>
         </div>
         <div class="modal-footer">
-          <button class="btn btn-outline-light" onclick="clearCompare()"><i class="fas fa-trash mr-2"></i>Clear</button>
-          <button class="btn btn-primary" data-dismiss="modal">Done</button>
+          <button class="btn btn-outline-light" onclick="clearCompare()"><i class="fas fa-trash mr-2"></i>{% t "clear" "Clear" %}</button>
+          <button class="btn btn-primary" data-dismiss="modal">{% t "done" "Done" %}</button>
         </div>
       </div>
     </div>
@@ -605,8 +586,8 @@
   <div aria-live="polite" aria-atomic="true" style="position: fixed; bottom: 18px; right: 18px; z-index: 1080;">
     <div id="appToast" class="toast" data-delay="2200">
       <div class="toast-header">
-        <strong class="mr-auto" id="toastTitle">Notice</strong>
-        <small class="muted">now</small>
+        <strong class="mr-auto" id="toastTitle">{% t "toast_notice" "Notice" %}</strong>
+        <small class="muted">{% t "toast_now" "now" %}</small>
         <button type="button" class="ml-2 mb-1 close" style="color:var(--text)"
           data-dismiss="toast"><span>&times;</span></button>
       </div>
@@ -615,6 +596,7 @@
   </div>
   {{ shop_products|json_script:"shop-products-data" }}
   {{ shop_rating_context|json_script:"shop-rating-context" }}
+  {{ ui_text|json_script:"home-ui-text" }}
   {% endblock %}
 
 

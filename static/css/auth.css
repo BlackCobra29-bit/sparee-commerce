@@ -113,6 +113,39 @@ body.auth-body {
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.72));
 }
 
+.go-home-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 14px;
+  padding: 10px 14px;
+  border: 1px solid rgba(8, 140, 22, 0.24);
+  border-radius: 12px;
+  background: rgba(8, 140, 22, 0.08);
+  color: #067812;
+  text-decoration: none !important;
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1;
+  width: fit-content;
+  box-shadow: 0 6px 18px rgba(8, 140, 22, 0.12);
+  transition: background-color 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
+}
+
+.go-home-btn:visited {
+  color: #067812;
+  text-decoration: none !important;
+}
+
+.go-home-btn:hover,
+.go-home-btn:focus-visible {
+  background: rgba(8, 140, 22, 0.14);
+  border-color: rgba(8, 140, 22, 0.35);
+  color: #05660f;
+  text-decoration: none !important;
+  transform: translateY(-1px);
+}
+
 .auth-form-wrap h1 {
   margin: 0;
   font-size: 28px;
@@ -258,15 +291,13 @@ body.auth-body {
   font-size: 13px;
 }
 
-.helper-links a,
-.go-home {
+.helper-links a {
   color: #067812;
   text-decoration: none;
   font-weight: 700;
 }
 
-.helper-links a:hover,
-.go-home:hover {
+.helper-links a:hover {
   text-decoration: underline;
 }
 

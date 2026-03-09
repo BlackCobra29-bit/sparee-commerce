@@ -19,6 +19,12 @@ from django.urls import reverse, reverse_lazy
 from django.views.generic import FormView, TemplateView, View
 from django_htmx.http import HttpResponseClientRedirect
 
+from .i18n import (
+    SESSION_LANGUAGE_KEY,
+    get_request_language,
+    get_ui_text,
+    normalize_language,
+)
 from .forms import (
     ForgotPasswordForm,
     LoginForm,
@@ -180,6 +186,9 @@ class HomeView(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        language = get_request_language(self.request)
+        context["shop_language"] = language
+        context["ui_text"] = get_ui_text(language)
         nav_context = _build_public_nav_user_context(self.request.user)
 
         shop_products = _build_shop_products()
@@ -226,6 +235,9 @@ class CategoryProductsView(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        language = get_request_language(self.request)
+        context["shop_language"] = language
+        context["ui_text"] = get_ui_text(language)
         selected_category = (self.request.GET.get("category") or "").strip()
 
         nav_context = _build_public_nav_user_context(self.request.user)
@@ -274,6 +286,9 @@ class SearchProductsView(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        language = get_request_language(self.request)
+        context["shop_language"] = language
+        context["ui_text"] = get_ui_text(language)
         query = (self.request.GET.get("q") or "").strip()
 
         nav_context = _build_public_nav_user_context(self.request.user)
@@ -315,6 +330,17 @@ class SearchProductsView(TemplateView):
         }
         context["announcement_note"] = _get_active_site_announcement()
         return context
+
+
+class SetLanguagePreferenceView(View):
+    http_method_names = ["post"]
+
+    def post(self, request, *args, **kwargs):
+        requested = request.POST.get("lang")
+        language = normalize_language(requested)
+        request.session["preferred_language"] = language
+        next_url = request.POST.get("next") or request.META.get("HTTP_REFERER") or reverse("home")
+        return redirect(next_url)
 
 
 class VendorAccessMixin(LoginRequiredMixin):
@@ -1762,6 +1788,13 @@ class HtmxTemplateMixin:
             return HttpResponseClientRedirect(url)
         return HttpResponseRedirect(url)
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        language = get_request_language(self.request)
+        context["shop_language"] = language
+        context["ui_text"] = get_ui_text(language)
+        return context
+
 
 class AccountSettingsView(LoginRequiredMixin, TemplateView):
     login_url = reverse_lazy("login")
@@ -2015,7 +2048,8 @@ class LogoutView(LoginRequiredMixin, View):
     http_method_names = ["post"]
 
     def post(self, request, *args, **kwargs):
+        language = normalize_language(request.session.get(SESSION_LANGUAGE_KEY))
         logout(request)
+        request.session[SESSION_LANGUAGE_KEY] = language
         messages.success(request, "You have been signed out successfully.")
         return redirect("login")
-

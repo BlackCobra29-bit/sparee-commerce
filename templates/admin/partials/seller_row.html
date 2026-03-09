@@ -1,3 +1,4 @@
+{% load translation_tags %}
 <tr id="seller-row-{{ seller.id }}">
   <td>
     <div class="d-flex px-2 py-1">
@@ -18,34 +19,34 @@
   </td>
   <td>
     {% if not seller.user.is_active %}
-    <span class="badge badge-sm bg-gradient-danger js-verification-status">Disabled</span>
+    <span class="badge badge-sm bg-gradient-danger js-verification-status">{% t "admin_disabled" "Disabled" %}</span>
     {% elif seller.is_verified %}
-    <span class="badge badge-sm bg-gradient-success js-verification-status">Verified</span>
+    <span class="badge badge-sm bg-gradient-success js-verification-status">{% t "admin_verified" "Verified" %}</span>
     {% else %}
-    <span class="badge badge-sm bg-gradient-warning js-verification-status">Pending</span>
+    <span class="badge badge-sm bg-gradient-warning js-verification-status">{% t "admin_pending" "Pending" %}</span>
     {% endif %}
 
     {% if seller.license_file %}
-    <a href="{{ seller.license_file.url }}" target="_blank" class="d-block text-xs mt-1">View license</a>
+    <a href="{{ seller.license_file.url }}" target="_blank" class="d-block text-xs mt-1">{% t "admin_view_license" "View license" %}</a>
     {% else %}
-    <span class="d-block text-xs mt-1 text-secondary">No license file</span>
+    <span class="d-block text-xs mt-1 text-secondary">{% t "admin_no_license_file" "No license file" %}</span>
     {% endif %}
 
     {% if seller.oem_authorization_certificate %}
-    <a href="{{ seller.oem_authorization_certificate.url }}" target="_blank" class="d-block text-xs mt-1">View OEM authorization certificate</a>
+    <a href="{{ seller.oem_authorization_certificate.url }}" target="_blank" class="d-block text-xs mt-1">{% t "admin_view_oem_authorization_certificate" "View OEM authorization certificate" %}</a>
     {% else %}
-    <span class="d-block text-xs mt-1 text-secondary">No OEM authorization certificate</span>
+    <span class="d-block text-xs mt-1 text-secondary">{% t "admin_no_oem_authorization_certificate" "No OEM authorization certificate" %}</span>
     {% endif %}
   </td>
   <td>
     <div class="text-xs text-secondary">
-      Products: <b>{{ seller.product_count|default:0 }}</b>
+      {% t "admin_products_label" "Products:" %} <b>{{ seller.product_count|default:0 }}</b>
     </div>
     <div class="text-xs text-secondary">
-      Orders: <b>{{ seller.delivered_orders|default:0 }}</b> delivered / <b>{{ seller.total_orders|default:0 }}</b> total
+      {% t "admin_orders_label" "Orders:" %} <b>{{ seller.delivered_orders|default:0 }}</b> {% t "admin_delivered" "delivered" %} / <b>{{ seller.total_orders|default:0 }}</b> {% t "admin_total" "total" %}
     </div>
     <div class="text-xs text-secondary">
-      Quantity sold: <b>{{ seller.sold_quantity|default:0 }}</b>
+      {% t "admin_quantity_sold_label" "Quantity sold:" %} <b>{{ seller.sold_quantity|default:0 }}</b>
     </div>
   </td>
   <td class="align-middle text-center">
@@ -57,7 +58,7 @@
         data-url="{% url 'admin_seller_verification_update' seller.id %}"
         data-action="disable"
       >
-        Disable Account
+        {% t "admin_disable_account" "Disable Account" %}
       </button>
       {% else %}
       <button
@@ -66,7 +67,7 @@
         data-url="{% url 'admin_seller_verification_update' seller.id %}"
         data-action="approve"
       >
-        Approve
+        {% t "admin_approve" "Approve" %}
       </button>
       <button
         type="button"
@@ -74,7 +75,7 @@
         data-url="{% url 'admin_seller_verification_update' seller.id %}"
         data-action="reject"
       >
-        Reject
+        {% t "admin_reject" "Reject" %}
       </button>
       {% endif %}
     {% else %}
@@ -84,7 +85,7 @@
       data-url="{% url 'admin_seller_verification_update' seller.id %}"
       data-action="enable"
     >
-      Enable Account
+      {% t "admin_enable_account" "Enable Account" %}
     </button>
     <button
       type="button"
@@ -92,7 +93,7 @@
       data-url="{% url 'admin_seller_verification_update' seller.id %}"
       data-action="delete"
     >
-      Delete
+      {% t "admin_delete" "Delete" %}
     </button>
     {% endif %}
   </td>

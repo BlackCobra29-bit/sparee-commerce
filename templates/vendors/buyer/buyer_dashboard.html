@@ -1,5 +1,5 @@
 {% extends "vendors/base.html" %}
-{% load number_format %}
+{% load number_format translation_tags %}
 {% block vendor_content %}
 <div class="row">
   <div class="col-xl-3 col-sm-6 mb-xl-0 mb-4">
@@ -8,9 +8,9 @@
         <div class="row">
           <div class="col-8">
             <div class="numbers">
-              <p class="text-sm mb-0 text-capitalize font-weight-bold">Submitted Orders</p>
+              <p class="text-sm mb-0 text-capitalize font-weight-bold">{% t "vendor_submitted_orders" "Submitted Orders" %}</p>
               <h5 class="font-weight-bolder mb-0">{{ orders_total|number_separator }}</h5>
-              <p class="text-xs text-secondary mb-0 mt-1">All orders you placed</p>
+              <p class="text-xs text-secondary mb-0 mt-1">{% t "vendor_all_orders_you_placed" "All orders you placed" %}</p>
             </div>
           </div>
           <div class="col-4 text-end">
@@ -29,9 +29,9 @@
         <div class="row">
           <div class="col-8">
             <div class="numbers">
-              <p class="text-sm mb-0 text-capitalize font-weight-bold">Pending Orders</p>
+              <p class="text-sm mb-0 text-capitalize font-weight-bold">{% t "vendor_pending_orders" "Pending Orders" %}</p>
               <h5 class="font-weight-bolder mb-0">{{ pending_orders_count|number_separator }}</h5>
-              <p class="text-xs text-secondary mb-0 mt-1">Waiting for delivery</p>
+              <p class="text-xs text-secondary mb-0 mt-1">{% t "vendor_waiting_for_delivery" "Waiting for delivery" %}</p>
             </div>
           </div>
           <div class="col-4 text-end">
@@ -50,9 +50,9 @@
         <div class="row">
           <div class="col-8">
             <div class="numbers">
-              <p class="text-sm mb-0 text-capitalize font-weight-bold">Delivered Orders</p>
+              <p class="text-sm mb-0 text-capitalize font-weight-bold">{% t "vendor_delivered_orders" "Delivered Orders" %}</p>
               <h5 class="font-weight-bolder mb-0">{{ delivered_orders_count|number_separator }}</h5>
-              <p class="text-xs text-secondary mb-0 mt-1">Completed successfully</p>
+              <p class="text-xs text-secondary mb-0 mt-1">{% t "vendor_completed_successfully" "Completed successfully" %}</p>
             </div>
           </div>
           <div class="col-4 text-end">
@@ -71,9 +71,9 @@
         <div class="row">
           <div class="col-8">
             <div class="numbers">
-              <p class="text-sm mb-0 text-capitalize font-weight-bold">Total Spent</p>
-              <h5 class="font-weight-bolder mb-0">{{ total_spent_amount|number_separator }} birr</h5>
-              <p class="text-xs text-secondary mb-0 mt-1">Delivered items: <b>{{ total_items_ordered|number_separator }}</b></p>
+              <p class="text-sm mb-0 text-capitalize font-weight-bold">{% t "vendor_total_spent" "Total Spent" %}</p>
+              <h5 class="font-weight-bolder mb-0">{{ total_spent_amount|number_separator }} {% t "vendor_birr" "birr" %}</h5>
+              <p class="text-xs text-secondary mb-0 mt-1">{% t "vendor_delivered_items" "Delivered items:" %} <b>{{ total_items_ordered|number_separator }}</b></p>
             </div>
           </div>
           <div class="col-4 text-end">

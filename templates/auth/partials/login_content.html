@@ -1,8 +1,9 @@
+{% load translation_tags %}
 <main id="auth-page" class="auth-shell">
 
     <section class="auth-form-wrap">
-      <h1>Welcome back</h1>
-      <p class="subline">Use your account credentials to continue.</p>
+      <h1>{% t "auth_login_heading" "Welcome back" %}</h1>
+      <p class="subline">{% t "auth_login_subline" "Use your account credentials to continue." %}</p>
 
       {% if messages %}
       <div class="alert-stack">
@@ -19,39 +20,43 @@
         {% csrf_token %}
 
         <div class="field">
-          <label for="username">Username</label>
+          <label for="username">{% t "auth_username" "Username" %}</label>
           <input id="username" name="username" class="input" required autocomplete="username"
-                 data-parsley-required-message="Username is required."
-                 value="{{ prefill_username|default:'' }}" placeholder="Enter your username">
+                 data-parsley-required-message="{% t "auth_username_required" "Username is required." %}"
+                 value="{{ prefill_username|default:'' }}" placeholder="{% t "auth_login_username_placeholder" "Enter your username" %}">
         </div>
 
         <div class="field">
-          <label for="password">Password</label>
+          <label for="password">{% t "auth_password" "Password" %}</label>
           <div class="pass-wrap">
             <input id="password" type="password" name="password" class="input" required autocomplete="current-password"
-                   data-parsley-required-message="Password is required."
-                   placeholder="Enter your password">
-            <button type="button" class="toggle-pass" data-toggle-password data-target="password">Show</button>
+                   data-parsley-required-message="{% t "auth_password_required" "Password is required." %}"
+                   placeholder="{% t "auth_login_password_placeholder" "Enter your password" %}">
+            <button type="button" class="toggle-pass" data-toggle-password data-target="password">{% t "auth_show" "Show" %}</button>
           </div>
           <div class="meta-row">
-            <span>Minimum: 8 characters</span>
+            <span>{% t "auth_password_minimum" "Minimum: 8 characters" %}</span>
             <a href="{% url 'forgot_password' %}" hx-get="{% url 'forgot_password' %}"
-               hx-target="#auth-page" hx-swap="outerHTML" hx-push-url="true">Forgot password?</a>
+               hx-target="#auth-page" hx-swap="outerHTML" hx-push-url="true">{% t "auth_forgot_password_link" "Forgot password?" %}</a>
           </div>
         </div>
 
         <label class="check-row">
           <input type="checkbox" name="remember">
-          Keep me signed in on this device
+          {% t "auth_remember_me" "Keep me signed in on this device" %}
         </label>
 
-        <button class="btn-brand" type="submit">Secure Login</button>
+        <button class="btn-brand" type="submit">{% t "auth_secure_login" "Secure Login" %}</button>
       </form>
 
       <div class="helper-links">
-        <span>New here?</span>
+        <span>{% t "auth_new_here" "New here?" %}</span>
         <a href="{% url 'signup' %}" hx-get="{% url 'signup' %}"
-           hx-target="#auth-page" hx-swap="outerHTML" hx-push-url="true">Create account</a>
+           hx-target="#auth-page" hx-swap="outerHTML" hx-push-url="true">{% t "auth_create_account_link" "Create account" %}</a>
       </div>
+      <a class="go-home-btn" href="{% url 'home' %}">
+        <i class="fas fa-arrow-left" aria-hidden="true"></i>
+        <span>{% t "auth_return_homepage" "Return to Homepage" %}</span>
+      </a>
     </section>
 </main>

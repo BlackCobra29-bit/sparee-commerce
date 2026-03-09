@@ -4,7 +4,7 @@
 * Wahid Spare Hub - Inventory Management
 =========================================================
 -->
-{% load static %}
+{% load static translation_tags %}
 <!DOCTYPE html>
 <html lang="en">
 
@@ -13,7 +13,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   <link rel="apple-touch-icon" sizes="76x76" href="{% static 'vendors/img/apple-icon.png' %}">
   <link rel="icon" type="image/png" href="{% static 'image/logo.png' %}">
-  <title>{% block vendor_title %}Inventory Management - Wahid Spare Hub{% endblock %}</title>
+  <title>{% block vendor_title %}{% t "vendor_base_title" "Inventory Management - Wahid Spare Hub" %}{% endblock %}</title>
   <!--     Fonts and icons     -->
   <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700" rel="stylesheet" />
   <!-- Nucleo Icons -->
@@ -295,12 +295,12 @@
             type="button"
           >
             <i class="fa fa-shopping-cart me-1"></i>
-            <span>Cart</span>
+            <span>{% t "vendor_cart" "Cart" %}</span>
             <span class="badge bg-danger ms-2 cart-count-badge">0</span>
           </button>
           {% endif %}
           {% if request.user.account_registration.account_type == 'seller' %}
-          <a href="{% url 'vendor_orders' %}" class="nav-link text-white p-0 position-relative d-inline-flex align-items-center justify-content-center vendor-mobile-icon-link" title="View orders">
+          <a href="{% url 'vendor_orders' %}" class="nav-link text-white p-0 position-relative d-inline-flex align-items-center justify-content-center vendor-mobile-icon-link" title="{% t 'vendor_view_orders' 'View orders' %}">
             <i class="fa fa-bell cursor-pointer"></i>
             {% if seller_notification_count > 0 %}
             <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger px-1 py-0" style="font-size: 0.6rem; min-width: 1rem;">
@@ -347,7 +347,7 @@
                 <div class="icon icon-shape icon-sm border-radius-md {% if current_url_name == 'admin_dashboard' %}bg-gradient-primary text-white{% else %}bg-white text-dark{% endif %} text-center me-2 d-flex align-items-center justify-content-center">
                   <i class="fa fa-gauge"></i>
                 </div>
-                <span class="nav-link-text ms-1">Dashboard</span>
+                <span class="nav-link-text ms-1">{% t "vendor_nav_dashboard" "Dashboard" %}</span>
               </a>
             </li>
             <li class="nav-item">
@@ -355,7 +355,7 @@
                 <div class="icon icon-shape icon-sm border-radius-md {% if current_url_name == 'admin_seller_management' %}bg-gradient-primary text-white{% else %}bg-white text-dark{% endif %} text-center me-2 d-flex align-items-center justify-content-center">
                   <i class="fa fa-user-check"></i>
                 </div>
-                <span class="nav-link-text ms-1">Sellers</span>
+                <span class="nav-link-text ms-1">{% t "vendor_nav_sellers" "Sellers" %}</span>
               </a>
             </li>
             <li class="nav-item">
@@ -363,7 +363,7 @@
                 <div class="icon icon-shape icon-sm border-radius-md {% if current_url_name == 'admin_product_sku_control' %}bg-gradient-primary text-white{% else %}bg-white text-dark{% endif %} text-center me-2 d-flex align-items-center justify-content-center">
                   <i class="fa fa-boxes-stacked"></i>
                 </div>
-                <span class="nav-link-text ms-1">Products</span>
+                <span class="nav-link-text ms-1">{% t "vendor_nav_products" "Products" %}</span>
               </a>
             </li>
             <li class="nav-item">
@@ -371,7 +371,7 @@
                 <div class="icon icon-shape icon-sm border-radius-md {% if current_url_name == 'admin_system_controls' %}bg-gradient-primary text-white{% else %}bg-white text-dark{% endif %} text-center me-2 d-flex align-items-center justify-content-center">
                   <i class="fa fa-sliders"></i>
                 </div>
-                <span class="nav-link-text ms-1">System Control</span>
+                <span class="nav-link-text ms-1">{% t "vendor_nav_system_control" "System Control" %}</span>
               </a>
             </li>
             <li class="nav-item">
@@ -379,7 +379,7 @@
                 <div class="icon icon-shape icon-sm border-radius-md {% if current_url_name == 'admin_system_admins' %}bg-gradient-primary text-white{% else %}bg-white text-dark{% endif %} text-center me-2 d-flex align-items-center justify-content-center">
                   <i class="fa fa-user-shield"></i>
                 </div>
-                <span class="nav-link-text ms-1">System Admins</span>
+                <span class="nav-link-text ms-1">{% t "vendor_nav_system_admins" "System Admins" %}</span>
               </a>
             </li>
               {% endif %}
@@ -395,7 +395,7 @@
                     </g>
                   </svg>
                 </div>
-                <span class="nav-link-text ms-1">Dashboard</span>
+                <span class="nav-link-text ms-1">{% t "vendor_nav_dashboard" "Dashboard" %}</span>
               </a>
             </li>
             <li class="nav-item">
@@ -409,7 +409,7 @@
                     </g>
                   </svg>
                 </div>
-                <span class="nav-link-text ms-1">Orders</span>
+                <span class="nav-link-text ms-1">{% t "vendor_nav_orders" "Orders" %}</span>
               </a>
             </li>
             <li class="nav-item">
@@ -424,7 +424,7 @@
                     </g>
                   </svg>
                 </div>
-                <span class="nav-link-text ms-1">Products</span>
+                <span class="nav-link-text ms-1">{% t "vendor_nav_products" "Products" %}</span>
               </a>
             </li>
               {% endif %}
@@ -440,7 +440,7 @@
                       </g>
                     </svg>
                   </div>
-                  <span class="nav-link-text ms-1">Dashboard</span>
+                  <span class="nav-link-text ms-1">{% t "vendor_nav_dashboard" "Dashboard" %}</span>
                 </a>
               </li>
               <li class="nav-item">
@@ -454,7 +454,7 @@
                       </g>
                     </svg>
                   </div>
-                  <span class="nav-link-text ms-1">Orders</span>
+                  <span class="nav-link-text ms-1">{% t "vendor_nav_orders" "Orders" %}</span>
                 </a>
               </li>
               {% endif %}
@@ -465,7 +465,7 @@
             <li class="nav-item me-lg-3 d-none d-lg-block">
               <button class="btn btn-outline-light btn-sm mb-0 d-flex align-items-center text-white" id="cartModalBtn" data-bs-toggle="modal" data-bs-target="#cartModal" type="button">
                 <i class="fa fa-shopping-cart me-1"></i>
-                <span>Cart</span>
+                <span>{% t "vendor_cart" "Cart" %}</span>
                 <span class="badge bg-danger ms-2 cart-count-badge" id="cartCount">0</span>
               </button>
             </li>
@@ -488,7 +488,7 @@
                 href="{% url 'admin_messages_inbox' %}"
                 class="nav-link text-white p-0 position-relative d-inline-flex align-items-center justify-content-center"
                 style="width: 18px; height: 18px;"
-                title="Contact messages inbox"
+                title="{% t 'vendor_contact_messages_inbox' 'Contact messages inbox' %}"
               >
                 <i class="fa fa-envelope cursor-pointer" style="font-size: 0.95rem; line-height: 1;"></i>
                 {% if superadmin_unseen_message_count > 0 %}
@@ -503,7 +503,7 @@
                 href="#"
                 class="nav-link text-white p-0 position-relative d-inline-flex align-items-center justify-content-center"
                 style="width: 18px; height: 18px;"
-                title="New seller approvals"
+                title="{% t 'vendor_new_seller_approvals' 'New seller approvals' %}"
                 data-bs-toggle="modal"
                 data-bs-target="#superadminSellerNotificationModal"
                 onclick="return false;"
@@ -521,13 +521,13 @@
               <a
                 href="{% url 'account_settings' %}"
                 class="btn btn-outline-light btn-sm mb-0 me-2 text-white{% if current_url_name == 'account_settings' %} active{% endif %}"
-                title="Account settings"
+                title="{% t 'vendor_account_settings' 'Account settings' %}"
               >
-                <i class="fa fa-cog me-1"></i>Settings
+                <i class="fa fa-cog me-1"></i>{% t "vendor_settings" "Settings" %}
               </a>
             </li>
             <li class="nav-item">
-              <button id="logoutBtn" class="btn btn-outline-light btn-sm mb-0 text-white" type="button" title="Sign out">Sign out</button>
+              <button id="logoutBtn" class="btn btn-outline-light btn-sm mb-0 text-white" type="button" title="{% t 'vendor_sign_out' 'Sign out' %}">{% t "vendor_sign_out" "Sign out" %}</button>
               <form id="logoutForm" method="post" action="{% url 'logout' %}" class="d-none">
                 {% csrf_token %}
               </form>
@@ -541,7 +541,7 @@
       <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content">
           <div class="modal-header">
-            <h5 class="modal-title fw-bold"><i class="fa fa-shopping-cart me-2"></i>Your Cart</h5>
+            <h5 class="modal-title fw-bold"><i class="fa fa-shopping-cart me-2"></i>{% t "your_cart" "Your Cart" %}</h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body">
@@ -549,35 +549,35 @@
               <table class="table table-hover align-middle mb-0">
                 <thead>
                   <tr>
-                    <th>Seller</th>
-                    <th>Item</th>
-                    <th class="text-end">Price</th>
-                    <th class="text-center">Qty</th>
-                    <th class="text-end">Total</th>
-                    <th class="text-end" style="width:56px;">Remove</th>
+                    <th>{% t "seller" "Seller" %}</th>
+                    <th>{% t "item" "Item" %}</th>
+                    <th class="text-end">{% t "price" "Price" %}</th>
+                    <th class="text-center">{% t "qty" "Qty" %}</th>
+                    <th class="text-end">{% t "total" "Total" %}</th>
+                    <th class="text-end" style="width:56px;">{% t "remove" "Remove" %}</th>
                   </tr>
                 </thead>
                 <tbody id="cartTable"></tbody>
               </table>
             </div>
             <div class="d-flex align-items-center justify-content-between mt-3">
-              <div class="text-sm text-muted">Total amount of money you will cost.</div>
+              <div class="text-sm text-muted">{% t "vendor_cart_total_note" "Total amount of money you will cost." %}</div>
               <div class="text-end">
-                <div class="text-sm text-muted">Subtotal</div>
+                <div class="text-sm text-muted">{% t "subtotal" "Subtotal" %}</div>
                 <div class="h5 mb-0" id="cartSubtotal">0.00 ETB</div>
               </div>
             </div>
             <hr class="my-3">
             <div class="d-flex flex-wrap">
               <button class="btn btn-outline-secondary me-2 mb-2" type="button" onclick="clearCart()">
-                <i class="fa fa-trash me-2"></i>Clear
+                <i class="fa fa-trash me-2"></i>{% t "clear" "Clear" %}
               </button>
               <button
                 type="button"
                 class="btn btn-success ms-auto mb-2"
                 id="submitOrderBtn"
                 data-order-url="{% url 'order_create' %}">
-                <i class="fa fa-lock me-2"></i>Submit Order
+                <i class="fa fa-lock me-2"></i>{% t "submit_order" "Submit Order" %}
               </button>
             </div>
           </div>
@@ -591,7 +591,7 @@
         <div class="modal-content">
           <div class="modal-header">
             <h5 class="modal-title fw-bold">
-              <i class="fa fa-user-check me-2"></i>New Seller Registration Requests
+              <i class="fa fa-user-check me-2"></i>{% t "vendor_new_seller_registration_requests" "New Seller Registration Requests" %}
             </h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
@@ -600,10 +600,10 @@
               <table class="table table-hover align-middle mb-0">
                 <thead>
                   <tr>
-                    <th>Seller</th>
-                    <th>Email</th>
-                    <th>Date</th>
-                    <th class="text-end">Action</th>
+                    <th>{% t "seller" "Seller" %}</th>
+                    <th>{% t "email" "Email" %}</th>
+                    <th>{% t "date" "Date" %}</th>
+                    <th class="text-end">{% t "action" "Action" %}</th>
                   </tr>
                 </thead>
                 <tbody id="superadminSellerNotificationTableBody">
@@ -619,7 +619,7 @@
                         data-url="{% url 'admin_seller_verification_update' item.id %}"
                         data-action="approve"
                       >
-                        Approve
+                        {% t "vendor_approve" "Approve" %}
                       </button>
                       <button
                         type="button"
@@ -627,13 +627,13 @@
                         data-url="{% url 'admin_seller_verification_update' item.id %}"
                         data-action="reject"
                       >
-                        Reject
+                        {% t "vendor_reject" "Reject" %}
                       </button>
                     </td>
                   </tr>
                   {% empty %}
                   <tr id="superadminSellerNotificationEmptyRow">
-                    <td colspan="4" class="text-center text-sm text-secondary py-4">No pending seller accounts.</td>
+                    <td colspan="4" class="text-center text-sm text-secondary py-4">{% t "vendor_no_pending_seller_accounts" "No pending seller accounts." %}</td>
                   </tr>
                   {% endfor %}
                 </tbody>
@@ -661,15 +661,8 @@
             <div class="col-lg-6 mb-lg-0 mb-4">
               <div class="copyright text-center text-sm text-muted text-lg-start">
                 &copy <script>document.write(new Date().getFullYear())</script>,
-                Wahid Spare parts Hub
+                {% t "vendor_brand_footer" "Wahid Parts" %}
               </div>
-            </div>
-            <div class="col-lg-6">
-              <ul class="nav nav-footer justify-content-center justify-content-lg-end">
-                <li class="nav-item"><a href="../vendor/help.html" class="nav-link text-muted">Help</a></li>
-                <li class="nav-item"><a href="../vendor/policies.html" class="nav-link text-muted">Policies</a></li>
-                <li class="nav-item"><a href="../vendor/settings.html" class="nav-link pe-0 text-muted">Settings</a></li>
-              </ul>
             </div>
           </div>
         </div>
@@ -704,12 +697,12 @@
 
       logoutBtn.addEventListener('click', function () {
         Swal.fire({
-          title: 'Sign out?',
-          text: 'You will be logged out of your account.',
+          title: '{% t "vendor_swal_sign_out_title" "Sign out?" %}',
+          text: '{% t "vendor_swal_sign_out_text" "You will be logged out of your account." %}',
           icon: 'warning',
           showCancelButton: true,
-          confirmButtonText: 'Yes, sign out',
-          cancelButtonText: 'Cancel',
+          confirmButtonText: '{% t "vendor_swal_yes_sign_out" "Yes, sign out" %}',
+          cancelButtonText: '{% t "cancel" "Cancel" %}',
           confirmButtonColor: '#dc3545',
           reverseButtons: true,
           focusCancel: true
@@ -760,7 +753,7 @@
           badges.forEach(function (badge) { badge.remove(); });
           var tbody = document.getElementById('superadminSellerNotificationTableBody');
           if (tbody && !document.getElementById('superadminSellerNotificationEmptyRow')) {
-            tbody.insertAdjacentHTML('beforeend', '<tr id="superadminSellerNotificationEmptyRow"><td colspan="4" class="text-center text-sm text-secondary py-4">No pending seller accounts.</td></tr>');
+            tbody.insertAdjacentHTML('beforeend', '<tr id="superadminSellerNotificationEmptyRow"><td colspan="4" class="text-center text-sm text-secondary py-4">{% t "vendor_no_pending_seller_accounts" "No pending seller accounts." %}</td></tr>');
           }
           return;
         }
@@ -779,10 +772,12 @@
         var action = actionBtn.getAttribute('data-action');
         if (!url || !action || typeof Swal === 'undefined') return;
 
-        var confirmTitle = action === 'approve' ? 'Approve seller?' : 'Reject seller?';
+        var confirmTitle = action === 'approve'
+          ? '{% t "vendor_swal_approve_seller_title" "Approve seller?" %}'
+          : '{% t "vendor_swal_reject_seller_title" "Reject seller?" %}';
         var confirmText = action === 'approve'
-          ? 'Do you want to verify this seller account?'
-          : 'Do you want to reject this seller account?';
+          ? '{% t "vendor_swal_approve_seller_text" "Do you want to verify this seller account?" %}'
+          : '{% t "vendor_swal_reject_seller_text" "Do you want to reject this seller account?" %}';
         var confirmColor = action === 'approve' ? '#2dce89' : '#f5365c';
 
         Swal.fire({
@@ -790,8 +785,10 @@
           text: confirmText,
           icon: 'warning',
           showCancelButton: true,
-          confirmButtonText: action === 'approve' ? 'Yes, approve' : 'Yes, reject',
-          cancelButtonText: 'Cancel',
+          confirmButtonText: action === 'approve'
+            ? '{% t "vendor_swal_yes_approve" "Yes, approve" %}'
+            : '{% t "vendor_swal_yes_reject" "Yes, reject" %}',
+          cancelButtonText: '{% t "cancel" "Cancel" %}',
           confirmButtonColor: confirmColor,
           reverseButtons: true
         }).then(function (result) {
@@ -809,7 +806,7 @@
             .then(function (response) { return response.json(); })
             .then(function (data) {
               if (!data.ok) {
-                showToast(data.message || 'Unable to update seller account.', false);
+                showToast(data.message || '{% t "vendor_toast_unable_update_seller_account" "Unable to update seller account." %}', false);
                 return;
               }
               var row = actionBtn.closest('tr');
@@ -817,10 +814,10 @@
               var emptyRow = document.getElementById('superadminSellerNotificationEmptyRow');
               if (emptyRow) emptyRow.remove();
               updateSuperadminBellCount();
-              showToast(data.message || 'Seller request updated.', true);
+              showToast(data.message || '{% t "vendor_toast_seller_request_updated" "Seller request updated." %}', true);
             })
             .catch(function () {
-              showToast('Request failed. Please try again.', false);
+              showToast('{% t "vendor_toast_request_failed_try_again" "Request failed. Please try again." %}', false);
             });
         });
       });

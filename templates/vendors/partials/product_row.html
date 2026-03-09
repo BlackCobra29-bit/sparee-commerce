@@ -1,3 +1,4 @@
+{% load translation_tags %}
 {% with stock=product.current_stock|default_if_none:0 %}
 <tr id="product-row-{{ product.id }}">
   <td>
@@ -18,11 +19,11 @@
   </td>
   <td class="align-middle text-center">
     {% if stock <= 0 %}
-      <span class="badge badge-sm bg-gradient-danger">Out of Stock</span>
+      <span class="badge badge-sm bg-gradient-danger">{% t "vendor_out_of_stock" "Out of Stock" %}</span>
     {% elif stock <= product.reorder_level %}
-      <span class="badge badge-sm bg-gradient-warning">Low Stock</span>
+      <span class="badge badge-sm bg-gradient-warning">{% t "vendor_low_stock" "Low Stock" %}</span>
     {% else %}
-      <span class="badge badge-sm bg-gradient-success">In Stock</span>
+      <span class="badge badge-sm bg-gradient-success">{% t "vendor_in_stock" "In Stock" %}</span>
     {% endif %}
   </td>
   <td class="align-middle text-center">
@@ -67,3 +68,4 @@
   </td>
 </tr>
 {% endwith %}
+

@@ -77,6 +77,27 @@ function readRatingContext() {
   }
 }
 const RATING_CONTEXT = readRatingContext();
+function readUiText() {
+  const node = document.getElementById("home-ui-text");
+  if (!node) return {};
+  try {
+    const parsed = JSON.parse(node.textContent || "{}");
+    return parsed && typeof parsed === "object" ? parsed : {};
+  } catch (e) {
+    return {};
+  }
+}
+const UI_TEXT = readUiText();
+function t(key, fallback) {
+  const value = UI_TEXT[key];
+  if (typeof value === "string" && value.trim()) {
+    return value;
+  }
+  return fallback;
+}
+function tt(key, fallback) {
+  return t(key, fallback);
+}
 
 // ==========================
 // STATE (persisted)
@@ -264,14 +285,14 @@ function openRateModal(sku) {
   if (!normalizedSku) return;
 
   if (RATING_CONTEXT.is_superadmin) {
-    toast("Rating", "System admins cannot rate products.", "error");
+    toast(tt("js_toast_title_rating", "Rating"), tt("js_toast_system_admins_cannot_rate", "System admins cannot rate products."), "error");
     return;
   }
 
   if (ratedSkus.has(normalizedSku)) {
     toast(
-      "Rating",
-      "You already rated this product. You can only rate once.",
+      tt("js_toast_title_rating", "Rating"),
+      tt("js_toast_already_rated_once_only", "You already rated this product. You can only rate once."),
       "error"
     );
     return;
@@ -289,21 +310,21 @@ async function submitRating(sku, rating) {
   if (!normalizedSku) return;
 
   if (RATING_CONTEXT.is_superadmin) {
-    toast("Rating", "System admins cannot rate products.", "error");
+    toast(tt("js_toast_title_rating", "Rating"), tt("js_toast_system_admins_cannot_rate", "System admins cannot rate products."), "error");
     return;
   }
 
   if (ratedSkus.has(normalizedSku)) {
     toast(
-      "Rating",
-      "You already rated this product. You can only rate once.",
+      tt("js_toast_title_rating", "Rating"),
+      tt("js_toast_already_rated_once_only", "You already rated this product. You can only rate once."),
       "error"
     );
     return;
   }
 
   if (!RATING_CONTEXT.is_authenticated) {
-    toast("Rating", "Please log in to rate products.", "error");
+    toast(tt("js_toast_title_rating", "Rating"), tt("js_toast_please_log_in_to_rate", "Please log in to rate products."), "error");
     if (RATING_CONTEXT.login_url) {
       setTimeout(() => {
         window.location.href = RATING_CONTEXT.login_url;
@@ -313,19 +334,19 @@ async function submitRating(sku, rating) {
   }
 
   if (!RATING_CONTEXT.can_rate) {
-    toast("Rating", "Only registered accounts can rate products.", "error");
+    toast(tt("js_toast_title_rating", "Rating"), tt("js_toast_only_registered_can_rate", "Only registered accounts can rate products."), "error");
     return;
   }
 
   const value = Math.trunc(toNumber(rating, 0));
   if (value < 1 || value > 5) {
-    toast("Rating", "Please select a rating from 1 to 5.", "error");
+    toast(tt("js_toast_title_rating", "Rating"), tt("js_toast_select_rating_1_5", "Please select a rating from 1 to 5."), "error");
     return;
   }
 
   const url = buildRateUrl(normalizedSku);
   if (!url) {
-    toast("Rating", "Rating endpoint is not configured.", "error");
+    toast(tt("js_toast_title_rating", "Rating"), tt("js_toast_rating_endpoint_not_configured", "Rating endpoint is not configured."), "error");
     return;
   }
 
@@ -335,7 +356,7 @@ async function submitRating(sku, rating) {
     Number(product.owner_id || 0) > 0 &&
     Number(product.owner_id || 0) === Number(RATING_CONTEXT.current_user_id || 0);
   if (isOwnProduct) {
-    toast("Rating", "You cannot rate your own product.", "error");
+    toast(tt("js_toast_title_rating", "Rating"), tt("js_toast_cannot_rate_own_product", "You cannot rate your own product."), "error");
     return;
   }
 
@@ -384,9 +405,9 @@ async function submitRating(sku, rating) {
       );
     }
 
-    toast("Rating", data.message || "Thanks for your rating.");
+    toast(tt("js_toast_title_rating", "Rating"), data.message || tt("js_toast_thanks_for_rating", "Thanks for your rating."));
   } catch (error) {
-    toast("Rating", error.message || "Could not submit rating.", "error");
+    toast(tt("js_toast_title_rating", "Rating"), error.message || tt("js_toast_could_not_submit_rating", "Could not submit rating."), "error");
   }
 }
 async function submitContactMessageForm(form) {
@@ -399,7 +420,7 @@ async function submitContactMessageForm(form) {
 
   const submitUrl = String($(form).data("submit-url") || "").trim();
   if (!submitUrl) {
-    toast("Contact", "Contact endpoint is not configured.", "error");
+    toast(tt("js_toast_title_contact", "Contact"), tt("js_toast_contact_endpoint_not_configured", "Contact endpoint is not configured."), "error");
     return;
   }
 
@@ -412,7 +433,7 @@ async function submitContactMessageForm(form) {
   };
 
   if (!payload.name || !payload.email || !payload.subject || !payload.message_body) {
-    toast("Contact", "All fields are required.", "error");
+    toast(tt("js_toast_title_contact", "Contact"), tt("js_toast_all_fields_required", "All fields are required."), "error");
     return;
   }
 
@@ -444,9 +465,9 @@ async function submitContactMessageForm(form) {
       contactModal.modal("hide");
     }
     form.reset();
-    toast("Contact", data.message || "Message submitted successfully.");
+    toast(tt("js_toast_title_contact", "Contact"), data.message || tt("js_toast_message_submitted_successfully", "Message submitted successfully."));
   } catch (error) {
-    toast("Contact", error.message || "Unable to submit your message.", "error");
+    toast(tt("js_toast_title_contact", "Contact"), error.message || tt("js_toast_unable_submit_message", "Unable to submit your message."), "error");
   } finally {
     submitBtn.prop("disabled", false);
   }
@@ -483,7 +504,9 @@ function updateSavedVehicleBadge() {
       .removeClass("d-none")
       .text(`Saved vehicle: ${savedVehicle.make} ${savedVehicle.year}`);
   } else {
-    $("#savedVehicle").removeClass("d-none").text("No vehicle saved");
+    $("#savedVehicle")
+      .removeClass("d-none")
+      .text(t("no_vehicle_saved", "No vehicle saved"));
   }
 }
 
@@ -581,7 +604,7 @@ function renderProducts(items) {
 
     const wishOn = wish.includes(p.sku);
     const compOn = compare.includes(p.sku);
-    const sellerName = p.seller_name || p.brand || "Unknown Seller";
+    const sellerName = p.seller_name || p.brand || t("js_unknown_seller", "Unknown Seller");
     const sellerPhoto = p.seller_photo || sellerAvatarDataUri(sellerName);
 
     const fitHint =
@@ -601,7 +624,7 @@ function renderProducts(items) {
                   }')">
                     <i class="fas fa-eye"></i>
                   </div>
-                  <div class="icon-btn" title="Compare" onclick="addToCartBySku('${
+                  <div class="icon-btn" title="${t("js_compare", "Compare")}" onclick="addToCartBySku('${
                     p.sku
                   }')">
                     <i class="fas fa-shopping-cart"></i>
@@ -612,7 +635,7 @@ function renderProducts(items) {
               <div class="p-3">
                 <div class="d-flex justify-content-between align-items-start">
                   <div style="min-width:0">
-                    <div class="muted small"><b class="text-success">Category:</b> ${escapeHtml(
+                    <div class="muted small"><b class="text-success">${t("js_category", "Category")}:</b> ${escapeHtml(
                       p.category
                     )} ${fitHint}</div>
                     <div class="font-weight-bold text-truncate">${escapeHtml(
@@ -621,7 +644,7 @@ function renderProducts(items) {
                   </div>
                   <div class="text-right">
                     <div class="price">${money(p.price)}</div>
-                    <div class="muted small">Stock: <b>${p.stock}</b></div>
+                    <div class="muted small">${t("js_stock", "Stock")}: <b>${p.stock}</b></div>
                   </div>
                 </div>
 
@@ -687,7 +710,7 @@ function openQuickView(sku) {
   $("#qvPrice").text(money(p.price));
   $("#qvDesc").text(p.desc);
   $("#qvSku").text(p.sku);
-  $("#qvSellerName").text(p.seller_name || p.brand || "Unknown Seller");
+  $("#qvSellerName").text(p.seller_name || p.brand || t("js_unknown_seller", "Unknown Seller"));
   $("#qvSellerPhoto")
     .attr(
       "src",
@@ -740,8 +763,10 @@ function toggleWish(sku) {
   else wish.push(sku);
   saveLS(LS.wish, wish);
   toast(
-    "Wishlist",
-    wish.includes(sku) ? "Added to wishlist." : "Removed from wishlist."
+    tt("js_toast_title_wishlist", "Wishlist"),
+    wish.includes(sku)
+      ? tt("js_toast_added_to_wishlist", "Added to wishlist.")
+      : tt("js_toast_removed_from_wishlist", "Removed from wishlist.")
   );
   applyAll(false);
 }
@@ -751,7 +776,7 @@ function toggleCompare(sku) {
     compare = compare.filter((x) => x !== sku);
   } else {
     if (compare.length >= 3) {
-      toast("Compare", "You can compare up to 3 items.");
+      toast(tt("js_toast_title_compare", "Compare"), tt("js_toast_compare_up_to_3", "You can compare up to 3 items."));
       return;
     }
     compare.push(sku);
@@ -760,8 +785,10 @@ function toggleCompare(sku) {
   renderCompareUI();
   applyAll(false);
   toast(
-    "Compare",
-    compare.includes(sku) ? "Added to compare." : "Removed from compare."
+    tt("js_toast_title_compare", "Compare"),
+    compare.includes(sku)
+      ? tt("js_toast_added_to_compare", "Added to compare.")
+      : tt("js_toast_removed_from_compare", "Removed from compare.")
   );
 }
 
@@ -769,7 +796,7 @@ function clearCompare() {
   compare = [];
   saveLS(LS.compare, compare);
   renderCompareUI();
-  toast("Compare", "Cleared.");
+  toast(tt("js_toast_title_compare", "Compare"), tt("js_toast_cleared", "Cleared."));
 }
 
 function renderCompareUI() {
@@ -817,7 +844,7 @@ function renderCompareUI() {
 // ==========================
 function addToCartBySku(sku) {
   if (RATING_CONTEXT.is_superadmin) {
-    toast("Cart", "System admins cannot add items to cart.", "error");
+    toast(tt("js_toast_title_cart", "Cart"), tt("js_toast_system_admins_cannot_add_to_cart", "System admins cannot add items to cart."), "error");
     return;
   }
 
@@ -826,7 +853,7 @@ function addToCartBySku(sku) {
   const item = cart.find((x) => x.sku === sku);
   if (item) {
     if (item.qty >= p.stock) {
-      toast("Stock", `Only ${p.stock} available for ${p.name}.`, "error");
+      toast(tt("js_toast_title_stock", "Stock"), `${tt("js_toast_only_prefix", "Only")} ${p.stock} ${tt("js_toast_available_for", "available for")} ${p.name}.`, "error");
       return;
     }
     item.qty += 1;
@@ -834,7 +861,7 @@ function addToCartBySku(sku) {
     cart.push({ sku, qty: 1 });
   }
   saveLS(LS.cart, cart);
-  toast("Cart", `${p.name} added.`);
+  toast(t("js_cart", "Cart"), `${p.name} ${t("js_added", "added")}.`);
   renderCartBadge();
   renderCartTable();
 }
@@ -853,7 +880,7 @@ function setQty(sku, qty) {
   const requestedQty = Math.max(1, Number(qty) || 1);
   if (requestedQty > p.stock) {
     item.qty = p.stock;
-    toast("Stock", `Only ${p.stock} available for ${p.name}.`, "error");
+    toast(tt("js_toast_title_stock", "Stock"), `${tt("js_toast_only_prefix", "Only")} ${p.stock} ${tt("js_toast_available_for", "available for")} ${p.name}.`, "error");
   } else {
     item.qty = requestedQty;
   }
@@ -980,19 +1007,19 @@ function renderCartTable() {
 
 async function submitOrder() {
   if (RATING_CONTEXT.is_superadmin) {
-    toast("Order", "System admins cannot place orders.", "error");
+    toast(tt("js_toast_title_order", "Order"), tt("js_toast_system_admins_cannot_place_orders", "System admins cannot place orders."), "error");
     return;
   }
 
   if (!cart.length) {
-    toast("Order", "Your cart is empty.", "error");
+    toast(tt("js_toast_title_order", "Order"), tt("js_toast_cart_empty", "Your cart is empty."), "error");
     return;
   }
 
   const submitBtn = $("#submitOrderBtn");
   const url = submitBtn.data("order-url");
   if (!url) {
-    toast("Order", "Order endpoint is not configured.", "error");
+    toast(tt("js_toast_title_order", "Order"), tt("js_toast_order_endpoint_not_configured", "Order endpoint is not configured."), "error");
     return;
   }
 
@@ -1022,7 +1049,7 @@ async function submitOrder() {
 
     if (!response.ok) {
       if (response.status === 401 && data.login_url) {
-        toast("Order", data.error || "Please log in first.", "error");
+        toast(tt("js_toast_title_order", "Order"), data.error || tt("js_toast_please_log_in_first", "Please log in first."), "error");
         window.location.href = data.login_url;
         return;
       }
@@ -1030,11 +1057,11 @@ async function submitOrder() {
       throw new Error((data.error || "Could not submit order.") + details);
     }
 
-    toast("Order", data.message || "Order submitted successfully.");
+    toast(tt("js_toast_title_order", "Order"), data.message || tt("js_toast_order_submitted_successfully", "Order submitted successfully."));
     clearCart();
     $("#cartModal").modal("hide");
   } catch (error) {
-    toast("Order", error.message || "Could not submit order.", "error");
+    toast(tt("js_toast_title_order", "Order"), error.message || tt("js_toast_could_not_submit_order", "Could not submit order."), "error");
   } finally {
     submitBtn.prop("disabled", false);
   }
@@ -1120,7 +1147,7 @@ function applyAll(showToast = true) {
 
   renderProducts(view);
 
-  if (showToast) toast("Filters", `Applied - ${active} active`);
+  if (showToast) toast(tt("js_toast_title_filters", "Filters"), `${tt("js_toast_applied", "Applied")} - ${active} ${tt("js_toast_active", "active")}`);
 }
 
 function resetAll() {
@@ -1264,7 +1291,7 @@ function renderWizard() {
 
     $("#wizSave").on("click", () => {
       if (!wiz.make || !wiz.year) {
-        toast("Fitment", "Please complete steps 1 and 2.");
+        toast(tt("js_toast_title_fitment", "Fitment"), tt("js_toast_complete_steps_1_2", "Please complete steps 1 and 2."));
         return;
       }
       savedVehicle = { make: wiz.make, year: wiz.year };
@@ -1274,7 +1301,7 @@ function renderWizard() {
         .text("Vehicle saved")
         .removeClass("badge-soft")
         .addClass("badge badge-success");
-      toast("Fitment", `Saved: ${wiz.make} ${wiz.year}`);
+      toast(tt("js_toast_title_fitment", "Fitment"), `${tt("js_toast_saved_prefix", "Saved:")} ${wiz.make} ${wiz.year}`);
       $("#fitmentWizard").modal("hide");
       applyAll(false);
     });
@@ -1329,21 +1356,21 @@ $(function () {
   $("#btnSearch").on("click", () => {
     $("#suggestBox").hide();
     applyAll(false);
-    toast("Search", "Results updated.");
+    toast(tt("js_toast_title_search", "Search"), tt("js_toast_results_updated", "Results updated."));
   });
   $("#btnVoice").on("click", () =>
-    toast("Voice", "Voice search will be available soon.")
+    toast(tt("js_toast_title_voice", "Voice"), tt("js_toast_voice_search_soon", "Voice search will be available soon."))
   );
 
   // Filters
   $("#btnApply").on("click", () => applyAll(false));
   $("#btnReset").on("click", () => {
     resetAll();
-    toast("Filters", "Reset complete.");
+    toast(tt("js_toast_title_filters", "Filters"), tt("js_toast_reset_complete", "Reset complete."));
   });
   $("#btnReset2").on("click", () => {
     resetAll();
-    toast("Filters", "Reset complete.");
+    toast(tt("js_toast_title_filters", "Filters"), tt("js_toast_reset_complete", "Reset complete."));
   });
   $("#sortBy").on("change", () => applyAll(false));
 
@@ -1362,7 +1389,7 @@ $(function () {
       openQuickView(PRODUCTS[0].sku);
       return;
     }
-    toast("Deals", "No products are available yet.");
+    toast(tt("js_toast_title_deals", "Deals"), tt("js_toast_no_products_available_yet", "No products are available yet."));
   });
 
   // Fitment quick check
@@ -1372,7 +1399,7 @@ $(function () {
     const vin = ($("#vin").val() || "").trim();
 
     if (!vin && (!make || !year)) {
-      toast("Fitment", "Enter Part Number or select Make + Year.");
+      toast(tt("js_toast_title_fitment", "Fitment"), tt("js_toast_enter_part_or_select_make_year", "Enter Part Number or select Make + Year."));
       return;
     }
     const chosenMake = make || "Part Number vehicle";
@@ -1385,7 +1412,7 @@ $(function () {
       .text("Vehicle saved")
       .removeClass("badge-soft")
       .addClass("badge badge-success");
-    toast("Fitment", `Saved: ${chosenMake} ${chosenYear}`);
+    toast(tt("js_toast_title_fitment", "Fitment"), `${tt("js_toast_saved_prefix", "Saved:")} ${chosenMake} ${chosenYear}`);
     applyAll(false);
   });
 
@@ -1404,7 +1431,7 @@ $(function () {
     if (wiz.step === 1) {
       wiz.make = ($("#wizMake").val() || "").trim();
       if (!wiz.make) {
-        toast("Wizard", "Pick a make first.");
+        toast(tt("js_toast_title_wizard", "Wizard"), tt("js_toast_pick_make_first", "Pick a make first."));
         return;
       }
       wiz.step = 2;
@@ -1414,7 +1441,7 @@ $(function () {
     if (wiz.step === 2) {
       wiz.year = ($("#wizYear").val() || "").trim();
       if (!wiz.year) {
-        toast("Wizard", "Pick a year first.");
+        toast(tt("js_toast_title_wizard", "Wizard"), tt("js_toast_pick_year_first", "Pick a year first."));
         return;
       }
       wiz.step = 3;
@@ -1423,7 +1450,7 @@ $(function () {
     }
     if (wiz.step === 3) {
       // Finish button handled by Save
-      toast("Wizard", 'Press "Save Vehicle Profile" to finish.');
+      toast(tt("js_toast_title_wizard", "Wizard"), tt("js_toast_press_save_vehicle_profile_finish", 'Press "Save Vehicle Profile" to finish.'));
     }
   });
 
@@ -1445,7 +1472,7 @@ $(function () {
         $("#q").val("");
         $("#suggestBox").hide();
         applyAll(false);
-        toast("Search", "Cleared.");
+        toast(tt("js_toast_title_search", "Search"), tt("js_toast_cleared", "Cleared."));
       }
     }
     if ((e.key === "c" || e.key === "C") && !typing) {
@@ -1455,14 +1482,14 @@ $(function () {
 
   $("#btnHotkey").on("click", () =>
     toast(
-      "Hotkeys",
-      'Press "/" for search - "C" for cart - Esc to clear search'
+      tt("js_toast_title_hotkeys", "Hotkeys"),
+      tt("js_toast_hotkeys_help", 'Press "/" for search - "C" for cart - Esc to clear search')
     )
   );
 
   // Load more
   $("#btnLoadMore").on("click", () =>
-    toast("Notice", "More products will load as they become available.")
+    toast(tt("toast_notice", "Notice"), tt("js_toast_more_products_load_notice", "More products will load as they become available."))
   );
 
   $(document).on("click", "#submitOrderBtn", function (e) {
@@ -1473,7 +1500,7 @@ $(function () {
   $("#rateConfirmSubmit").on("click", function () {
     if (!pendingRatingConfirm) return;
     if (Math.trunc(toNumber(pendingRatingConfirm.rating, 0)) < 1) {
-      toast("Rating", "Please choose a rating first.", "error");
+      toast(tt("js_toast_title_rating", "Rating"), tt("js_toast_choose_rating_first", "Please choose a rating first."), "error");
       return;
     }
     const payload = { ...pendingRatingConfirm };
